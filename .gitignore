@@ -37,3 +37,6 @@ next-env.d.ts
 
 # Logs visuais do Next/Codex
 .next-visual*.log
+
+# Logs visuais do Next/Codex
+.next-visual*.log
