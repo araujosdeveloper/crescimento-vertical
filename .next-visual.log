@@ -1,0 +1,18 @@
+
+> crescimento-vertical@0.1.0 dev
+> next dev --webpack -p 3010
+
+▲ Next.js 16.2.9 (webpack)
+- Local:         http://localhost:3010
+- Network:       http://192.168.56.1:3010
+✓ Ready in 2.1s
+
+  We detected TypeScript in your project and reconfigured your tsconfig.json file for you.
+  The following suggested values were added to your tsconfig.json. These values can be changed to fit your project's needs:
+
+  	- include was updated to add '.next-visual/types/**/*.ts'
+  	- include was updated to add '.next-visual/dev/types/**/*.ts'
+
+
+○ Compiling / ...
+ GET / 200 in 3.7s (next.js: 2.5s, application-code: 1176ms)
