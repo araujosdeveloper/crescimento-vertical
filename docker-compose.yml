@@ -1,0 +1,21 @@
+services:
+  crescimento-vertical:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crescimento-vertical
+    restart: always
+    networks:
+      - n8n_default
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=n8n_default'
+      - 'traefik.http.routers.crescimento-vertical.rule=Host(`crescimentovertical.com`) || Host(`www.crescimentovertical.com`)'
+      - 'traefik.http.routers.crescimento-vertical.entrypoints=websecure'
+      - 'traefik.http.routers.crescimento-vertical.tls=true'
+      - 'traefik.http.routers.crescimento-vertical.tls.certresolver=mytlschallenge'
+      - 'traefik.http.services.crescimento-vertical.loadbalancer.server.port=3000'
+
+networks:
+  n8n_default:
+    external: true
