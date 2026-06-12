@@ -862,4 +862,232 @@ gap: 8px !important;
 padding-inline: 17px !important;
 }
 }
+/* =========================================================
+   Problem Section - layout limpo e responsivo
+   Substitui visualmente a antiga comparison-layout
+   ========================================================= */
 
+.problem-comparison-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 56px 1fr;
+  align-items: center;
+  gap: 18px;
+  max-width: 1040px;
+  margin: 62px auto 0;
+}
+
+.problem-card {
+  position: relative;
+  width: 100%;
+  min-height: 430px;
+  border: 1px solid rgba(93, 137, 181, .15);
+  border-radius: 21px;
+  padding: 31px;
+  overflow: hidden;
+}
+
+.problem-card-muted {
+  background: linear-gradient(145deg, rgba(17, 26, 43, .78), rgba(6, 12, 25, .85));
+}
+
+.problem-card-active {
+  border-color: rgba(0, 174, 255, .35);
+  background: linear-gradient(145deg, rgba(7, 40, 71, .84), rgba(4, 14, 31, .9));
+  box-shadow:
+    0 25px 75px rgba(0, 0, 0, .32),
+    0 0 60px rgba(0, 132, 255, .09),
+    inset 0 1px rgba(255, 255, 255, .04);
+}
+
+.problem-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid rgba(115, 167, 218, .1);
+  padding-bottom: 23px;
+}
+
+.problem-card-icon {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  flex: 0 0 43px;
+  place-items: center;
+  border: 1px solid rgba(117, 151, 188, .16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .035);
+  color: #70849f;
+}
+
+.problem-card-active .problem-card-icon {
+  border-color: rgba(0, 174, 255, .3);
+  background: rgba(10, 132, 255, .12);
+  color: #43c3ff;
+  box-shadow: 0 0 24px rgba(0, 132, 255, .1);
+}
+
+.problem-card-heading h3 {
+  margin: 0;
+  color: white;
+  font-size: 20px;
+  font-weight: 630;
+  line-height: 1.2;
+}
+
+.problem-card-heading p {
+  margin-top: 4px;
+  color: #667c98;
+  font-size: 11px;
+}
+
+.problem-card-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.problem-card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(112, 157, 202, .09);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, .025);
+  padding: 13px 14px;
+  color: #a0b1c6;
+  font-size: 13px;
+}
+
+.problem-card-item svg {
+  flex: 0 0 auto;
+  color: #5d718b;
+}
+
+.problem-card-active .problem-card-item {
+  border-color: rgba(0, 163, 255, .1);
+  color: #c8d8e9;
+}
+
+.problem-card-active .problem-card-item svg {
+  color: #35c4ff;
+  filter: drop-shadow(0 0 5px rgba(0, 163, 255, .45));
+}
+
+.problem-card-item span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.problem-comparison-arrow {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid rgba(0, 174, 255, .35);
+  border-radius: 50%;
+  background: #071426;
+  color: #42c3ff;
+  font-size: 20px;
+  box-shadow: 0 0 30px rgba(0, 132, 255, .2);
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .problem-section {
+    overflow: visible !important;
+    padding-block: 48px !important;
+  }
+
+  .problem-comparison-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 18px !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 32px 0 0 !important;
+  }
+
+  .problem-card {
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 20px 16px !important;
+    border-radius: 18px !important;
+    overflow: visible !important;
+  }
+
+  .problem-card-heading {
+    gap: 12px !important;
+    padding-bottom: 16px !important;
+  }
+
+  .problem-card-icon {
+    width: 46px !important;
+    height: 46px !important;
+    flex: 0 0 46px !important;
+  }
+
+  .problem-card-heading h3 {
+    font-size: 21px !important;
+    line-height: 1.1 !important;
+  }
+
+  .problem-card-heading p {
+    margin-top: 5px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+  }
+
+  .problem-card-items {
+    gap: 10px !important;
+    margin-top: 16px !important;
+  }
+
+  .problem-card-item {
+    min-height: 46px !important;
+    padding: 12px 13px !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .problem-comparison-arrow {
+    width: 42px !important;
+    height: 42px !important;
+    margin-inline: auto !important;
+    font-size: 18px !important;
+  }
+
+  .floating-whatsapp {
+    right: 14px !important;
+    bottom: 76px !important;
+    width: 50px !important;
+    min-height: 50px !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+
+  .floating-whatsapp span {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .problem-card {
+    padding: 18px 14px !important;
+  }
+
+  .problem-card-heading h3 {
+    font-size: 19px !important;
+  }
+
+  .problem-card-item {
+    font-size: 12px !important;
+  }
+}
