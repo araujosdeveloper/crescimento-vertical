@@ -1,6 +1,6 @@
-import { Check, CircleAlert, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 
-const withoutStructure = [
+const semEstrutura = [
   "Anúncios sem direção",
   "Leads perdidos",
   "Atendimento manual desorganizado",
@@ -8,7 +8,7 @@ const withoutStructure = [
   "Decisões baseadas em achismo",
 ];
 
-const withStructure = [
+const comEstrutura = [
   "Jornada clara",
   "Captação organizada",
   "Follow-up automatizado",
@@ -18,76 +18,71 @@ const withStructure = [
 
 export function ProblemSection() {
   return (
-    <section className="section-pad problem-section">
+    <section className="ps-section">
       <div className="container-shell">
-        <div className="section-heading-centered">
-          <p className="section-kicker">A diferença está na estrutura</p>
+        <div className="ps-head">
+          <p className="ps-kicker">A diferença está na estrutura</p>
 
-          <h2 className="section-title">
+          <h2 className="ps-title">
             Estar no digital não significa <span>estar crescendo</span>
           </h2>
 
-          <p className="section-copy">
+          <p className="ps-copy">
             Muitas empresas têm redes sociais, anúncios e até um site, mas continuam sem
             previsibilidade porque não possuem uma estrutura digital clara.
           </p>
         </div>
 
-        <div className="problem-comparison-layout">
-          <ProblemCard
-            title="Sem estrutura"
-            subtitle="Ações desconectadas e pouca clareza"
-            items={withoutStructure}
-            negative
-          />
+        <div className="ps-grid">
+          <div className="ps-card ps-card--bad">
+            <div className="ps-card-head">
+              <div className="ps-icon ps-icon--bad">
+                <X size={18} />
+              </div>
 
-          <div className="problem-comparison-arrow" aria-hidden="true">
+              <div>
+                <h3>Sem estrutura</h3>
+                <p>Ações desconectadas e pouca clareza</p>
+              </div>
+            </div>
+
+            <div className="ps-list">
+              {semEstrutura.map((item) => (
+                <div className="ps-item ps-item--bad" key={item}>
+                  <X size={16} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="ps-divider" aria-hidden="true">
             ↓
           </div>
 
-          <ProblemCard
-            title="Com estrutura"
-            subtitle="Uma operação conectada e mensurável"
-            items={withStructure}
-          />
+          <div className="ps-card ps-card--good">
+            <div className="ps-card-head">
+              <div className="ps-icon ps-icon--good">
+                <Check size={18} />
+              </div>
+
+              <div>
+                <h3>Com estrutura</h3>
+                <p>Uma operação conectada e mensurável</p>
+              </div>
+            </div>
+
+            <div className="ps-list">
+              {comEstrutura.map((item) => (
+                <div className="ps-item ps-item--good" key={item}>
+                  <Check size={16} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function ProblemCard({
-  title,
-  subtitle,
-  items,
-  negative = false,
-}: {
-  title: string;
-  subtitle: string;
-  items: string[];
-  negative?: boolean;
-}) {
-  return (
-    <article className={`problem-card ${negative ? "problem-card-muted" : "problem-card-active"}`}>
-      <div className="problem-card-heading">
-        <span className="problem-card-icon">
-          {negative ? <CircleAlert size={20} /> : <Check size={20} />}
-        </span>
-
-        <div>
-          <h3>{title}</h3>
-          <p>{subtitle}</p>
-        </div>
-      </div>
-
-      <div className="problem-card-items">
-        {items.map((item) => (
-          <div className="problem-card-item" key={item}>
-            {negative ? <X size={17} /> : <Check size={17} />}
-            <span>{item}</span>
-          </div>
-        ))}
-      </div>
-    </article>
   );
 }
