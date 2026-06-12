@@ -29,12 +29,12 @@ export function Header() {
           ))}
         </nav>
 
-        <a className="button-primary hidden lg:inline-flex" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
+        <a className="header-cta button-primary hidden md:inline-flex" href={WHATSAPP_URL} target="_blank" rel="noreferrer">
           Falar com especialista <ArrowUpRight size={16} />
         </a>
 
         <button
-          className="mobile-menu-button lg:hidden"
+          className="mobile-menu-button md:hidden"
           onClick={() => setOpen((value) => !value)}
           aria-label={open ? "Fechar menu" : "Abrir menu"}
           aria-expanded={open}
@@ -44,7 +44,7 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="mobile-menu lg:hidden">
+        <div className="mobile-menu md:hidden">
           <nav className="container-shell flex flex-col gap-1" aria-label="Navegação mobile">
             {links.map(([label, href]) => (
               <a className="rounded-lg px-3 py-3 text-sm text-slate-300 hover:bg-white/5 hover:text-white" href={href} key={href} onClick={() => setOpen(false)}>{label}</a>

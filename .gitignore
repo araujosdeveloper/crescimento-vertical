@@ -16,6 +16,7 @@
 # local files
 .DS_Store
 *.pem
+/mobile-*.png
 .npm-cache/
 .npm-logs/
 
