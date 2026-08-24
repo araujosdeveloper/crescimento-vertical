@@ -248,10 +248,24 @@ Nomes exigidos (valores reais nunca são versionados):
 A validação está em `src/lib/env.ts` e o `.env.example` documenta apenas nomes e
 exemplos inofensivos.
 
+## Validação no staging (Fase 2A)
+
+A fundação editorial foi ativada e validada no staging em blue-green
+(docs/18-deploy-phase2-staging.md), sem tocar produção nem o staging antigo:
+
+- Payload Admin acessível; PostgreSQL 16 dedicado saudável.
+- Primeiro administrador criado manualmente; um único usuário ativo com role
+  `admin`.
+- Coleções editoriais vazias (authors, categories, media, sources,
+  research_dossiers e articles).
+- Migração inicial aplicada (`20260824_191516_initial_foundation`).
+- Backup integral criado e verificado (caminho e tamanho em docs/12 e docs/15).
+- BasicAuth com rotação verificada como pendente (backup pré-rotação idêntico
+  ao estado atual).
+
 ## Não concluído (deliberadamente)
 
-- Deploy em staging/produção.
-- Credenciais e valores reais.
-- Criação do primeiro usuário administrador.
+- Produção editorial (deploy em produção).
 - Integração Hermes/n8n.
-- Páginas públicas do blog.
+- Páginas públicas do blog e conteúdo editorial real.
+- Migração de DNS (@ e www).

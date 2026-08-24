@@ -109,3 +109,29 @@ O teste autenticado e a criação do primeiro administrador são manuais:
 - Não alterar produção, `docker-compose.yml`, `.env.staging` ou o Traefik global.
 - Não executar `docker compose` do projeto de produção.
 - Não recriar `crescimento-vertical` nem `crescimento-vertical-staging`.
+
+## Validação final (executada)
+
+Validação documental (somente leitura) que registra o estado final da Fase 2A:
+
+- Git: working tree limpa e branch sincronizada com origin em
+  `8db009006701a7ab51d6e8ee623cfa90e4906cf1`.
+- Candidate (`cv-phase2-staging-app`) e PostgreSQL (`cv-phase2-staging-postgres`)
+  running/healthy; produção e staging antigo preservados e saudáveis.
+- Payload Admin acessível (`/admin` 200); healthchecks live/ready 200.
+- Primeiro administrador criado manualmente: um único usuário ativo com role
+  `admin`.
+- Demais coleções vazias: authors=0, categories=0, media=0, sources=0,
+  research_dossiers=0 e articles=0.
+- Migração aplicada: `20260824_191516_initial_foundation`.
+- Backup integral em
+  `/opt/backups/crescimento-vertical/phase2a-staging-8db0090-20260824-231850`
+  (aproximadamente 196 MB, permissões 700/600), verificado com `sha256sum -c`,
+  `git bundle verify`, `pg_restore --list` e validação de `payload-media.tar.gz`
+  sem restaurar nem extrair.
+- BasicAuth: rotação após exposição do hash anterior verificada como pendente
+  (backup pré-rotação idêntico ao estado atual).
+- Rollback disponível conforme o procedimento acima (não executado).
+
+Continuam pendentes: páginas públicas do blog, conteúdo editorial real,
+integração Hermes/n8n, produção editorial e migração de @ e www.

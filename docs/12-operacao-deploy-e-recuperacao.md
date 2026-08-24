@@ -110,6 +110,25 @@ Não registrar corpo integral de lead, token, cookie ou prompt com segredo.
 - Export controlado de workflows n8n, sem credenciais.
 - Skill e schemas do Hermes no Git.
 
+### Backup integral da Fase 2A (staging)
+
+Na validação final da Fase 2A foi criado um backup integral do estado do staging:
+
+- Caminho: `/opt/backups/crescimento-vertical/phase2a-staging-8db0090-20260824-231850`.
+- Tamanho aproximado: 196 MB.
+- Permissões: diretório 700 e arquivos 600.
+- Conteúdo: `.env` do staging/phase2 (sem valores versionados), `Dockerfile`,
+  Compose de staging e phase2, dump PostgreSQL (`payload-postgres.dump`),
+  `payload-media.tar.gz`, imagem Docker (`images.tar`), bundle Git
+  (`repository.bundle`), snapshots de estado dos containers e `SHA256SUMS`.
+- Verificações executadas sem restaurar nem extrair: `sha256sum -c`,
+  `git bundle verify`, `pg_restore --list` e validação de `payload-media.tar.gz`.
+- O backup preserva produção e o staging antigo como referência de rollback.
+
+A rotação do BasicAuth após a exposição do hash anterior foi verificada e
+permanece pendente (o backup pré-rotação e o estado atual são idênticos).
+Nenhum hash, senha ou valor de `.env` é registrado no repositório.
+
 ## Recuperação
 
 - RPO: até 6 horas.

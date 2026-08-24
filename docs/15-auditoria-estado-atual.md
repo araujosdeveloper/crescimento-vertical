@@ -251,3 +251,32 @@ A fundação editorial foi ativada no staging em arquitetura blue-green
 - Sem dados editoriais: users, authors, categories, media, sources,
   research_dossiers e articles com zero registros.
 - Produção e staging antigo permaneceram running/healthy sem recriação.
+
+## Validação final da Fase 2A no staging — 24 de agosto de 2026
+
+Validação documental (somente leitura) do staging blue-green da Fase 2A:
+
+- Git: `HEAD 8db0090`, working tree limpa e branch
+  `feat/portal-phase-2-editorial-foundation` sincronizada com origin.
+- Containers running/healthy: `crescimento-vertical` (produção),
+  `crescimento-vertical-staging` (staging antigo), `cv-phase2-staging-app`
+  (candidate) e `cv-phase2-staging-postgres` (PostgreSQL).
+- Payload Admin acessível (`/admin` retorna 200) e healthchecks live/ready 200.
+- Primeiro administrador criado manualmente; um único usuário ativo com role
+  `admin`.
+- Coleções editoriais vazias: authors=0, categories=0, media=0, sources=0,
+  research_dossiers=0 e articles=0.
+- Migração aplicada: `20260824_191516_initial_foundation`.
+- Backup integral em
+  `/opt/backups/crescimento-vertical/phase2a-staging-8db0090-20260824-231850`
+  (aproximadamente 196 MB, permissões 700/600), com SHA-256 conferido, bundle
+  Git verificado, `pg_restore --list` e `payload-media.tar.gz` validados sem
+  restaurar nem extrair.
+- Produção e staging antigo preservados; rollback disponível.
+- BasicAuth: rotação após exposição do hash anterior verificada como pendente
+  (o backup pré-rotação e o estado atual são idênticos).
+- Nenhum e-mail administrativo, senha, hash, `DATABASE_URL`, IP ou conteúdo de
+  `.env` foi versionado.
+
+Continuam pendentes: páginas públicas do blog, conteúdo editorial real,
+integração Hermes/n8n, produção editorial e migração de @ e www.

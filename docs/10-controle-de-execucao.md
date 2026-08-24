@@ -227,6 +227,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Teste autenticado e primeiro usuário admin permanecem manuais; rollback não executado (documentado) |
 | Próxima ação | Operador: teste autenticado e criação do primeiro administrador no /admin |
 
+## Registro da sessão 2026-08-24 — validação final da Fase 2A no staging
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation @ 8db009006701a7ab51d6e8ee623cfa90e4906cf1 |
+| Fase | 2A (validação final no staging) |
+| Objetivo | Registrar documentalmente a validação da fundação editorial ativada no staging |
+| Alterações | Nenhuma em aplicação, containers, banco, credenciais ou configuração; somente documentação |
+| Validações | Git local/remoto sincronizado, State/Health dos quatro containers, backup integral (700/600, SHA-256, bundle verify, pg_restore --list, tar), coleções vazias (users=1 admin, demais=0), migrations aplicadas, rotação BasicAuth |
+| Riscos | Rotação BasicAuth pendente; páginas públicas, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
+| Próxima ação | Confirmar rotação BasicAuth e prosseguir para a Fase 3 quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:
