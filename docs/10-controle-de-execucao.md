@@ -44,7 +44,7 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 - [x] Gerar aplicação Next.js em modo standalone.
 - [x] Executar smoke test HTTP da home e dos healthchecks.
 - [x] Validar sintaxe YAML do Docker Compose.
-- [ ] Construir e validar imagem Docker em ambiente com Docker.
+- [x] Construir e validar imagem Docker em ambiente com Docker.
 - [ ] Demonstrar rollback.
 - [x] Atualizar auditoria com evidências.
 
@@ -85,6 +85,30 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 Os identificadores, endereços, métricas e caminhos internos completos ficam em
 `.private/vps-audit-2026-08-24.md`, ignorado pelo Git.
 
+## Evidências da imagem e do container — 2026-08-24
+
+| Verificação | Resultado |
+| --- | --- |
+| Commit-base implantado | b71b52a8c0cdd4442a1c6244e61a53f8f57b532c |
+| npm ci | Aprovado |
+| npm run check | Aprovado |
+| ESLint | Aprovado |
+| TypeScript | Aprovado |
+| Next.js build | Aprovado |
+| docker compose build | Aprovado |
+| Imagem | crescimento-vertical-crescimento-vertical |
+| Subida do container | --no-build e --wait |
+| Estado do container | healthy em cerca de 6 s |
+| GET /api/health/live | {"status":"ok"} |
+| GET /api/health/ready | {"status":"ready"} |
+| Traefik apex | crescimentovertical.com → HTTP 200 |
+| Traefik www | www.crescimentovertical.com → HTTP 200 |
+| Processo Next.js | Iniciado em 0.0.0.0:3000 |
+| TLS local | Resultado 18; o DNS ainda aponta para a infraestrutura anterior — não é TLS de produção aprovado |
+| Dependência do runtime | libatomic1 adicionado à VPS para executar o Node instalado |
+| DNS | Nenhuma alteração |
+| Serviços existentes | Hermes, n8n, Traefik e demais preservados |
+
 ## Registro da sessão 2026-08-23
 
 | Campo | Conteúdo |
@@ -108,6 +132,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Validações | Hostname, /opt e contêineres ativos inspecionados |
 | Riscos | DNS no destino anterior, TLS inválido, risco preexistente privado, volumes e contatos pendentes |
 | Próxima ação | Publicar a branch técnica e preparar implantação controlada |
+
+## Registro da sessão 2026-08-24 — validação da imagem Docker
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-1-baseline @ b71b52a8c0cdd4442a1c6244e61a53f8f57b532c |
+| Fase | 1 |
+| Objetivo | Construir e validar a imagem Docker real na VPS |
+| Alterações | Nenhuma em código; somente validação operacional |
+| Validações | docker compose build, healthchecks live/ready, Traefik apex/www |
+| Riscos | DNS na infraestrutura anterior, TLS local inválido, backup, contatos, staging e rollback pendentes |
+| Próxima ação | Executar backup/rollback e confirmar contatos reais |
 
 ## Registro por sessão
 

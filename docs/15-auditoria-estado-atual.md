@@ -29,6 +29,23 @@ Data da auditoria: 23 de agosto de 2026.
 - Não existe router atual para crescimentovertical.com; não há conflito de host.
 - Os volumes ainda precisam ser auditados antes do deploy definitivo.
 
+## Validação da imagem e do container — 24 de agosto de 2026
+
+- Commit-base implantado: b71b52a8c0cdd4442a1c6244e61a53f8f57b532c.
+- npm ci, npm run check, ESLint, TypeScript e build Next.js: aprovados.
+- docker compose build: aprovado; imagem crescimento-vertical-crescimento-vertical.
+- Container iniciado com --no-build e --wait; estado healthy em cerca de 6 s.
+- GET /api/health/live retornou {"status":"ok"}.
+- GET /api/health/ready retornou {"status":"ready"}.
+- Traefik local entregou crescimentovertical.com e www.crescimentovertical.com
+  com HTTP 200.
+- O processo Next.js iniciou em 0.0.0.0:3000.
+- A VPS exigiu o pacote libatomic1 para executar o Node instalado.
+- TLS local resultou em 18: o DNS ainda aponta para a infraestrutura anterior;
+  isso não configura TLS de produção aprovado.
+- Nenhum DNS foi alterado.
+- Hermes, n8n, Traefik e demais serviços existentes foram preservados.
+
 ## Repositório
 
 - Repositório: araujosdeveloper/crescimento-vertical.
@@ -139,8 +156,9 @@ integração do Hermes deve ser instalada antes desse gate.
 - Healthchecks live e ready: aprovados em smoke test HTTP.
 - Home gerada sem telefone fictício.
 - Docker Compose: YAML validado.
-- Imagem Docker: ainda não validada porque Docker não está disponível nesta
-  sessão.
+- Imagem Docker: construída e validada na VPS; container saudável e healthchecks
+  aprovados.
 
-Não há commit implantado na VPS oficial. Backup pré-implantação, redes, DNS, TLS,
+A imagem foi construída e validada na VPS oficial com commit-base
+b71b52a8c0cdd4442a1c6244e61a53f8f57b532c. Backup pré-implantação, redes, DNS, TLS,
 staging e rollback continuam dependentes da auditoria operacional.
