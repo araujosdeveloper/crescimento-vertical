@@ -39,7 +39,7 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 - [x] Remover telefone fictício e tornar o contato configurável.
 - [ ] Confirmar e configurar WhatsApp e e-mail reais.
 - [x] Criar branch feat/portal-phase-1-baseline.
-- [ ] Criar staging protegido/noindex.
+- [x] Criar staging protegido/noindex.
 - [x] Criar healthchecks live e ready.
 - [x] Gerar aplicação Next.js em modo standalone.
 - [x] Executar smoke test HTTP da home e dos healthchecks.
@@ -190,6 +190,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Validações | npm ci, npm run check, docker compose config e build do staging, git diff --check |
 | Riscos | Staging ainda não subido; DNS e publicação não executados |
 | Próxima ação | Gerar hash BasicAuth real, criar .env.staging (600) e subir staging quando autorizado |
+
+## Registro da sessão 2026-08-24 — validação do staging protegido
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-1-baseline |
+| Fase | 1 |
+| Objetivo | Ativar e validar o staging protegido por autenticação e noindex |
+| Alterações | Nenhuma em código, configuração, containers, DNS ou credenciais; somente documentação |
+| Validações | BasicAuth 401/200, TLS, X-Robots-Tag, robots.txt, healthchecks live/ready, produção running/healthy |
+| Riscos | DNS @/www ainda na infraestrutura anterior; homologação visual pendente |
+| Próxima ação | Inspeção visual e homologação do staging |
 
 ## Registro por sessão
 

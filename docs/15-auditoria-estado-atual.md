@@ -73,6 +73,23 @@ aplicação no próprio ambiente), não a recuperação de desastre. A recupera�
 desastre depende de cópia externa/off-site, que ainda não foi executada e
 permanece pendente, além dos itens de backup automatizado previstos na Fase 11.
 
+## Ativação e validação do staging protegido — 24 de agosto de 2026
+
+- Data e horário da validação (America/Sao_Paulo): 2026-08-24 15:20.
+- staging.crescimentovertical.com resolve para a VPS oficial.
+- Acesso sem autenticação retorna HTTP 401; com autenticação, HTTP 200.
+- TLS válido no hostname de staging.
+- Bloqueio de indexação validado nas três camadas: metadados/robots
+  (noindex/nosnippet), `/robots.txt` (`Disallow: /`) e `X-Robots-Tag`
+  (`noindex, nofollow, noarchive`).
+- `/api/health/live` retornou `{"status":"ok"}` e `/api/health/ready`
+  retornou `{"status":"ready"}`.
+- Container de staging running/healthy.
+- Produção permaneceu running/healthy e não foi reiniciada.
+- Nenhuma credencial, hash ou conteúdo de `.env.staging` foi versionado.
+- DNS principal (@ e www) ainda não foi migrado para a VPS.
+- Staging pronto para inspeção visual e homologação.
+
 ## Repositório
 
 - Repositório: araujosdeveloper/crescimento-vertical.
@@ -188,5 +205,6 @@ integração do Hermes deve ser instalada antes desse gate.
 
 A imagem foi construída e validada na VPS oficial com commit-base
 b71b52a8c0cdd4442a1c6244e61a53f8f57b532c. Backup pré-mudança, restauração e
-rollback operacional local foram comprovados. Redes, DNS, TLS de produção,
-staging, contatos reais e cópia off-site permanecem pendentes.
+rollback operacional local foram comprovados, e o staging protegido foi ativado
+e validado. Redes, DNS, TLS de produção, contatos reais e cópia off-site
+permanecem pendentes.

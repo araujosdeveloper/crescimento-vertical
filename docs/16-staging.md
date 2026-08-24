@@ -7,8 +7,9 @@ qualquer implantação em produção. Ele reproduz o build real da aplicação
 (mesmo `Dockerfile`), mas permanece bloqueado para indexação e restrito aos
 responsáveis.
 
-Nesta execução, apenas a estrutura foi preparada: o ambiente ainda não foi
-subido, o DNS não foi alterado e nenhum container foi criado.
+Nesta etapa o ambiente foi ativado e validado: o container de staging está
+saudável, o TLS é válido e a autenticação BasicAuth bloqueia o acesso sem
+credenciais. O DNS principal (@ e www) permanece na infraestrutura anterior.
 
 ## Isolamento em relação à produção
 
@@ -53,7 +54,7 @@ chmod 600 .env.staging
 Editar somente os valores seguros: `STAGING_HOST`, `NEXT_PUBLIC_SITE_URL` e
 `STAGING_BASIC_AUTH_USERS` (com hash real gerado fora do Git e `$` duplicado).
 
-## Comandos de referência (não executar nesta etapa)
+## Comandos de referência
 
 Estes comandos serão usados quando a subida for autorizada:
 
@@ -84,8 +85,24 @@ docker compose --env-file .env.staging -f docker-compose.staging.yml down
   `/api/health/ready` → `{"status":"ready"}`.
 - Metadados: o HTML gerado deve conter `noindex` e `nosnippet`.
 
+## Validação executada — 24 de agosto de 2026
+
+- Data e horário (America/Sao_Paulo): 2026-08-24 15:20.
+- Container de staging: running/healthy, sem portas públicas diretas.
+- TLS: válido no hostname staging.crescimentovertical.com.
+- BasicAuth: 401 sem autenticação; 200 com autenticação.
+- Bloqueio de indexação validado nas três camadas: metadados/robots
+  (noindex/nosnippet), `/robots.txt` (`Disallow: /`) e `X-Robots-Tag`
+  (`noindex, nofollow, noarchive`).
+- Healthchecks: `/api/health/live` → `{"status":"ok"}` e
+  `/api/health/ready` → `{"status":"ready"}`.
+- Produção: permaneceu running/healthy e não foi reiniciada.
+- Nenhuma credencial, hash ou conteúdo de `.env.staging` foi versionado.
+- Staging pronto para inspeção visual e homologação.
+
 ## Aviso
 
-DNS e subida do staging não fazem parte desta execução. Nenhum container de
-staging ou de produção foi iniciado, e nenhuma alteração de DNS, Traefik
-global, Hermes ou n8n foi realizada.
+O DNS principal (@ e www) ainda não foi migrado para a VPS; apenas
+staging.crescimentovertical.com está ativo. Nenhuma alteração foi feita em DNS
+de produção, Traefik global, Hermes ou n8n, e a produção permaneceu
+running/healthy sem reinicialização.
