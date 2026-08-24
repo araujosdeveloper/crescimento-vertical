@@ -24,6 +24,7 @@
 - [Controle de execução](10-controle-de-execucao.md)
 - [Qualidade e aceite](11-qualidade-e-aceite.md)
 - [Operação, deploy e recuperação](12-operacao-deploy-e-recuperacao.md)
+- [Ambiente de staging](16-staging.md)
 
 ## Templates
 

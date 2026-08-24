@@ -9,6 +9,7 @@ services:
         - NEXT_PUBLIC_WHATSAPP_NUMBER
         - NEXT_PUBLIC_WHATSAPP_DISPLAY
         - NEXT_PUBLIC_WHATSAPP_MESSAGE
+        - SITE_NOINDEX=false
     container_name: crescimento-vertical
     restart: always
     init: true

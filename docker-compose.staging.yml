@@ -1,0 +1,52 @@
+name: crescimento-vertical-staging
+
+services:
+  crescimento-vertical-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://staging.crescimentovertical.com}
+        - NEXT_PUBLIC_CONTACT_EMAIL=${NEXT_PUBLIC_CONTACT_EMAIL:-contato@crescimentovertical.com}
+        - NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
+        - NEXT_PUBLIC_WHATSAPP_DISPLAY=${NEXT_PUBLIC_WHATSAPP_DISPLAY:-}
+        - NEXT_PUBLIC_WHATSAPP_MESSAGE=${NEXT_PUBLIC_WHATSAPP_MESSAGE:-}
+        - SITE_NOINDEX=true
+    image: crescimento-vertical-staging:latest
+    container_name: crescimento-vertical-staging
+    restart: always
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - n8n_default
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health/live').then((response) => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=n8n_default'
+      - 'traefik.http.routers.crescimento-vertical-staging.rule=Host(`${STAGING_HOST}`)'
+      - 'traefik.http.routers.crescimento-vertical-staging.entrypoints=websecure'
+      - 'traefik.http.routers.crescimento-vertical-staging.tls=true'
+      - 'traefik.http.routers.crescimento-vertical-staging.tls.certresolver=mytlschallenge'
+      - 'traefik.http.routers.crescimento-vertical-staging.middlewares=crescimento-vertical-staging-basicauth,crescimento-vertical-staging-robots'
+      - 'traefik.http.middlewares.crescimento-vertical-staging-basicauth.basicauth.users=${STAGING_BASIC_AUTH_USERS}'
+      - 'traefik.http.middlewares.crescimento-vertical-staging-robots.headers.customresponseheaders.X-Robots-Tag=noindex, nofollow, noarchive'
+      - 'traefik.http.services.crescimento-vertical-staging.loadbalancer.server.port=3000'
+
+networks:
+  n8n_default:
+    external: true

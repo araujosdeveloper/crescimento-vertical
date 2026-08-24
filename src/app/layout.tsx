@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://crescimentovertical.com";
+const NOINDEX = process.env.SITE_NOINDEX === "true";
+
 export const metadata: Metadata = {
   title: "Crescimento Vertical | Estratégia Digital, Automação e Performance",
   description:
@@ -13,6 +16,26 @@ export const metadata: Metadata = {
     "tráfego pago",
     "funis de venda",
   ],
+  metadataBase: new URL(SITE_URL),
+  robots: NOINDEX
+    ? {
+        index: false,
+        follow: false,
+        noarchive: true,
+        nosnippet: true,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+          noarchive: true,
+          nosnippet: true,
+          nocache: true,
+        },
+      }
+    : {
+        index: true,
+        follow: true,
+      },
   openGraph: {
     title: "Crescimento Vertical | Estratégia Digital, Automação e Performance",
     description:

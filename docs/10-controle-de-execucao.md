@@ -179,6 +179,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Cópia off-site, contatos reais, staging e DNS/TLS de produção pendentes |
 | Próxima ação | Confirmar contatos reais, staging e DNS/TLS de produção |
 
+## Registro da sessão 2026-08-24 — estrutura de staging preparada
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-1-baseline |
+| Fase | 1 |
+| Objetivo | Preparar staging protegido por autenticação e noindex |
+| Alterações | Controle de indexação (SITE_NOINDEX, metadata robots, robots.ts), docker-compose.staging.yml, .env.staging.example, documentação |
+| Validações | npm ci, npm run check, docker compose config e build do staging, git diff --check |
+| Riscos | Staging ainda não subido; DNS e publicação não executados |
+| Próxima ação | Gerar hash BasicAuth real, criar .env.staging (600) e subir staging quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:
