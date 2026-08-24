@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "feat/**"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: lint, typecheck, test, migrate e build
+    runs-on: ubuntu-latest
+
+    env:
+      # Valores descartáveis de CI — nunca usar segredos reais neste workflow.
+      DATABASE_URL: postgresql://payload:payload@localhost:5432/payload_ci
+      PAYLOAD_SECRET: ci-only-dummy-secret-value-not-used-in-production
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: payload_ci
+          POSTGRES_USER: payload
+          POSTGRES_PASSWORD: payload
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U payload -d payload_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Testes
+        run: npm test
+
+      - name: Migrations (banco efêmero)
+        run: |
+          npm run migrate
+          npm run migrate:status
+
+      - name: Build
+        run: npm run build

@@ -7,3 +7,5 @@ npm-debug.log*
 docs
 *.md
 mobile-*.png
+media
+tests

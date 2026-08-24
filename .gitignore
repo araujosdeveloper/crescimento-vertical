@@ -21,6 +21,9 @@
 .npm-logs/
 /.private/
 
+# CMS media uploads (persistent volume in production)
+/media
+
 # debug
 npm-debug.log*
 yarn-debug.log*

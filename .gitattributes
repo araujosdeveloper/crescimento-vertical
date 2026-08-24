@@ -1,0 +1,4 @@
+# Arquivos de migração gerados pelo Payload/drizzle contêm SQL com tabulação e
+# espaços finais dentro de template literals. Desativa a checagem de whitespace
+# somente para esses arquivos gerados.
+migrations/** -whitespace

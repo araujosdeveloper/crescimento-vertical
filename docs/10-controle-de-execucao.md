@@ -203,6 +203,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | DNS @/www ainda na infraestrutura anterior; homologação visual pendente |
 | Próxima ação | Inspeção visual e homologação do staging |
 
+## Registro da sessão 2026-08-24 — fundação editorial (Fase 2A)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation |
+| Fase | 2A (fundação editorial em código) |
+| Objetivo | Integrar Payload + PostgreSQL, coleções, permissões, migrações, testes e CI |
+| Alterações | Payload 3.88.0, adaptador Postgres, 7 coleções, papéis, workflow, migração inicial, tipos, Dockerfile, Compose de validação, Vitest, GitHub Actions, documentação |
+| Validações | npm ci, lint, typecheck, 38 testes, generate:types, migrate/migrate:status em banco descartável, docker compose config, next build |
+| Riscos | Deploy, credenciais reais, primeiro usuário admin e integração Hermes/n8n permanecem pendentes |
+| Próxima ação | Gate da Fase 1/2 e preparação do deploy da Fase 3 quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

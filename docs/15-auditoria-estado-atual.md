@@ -208,3 +208,32 @@ b71b52a8c0cdd4442a1c6244e61a53f8f57b532c. Backup pré-mudança, restauração e
 rollback operacional local foram comprovados, e o staging protegido foi ativado
 e validado. Redes, DNS, TLS de produção, contatos reais e cópia off-site
 permanecem pendentes.
+
+## Fundação editorial implementada em código — 24 de agosto de 2026
+
+A Fase 2A implementou, em código (sem deploy), a fundação editorial descrita em
+docs/17-fundacao-editorial-payload.md:
+
+- Payload 3.88.0 integrado ao Next.js 16.2.9 (rotas `/admin` e `/api`,
+  `withPayload`, `output: standalone` preservado).
+- PostgreSQL 16 dedicado com migrações versionadas e `push` desativado.
+- Coleções users, authors, categories, media, sources, research-dossiers e
+  articles, com drafts/versões.
+- Papéis admin, editor, reviewer, researcher e automation, com acesso e hooks no
+  servidor (workflow editorial e exigência de fonte validada).
+- Migration inicial versionada, `payload-types.ts` gerado, testes (Vitest) e CI
+  (GitHub Actions com PostgreSQL efêmero).
+
+Estado anteriormente “ausente” que passou a existir em código:
+
+| Item | Estado |
+| --- | --- |
+| Banco | PostgreSQL (adapter dedicado, código + Compose de validação) |
+| CMS | Payload integrado ao Next.js |
+| Testes | Vitest (38 testes) |
+| CI | GitHub Actions |
+| Migrações | Migration inicial versionada |
+
+Continuam pendentes: deploy, credenciais reais, primeiro usuário administrador,
+seed estrutural, backup/restauração do banco, integração Hermes/n8n e páginas
+públicas do blog. Produção e staging ativos não foram recriados.
