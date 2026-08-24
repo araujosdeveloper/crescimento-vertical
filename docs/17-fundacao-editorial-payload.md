@@ -198,14 +198,17 @@ As migrações foram validadas em banco vazio e aplicadas com sucesso nesta fase
 
 - `Dockerfile` multi-stage, non-root (`nextjs:nodejs`), `output: standalone`
   preservado, `sharp` funcional no Alpine (binários musl pré-compilados) e
-  diretório `/app/media` criado e atribuído ao usuário da aplicação.
-- `docker-compose.phase2.yml` (validação) declara: serviço exclusivo de
-  PostgreSQL 16 Alpine, volume persistente exclusivo, rede interna exclusiva,
-  sem porta publicada, healthcheck, limites de recursos e rotação de logs. A
-  aplicação participa da rede externa `n8n_default` somente para o Traefik.
+  diretório `/app/media` criado e atribuído ao usuário da aplicação. Possui um
+  alvo `migrate` (non-root) para migrações one-shot.
+- `docker-compose.phase2.yml` é o compose blue-green do staging
+  (docs/18-deploy-phase2-staging.md): serviço exclusivo de PostgreSQL 16 Alpine,
+  volume persistente exclusivo, rede interna exclusiva, sem porta publicada,
+  healthcheck, limites de recursos, `cap_drop`, `read_only` (app), `tmpfs` e
+  rotação de logs. A aplicação participa da rede externa `n8n_default` somente
+  para o Traefik.
 - Banco e mídia nunca são expostos diretamente.
-- A produção atual continua sem dependência imediata do novo banco; o staging
-  não foi recriado nesta execução.
+- A produção continua sem dependência do novo banco; o staging antigo segue
+  ativo como rollback.
 
 ## Testes
 

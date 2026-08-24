@@ -215,6 +215,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Deploy, credenciais reais, primeiro usuário admin e integração Hermes/n8n permanecem pendentes |
 | Próxima ação | Gate da Fase 1/2 e preparação do deploy da Fase 3 quando autorizado |
 
+## Registro da sessão 2026-08-24 — deploy blue-green do staging (Fase 2A)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation |
+| Fase | 2A (ativação no staging em blue-green) |
+| Objetivo | Subir Payload + PostgreSQL em staging isolado, sem tocar produção/staging antigo |
+| Alterações | Dockerfile (alvo migrate + npm pinado), docker-compose.phase2.yml (blue-green, hardening, Traefik toggle), docs |
+| Validações | compose config, build, postgres healthy, migrate + migrate:status, app healthy, HTTP interno (200/403), público 401 + X-Robots-Tag + TLS, ausência de dados editoriais |
+| Riscos | Teste autenticado e primeiro usuário admin permanecem manuais; rollback não executado (documentado) |
+| Próxima ação | Operador: teste autenticado e criação do primeiro administrador no /admin |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

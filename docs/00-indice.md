@@ -26,6 +26,7 @@
 - [Operação, deploy e recuperação](12-operacao-deploy-e-recuperacao.md)
 - [Ambiente de staging](16-staging.md)
 - [Fundação editorial — Payload + PostgreSQL](17-fundacao-editorial-payload.md)
+- [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 
 ## Templates
 

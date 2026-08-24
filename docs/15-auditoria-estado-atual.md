@@ -237,3 +237,17 @@ Estado anteriormente “ausente” que passou a existir em código:
 Continuam pendentes: deploy, credenciais reais, primeiro usuário administrador,
 seed estrutural, backup/restauração do banco, integração Hermes/n8n e páginas
 públicas do blog. Produção e staging ativos não foram recriados.
+
+## Staging blue-green ativado — 24 de agosto de 2026
+
+A fundação editorial foi ativada no staging em arquitetura blue-green
+(docs/18-deploy-phase2-staging.md), sem alterar produção nem o staging antigo:
+
+- Projeto `crescimento-vertical-phase2-staging` com containers
+  `cv-phase2-staging-app` e `cv-phase2-staging-postgres` (running/healthy).
+- PostgreSQL 16 dedicado com migration inicial aplicada (`migrate:status` = Ran).
+- Roteamento por `PHASE2_TRAEFIK_ENABLE`, router com prioridade superior ao
+  staging antigo, BasicAuth e `X-Robots-Tag`.
+- Sem dados editoriais: users, authors, categories, media, sources,
+  research_dossiers e articles com zero registros.
+- Produção e staging antigo permaneceram running/healthy sem recriação.

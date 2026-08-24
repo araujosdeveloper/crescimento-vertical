@@ -1,16 +1,23 @@
 # =============================================================================
-# Fase 2A — Compose de VALIDAÇÃO da fundação editorial (Payload + PostgreSQL).
+# Fase 2A — Blue-green staging (Payload + PostgreSQL).
 #
-# Este arquivo NÃO substitui docker-compose.yml nem docker-compose.staging.yml.
-# Ele usa nomes de projeto/serviço/volume exclusivos e não deve ser implantado
-# em produção agora: serve para validar a topologia dedicada do banco e da
-# mídia persistente sem tocar nos projetos ativos.
+# Projeto exclusivo: crescimento-vertical-phase2-staging
+#   - cv-phase2-staging-app
+#   - cv-phase2-staging-postgres
+#   - cv-phase2-staging-migrate (one-shot, perfil "migrate")
 #
-# Rede interna dedicada (app + banco) sem porta PostgreSQL publicada na VPS.
-# O app também entra na rede externa n8n_default SOMENTE para o Traefik
-# alcançá-lo (mesma regra dos projetos ativos).
+# NÃO substitui docker-compose.yml (produção) nem docker-compose.staging.yml
+# (staging antigo). O staging antigo permanece ativo como fallback de rollback.
+#
+# Rede interna exclusiva (app + postgres) sem porta publicada. A aplicação
+# também entra na rede externa n8n_default SOMENTE para o Traefik alcançá-la.
+# O postgres NÃO participa de n8n_default.
+#
+# Roteamento controlado por PHASE2_TRAEFIK_ENABLE (default false). Quando true,
+# o router do candidate assume o Host do staging com prioridade superior à do
+# staging antigo.
 # =============================================================================
-name: crescimento-vertical-cms
+name: crescimento-vertical-phase2-staging
 
 services:
   app:
@@ -18,22 +25,28 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://crescimentovertical.com}
-        - NEXT_PUBLIC_CONTACT_EMAIL=${NEXT_PUBLIC_CONTACT_EMAIL:-contato@crescimentovertical.com}
+        - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+        - NEXT_PUBLIC_CONTACT_EMAIL=${NEXT_PUBLIC_CONTACT_EMAIL}
         - NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
         - NEXT_PUBLIC_WHATSAPP_DISPLAY=${NEXT_PUBLIC_WHATSAPP_DISPLAY:-}
         - NEXT_PUBLIC_WHATSAPP_MESSAGE=${NEXT_PUBLIC_WHATSAPP_MESSAGE:-}
-        - SITE_NOINDEX=${SITE_NOINDEX:-false}
-    image: crescimento-vertical-cms:latest
-    container_name: crescimento-vertical-cms
-    restart: always
+        - SITE_NOINDEX=true
+    image: cv-phase2-staging-app:latest
+    container_name: cv-phase2-staging-app
+    restart: unless-stopped
     init: true
     security_opt:
       - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://${POSTGRES_USER:-cms_user}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-crescimento_vertical}
+      DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      PAYLOAD_MEDIA_DIR: /app/media
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,23 +76,35 @@ services:
           cpus: "1.00"
           memory: 512M
     labels:
-      # Exemplo da futura exposição via Traefik (Fase 3+). O host real e a
-      # regra de publicação serão definidos quando o CMS for para produção.
-      - 'traefik.enable=true'
+      - 'traefik.enable=${PHASE2_TRAEFIK_ENABLE:-false}'
       - 'traefik.docker.network=n8n_default'
-      - 'traefik.http.routers.crescimento-vertical-cms.rule=Host(`${CMS_HOST:-cms.crescimentovertical.com}`)'
-      - 'traefik.http.routers.crescimento-vertical-cms.entrypoints=websecure'
-      - 'traefik.http.routers.crescimento-vertical-cms.tls=true'
-      - 'traefik.http.routers.crescimento-vertical-cms.tls.certresolver=mytlschallenge'
-      - 'traefik.http.services.crescimento-vertical-cms.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.cv-phase2-staging.rule=Host(`${STAGING_HOST}`)'
+      - 'traefik.http.routers.cv-phase2-staging.entrypoints=websecure'
+      - 'traefik.http.routers.cv-phase2-staging.tls=true'
+      - 'traefik.http.routers.cv-phase2-staging.tls.certresolver=mytlschallenge'
+      - 'traefik.http.routers.cv-phase2-staging.priority=200'
+      - 'traefik.http.routers.cv-phase2-staging.middlewares=cv-phase2-staging-robots,cv-phase2-staging-basicauth'
+      - 'traefik.http.middlewares.cv-phase2-staging-basicauth.basicauth.users=${STAGING_BASIC_AUTH_USERS}'
+      - 'traefik.http.middlewares.cv-phase2-staging-robots.headers.customresponseheaders.X-Robots-Tag=noindex, nofollow, noarchive'
+      - 'traefik.http.services.cv-phase2-staging.loadbalancer.server.port=3000'
 
   postgres:
     image: postgres:16-alpine
-    container_name: crescimento-vertical-postgres
-    restart: always
+    container_name: cv-phase2-staging-postgres
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-crescimento_vertical}
-      POSTGRES_USER: ${POSTGRES_USER:-cms_user}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - internal
@@ -104,6 +129,31 @@ services:
         limits:
           cpus: "1.00"
           memory: 512M
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    image: cv-phase2-staging-migrate:latest
+    profiles: ["migrate"]
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
 
 networks:
   internal:

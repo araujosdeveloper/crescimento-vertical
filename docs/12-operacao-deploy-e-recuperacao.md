@@ -137,6 +137,14 @@ Não registrar corpo integral de lead, token, cookie ou prompt com segredo.
 - Usar versões do Payload para reverter documento.
 - Preservar nota de correção quando conteúdo já foi público.
 
+### Staging blue-green (Fase 2A)
+
+O staging da Fase 2A usa roteamento controlado por `PHASE2_TRAEFIK_ENABLE`.
+Reverter para o staging antigo sem apagar dados: definir
+`PHASE2_TRAEFIK_ENABLE=false` e recriar somente o container `cv-phase2-staging-app`.
+Banco e volumes do candidate permanecem preservados. Detalhes em
+docs/18-deploy-phase2-staging.md.
+
 ## Rotina operacional
 
 ### Diária
