@@ -46,6 +46,33 @@ Data da auditoria: 23 de agosto de 2026.
 - Nenhum DNS foi alterado.
 - Hermes, n8n, Traefik e demais serviços existentes foram preservados.
 
+## Backup, restauração e rollback — 24 de agosto de 2026
+
+Backup local, restauração e rollback operacional foram comprovados na Fase 1.
+
+- Git bundle criado contendo main e feat/portal-phase-1-baseline; verificado e
+  declarado como histórico completo.
+- Commit da branch incluído no bundle: 8f9d82d0372e7796bb4fd2cb540eec3e1a280af6.
+- Imagem Docker de rollback criada a partir do baseline da aplicação e exportada
+  para arquivo.
+- Configurações necessárias para a recuperação foram preservadas.
+- Checksums SHA-256 foram gerados para os arquivos do backup.
+- Arquivos do backup receberam permissão 600.
+- Imagem de rollback foi carregada novamente com sucesso.
+- Container descartável de prova foi criado sem portas públicas e sem labels do
+  Traefik.
+- Probe de rollback retornou {"status":"ok"} em live e {"status":"ready"} em
+  ready.
+- Probe descartável foi removido após o teste.
+- A aplicação principal permaneceu running e healthy; nenhum serviço existente
+  foi interrompido.
+- O backup operacional local ocupa aproximadamente 76 MB.
+
+Esse resultado comprova o rollback operacional local (reproduzir o baseline da
+aplicação no próprio ambiente), não a recuperação de desastre. A recuperação de
+desastre depende de cópia externa/off-site, que ainda não foi executada e
+permanece pendente, além dos itens de backup automatizado previstos na Fase 11.
+
 ## Repositório
 
 - Repositório: araujosdeveloper/crescimento-vertical.
@@ -160,5 +187,6 @@ integração do Hermes deve ser instalada antes desse gate.
   aprovados.
 
 A imagem foi construída e validada na VPS oficial com commit-base
-b71b52a8c0cdd4442a1c6244e61a53f8f57b532c. Backup pré-implantação, redes, DNS, TLS,
-staging e rollback continuam dependentes da auditoria operacional.
+b71b52a8c0cdd4442a1c6244e61a53f8f57b532c. Backup pré-mudança, restauração e
+rollback operacional local foram comprovados. Redes, DNS, TLS de produção,
+staging, contatos reais e cópia off-site permanecem pendentes.

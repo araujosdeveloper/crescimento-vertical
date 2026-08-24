@@ -31,8 +31,8 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 - [ ] Auditar containers, redes, volumes e portas.
 - [ ] Confirmar DNS, TLS e redirects www/apex.
 - [ ] Inventariar variáveis sem expor valores.
-- [ ] Criar backup pré-mudança.
-- [ ] Verificar restauração do backup.
+- [x] Criar backup pré-mudança.
+- [x] Verificar restauração do backup.
 - [x] Registrar commit-base local: 5b461252037f6670be7d8cd4095c5d202f97ae5d.
 - [x] Executar npm ci, lint, typecheck e build.
 - [ ] Registrar baseline visual.
@@ -45,7 +45,7 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 - [x] Executar smoke test HTTP da home e dos healthchecks.
 - [x] Validar sintaxe YAML do Docker Compose.
 - [x] Construir e validar imagem Docker em ambiente com Docker.
-- [ ] Demonstrar rollback.
+- [x] Demonstrar rollback.
 - [x] Atualizar auditoria com evidências.
 
 ## Evidências locais da Fase 1
@@ -109,6 +109,28 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | DNS | Nenhuma alteração |
 | Serviços existentes | Hermes, n8n, Traefik e demais preservados |
 
+## Evidências de backup, restauração e rollback — 2026-08-24
+
+| Verificação | Resultado |
+| --- | --- |
+| Git bundle | Criado com main e feat/portal-phase-1-baseline |
+| Integridade do bundle | Verificado; histórico completo declarado |
+| Commit incluído | 8f9d82d0372e7796bb4fd2cb540eec3e1a280af6 |
+| Imagem de rollback | Criada a partir do baseline da aplicação |
+| Export da imagem | Imagem exportada para arquivo |
+| Configurações de recuperação | Preservadas |
+| Checksums | SHA-256 gerados para os arquivos do backup |
+| Permissões | Arquivos do backup com 600 |
+| Recarga da imagem | Imagem de rollback carregada novamente com sucesso |
+| Container de prova | Descartável, sem portas públicas e sem labels do Traefik |
+| Probe live | {"status":"ok"} |
+| Probe ready | {"status":"ready"} |
+| Limpeza | Probe descartável removido após o teste |
+| Aplicação principal | Permaneceu running e healthy |
+| Serviços existentes | Nenhum serviço foi interrompido |
+| Tamanho do backup local | Aproximadamente 76 MB |
+| Cópia off-site | Não executada; permanece pendente |
+
 ## Registro da sessão 2026-08-23
 
 | Campo | Conteúdo |
@@ -144,6 +166,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Validações | docker compose build, healthchecks live/ready, Traefik apex/www |
 | Riscos | DNS na infraestrutura anterior, TLS local inválido, backup, contatos, staging e rollback pendentes |
 | Próxima ação | Executar backup/rollback e confirmar contatos reais |
+
+## Registro da sessão 2026-08-24 — backup, restauração e rollback
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-1-baseline @ 8f9d82d0372e7796bb4fd2cb540eec3e1a280af6 |
+| Fase | 1 |
+| Objetivo | Comprovar backup, restauração e rollback sem afetar a aplicação principal |
+| Alterações | Nenhuma em código; somente evidências operacionais registradas |
+| Validações | Git bundle, imagem de rollback, checksums SHA-256, recarga da imagem, probe live/ready |
+| Riscos | Cópia off-site, contatos reais, staging e DNS/TLS de produção pendentes |
+| Próxima ação | Confirmar contatos reais, staging e DNS/TLS de produção |
 
 ## Registro por sessão
 
