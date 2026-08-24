@@ -129,8 +129,11 @@ Validação documental (somente leitura) que registra o estado final da Fase 2A:
   (aproximadamente 196 MB, permissões 700/600), verificado com `sha256sum -c`,
   `git bundle verify`, `pg_restore --list` e validação de `payload-media.tar.gz`
   sem restaurar nem extrair.
-- BasicAuth: rotação após exposição do hash anterior verificada como pendente
-  (backup pré-rotação idêntico ao estado atual).
+- BasicAuth: rotação após exposição do hash anterior concluída (backup
+  pré-rotação com hash anterior difere do estado atual; novo hash idêntico em
+  `.env.staging`, `.env.phase2.staging` e nos labels BasicAuth dos dois
+  containers). Staging antigo e candidate recriados exclusivamente para aplicar
+  o novo hash; produção e PostgreSQL preservados.
 - Rollback disponível conforme o procedimento acima (não executado).
 
 Continuam pendentes: páginas públicas do blog, conteúdo editorial real,

@@ -239,6 +239,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Rotação BasicAuth pendente; páginas públicas, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
 | Próxima ação | Confirmar rotação BasicAuth e prosseguir para a Fase 3 quando autorizado |
 
+## Registro da sessão 2026-08-24 — conclusão da rotação BasicAuth
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation |
+| Fase | 2A (pós-validação — operação) |
+| Objetivo | Registrar a conclusão efetiva da rotação BasicAuth |
+| Alterações | Nenhuma em aplicação, banco, containers ou credenciais; somente documentação |
+| Validações | Backup pré-rotação difere do estado atual; novo hash idêntico em `.env.staging` e `.env.phase2.staging` e nos labels BasicAuth dos dois containers; TLS válido, 401 sem autenticação; produção, staging antigo, candidate e PostgreSQL running/healthy |
+| Riscos | Páginas públicas, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
+| Próxima ação | Prosseguir para a Fase 3 quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

@@ -260,8 +260,9 @@ A fundação editorial foi ativada e validada no staging em blue-green
   research_dossiers e articles).
 - Migração inicial aplicada (`20260824_191516_initial_foundation`).
 - Backup integral criado e verificado (caminho e tamanho em docs/12 e docs/15).
-- BasicAuth com rotação verificada como pendente (backup pré-rotação idêntico
-  ao estado atual).
+- BasicAuth com rotação concluída (backup pré-rotação com hash anterior difere
+  do estado atual; novo hash idêntico em `.env.staging`, `.env.phase2.staging`
+  e nos labels BasicAuth dos dois containers).
 
 ## Não concluído (deliberadamente)
 

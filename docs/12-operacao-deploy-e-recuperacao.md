@@ -125,8 +125,12 @@ Na validação final da Fase 2A foi criado um backup integral do estado do stagi
   `git bundle verify`, `pg_restore --list` e validação de `payload-media.tar.gz`.
 - O backup preserva produção e o staging antigo como referência de rollback.
 
-A rotação do BasicAuth após a exposição do hash anterior foi verificada e
-permanece pendente (o backup pré-rotação e o estado atual são idênticos).
+A rotação do BasicAuth após a exposição do hash anterior foi concluída: o backup
+pré-rotação (hash anterior) difere do estado atual, e o novo hash é idêntico em
+`.env.staging`, em `.env.phase2.staging` e nos labels BasicAuth dos dois
+containers. O staging antigo e o candidate foram recriados exclusivamente para
+aplicar o novo hash; produção e PostgreSQL foram preservados. TLS, BasicAuth e
+Admin foram validados. O backup anterior à rotação foi preservado.
 Nenhum hash, senha ou valor de `.env` é registrado no repositório.
 
 ## Recuperação

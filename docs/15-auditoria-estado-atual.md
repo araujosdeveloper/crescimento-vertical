@@ -273,8 +273,12 @@ Validação documental (somente leitura) do staging blue-green da Fase 2A:
   Git verificado, `pg_restore --list` e `payload-media.tar.gz` validados sem
   restaurar nem extrair.
 - Produção e staging antigo preservados; rollback disponível.
-- BasicAuth: rotação após exposição do hash anterior verificada como pendente
-  (o backup pré-rotação e o estado atual são idênticos).
+- BasicAuth: rotação após exposição do hash anterior concluída. O backup
+  pré-rotação (hash anterior) difere do estado atual, e o novo hash é idêntico
+  em `.env.staging`, em `.env.phase2.staging` e nos labels BasicAuth dos dois
+  containers. Staging antigo e candidate foram recriados exclusivamente para
+  aplicar o novo hash; produção e PostgreSQL foram preservados; TLS, BasicAuth e
+  Admin validados.
 - Nenhum e-mail administrativo, senha, hash, `DATABASE_URL`, IP ou conteúdo de
   `.env` foi versionado.
 
