@@ -1,0 +1,133 @@
+# Segurança e LGPD
+
+## Princípios
+
+- Privilégio mínimo.
+- Negar por padrão.
+- Separar ambientes e credenciais.
+- Validar toda entrada.
+- Registrar decisões críticas.
+- Coletar o mínimo de dado necessário.
+- Ser capaz de recuperar e revogar.
+
+## Identidade e acesso
+
+- Contas individuais para administradores.
+- Proibir conta administrativa compartilhada.
+- Senha forte e rate limiting.
+- MFA obrigatório assim que suportado pela configuração adotada.
+- Sessão com expiração e cookies Secure, HttpOnly e SameSite.
+- Roles aplicadas no servidor.
+- Revogação imediata de usuário desligado.
+- Usuários de serviço sem login interativo quando possível.
+
+## Segredos
+
+- Variáveis em arquivo protegido ou gerenciador de segredos.
+- .env.example contém apenas nomes e exemplos inofensivos.
+- Nunca registrar token, senha, cookie ou webhook secreto.
+- Rotação documentada.
+- Segredos distintos por ambiente.
+- Credencial do Hermes não pode administrar CMS.
+
+## Rede
+
+- Somente Traefik expõe 80/443.
+- Banco e serviços internos sem portas públicas.
+- Redes Docker separadas por responsabilidade.
+- Painel do CMS protegido por autenticação e rate limiting.
+- Staging protegido adicionalmente e bloqueado para indexação.
+- Webhook exige assinatura mesmo em rede privada.
+
+## Aplicação
+
+- CSP definida e validada antes da produção.
+- HSTS após confirmação de HTTPS integral.
+- X-Content-Type-Options: nosniff.
+- Referrer-Policy restritiva.
+- Permissions-Policy mínima.
+- Proteção contra CSRF conforme método de autenticação.
+- Sanitização de rich text.
+- Upload limitado por tipo, tamanho e inspeção.
+- Dependências fixadas e auditadas.
+
+## Formulários e abuso
+
+- Honeypot e proteção antiautomação progressiva.
+- Rate limit por IP e chave contextual.
+- Validação no servidor.
+- Mensagem pública não confirma existência de conta.
+- Idempotência para impedir leads duplicados por repetição.
+- Links e anexos não são aceitos em campos livres sem necessidade.
+
+## Webhooks
+
+- HMAC calculado sobre corpo bruto, timestamp e versão.
+- Comparação em tempo constante.
+- Janela de replay.
+- Idempotency-Key única.
+- Corpo máximo.
+- Schema estrito.
+- Resposta sem stack trace.
+- Dead-letter operacional para falhas.
+
+## Riscos específicos de IA
+
+- Prompt injection em fontes.
+- Fonte fabricada.
+- Citação incompatível com a afirmação.
+- Confusão entre data do fato e data do artigo.
+- Reprodução indevida.
+- Vazamento de segredo.
+- Publicação de instrução maliciosa.
+
+Controles:
+
+- fontes permitidas;
+- verificação de URL;
+- claims ligados a evidências;
+- revisão humana;
+- usuário sem permissão de publicar;
+- logs e dossiê imutável;
+- testes adversariais.
+
+## LGPD
+
+### Dados previstos
+
+- Identificação e contato em diagnóstico.
+- Informações profissionais e da empresa.
+- Origem, campanha e páginas visitadas conforme consentimento/configuração.
+- E-mail e evidência de opt-in da newsletter.
+
+### Regras
+
+- Informar finalidade antes do envio.
+- Registrar versão do texto de consentimento.
+- Não condicionar contato essencial a consentimento de marketing.
+- Disponibilizar canal para acesso, correção e exclusão.
+- Definir controlador, canal e política de retenção.
+- Não enviar lead para ferramenta não documentada.
+- Contratos com operadores devem ser avaliados.
+- Minimizar dados em backups e logs.
+
+## Retenção inicial
+
+A retenção definitiva depende da política jurídica aprovada. Até lá:
+
+- não coletar CPF, documento, dados bancários ou dado sensível;
+- lead sem relação comercial ativa entra em revisão periódica;
+- opt-out de newsletter é propagado imediatamente;
+- logs de aplicação não armazenam conteúdo integral de formulário.
+
+## Resposta a incidente
+
+1. Conter.
+2. Preservar evidências.
+3. Rotacionar credenciais afetadas.
+4. Identificar dados, período e pessoas impactadas.
+5. Restaurar serviço seguro.
+6. Avaliar obrigações de comunicação.
+7. Registrar causa, correção e prevenção.
+
+Nenhum incidente será “resolvido” apagando logs sem preservação.

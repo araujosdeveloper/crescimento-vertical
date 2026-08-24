@@ -1,0 +1,133 @@
+# Controle de execução
+
+Este documento é o quadro de controle. O detalhamento das fases permanece em
+../ROTEIRO-MESTRE.md.
+
+## Situação
+
+- Fase ativa: Fase 1 — Baseline técnico e segurança de implantação.
+- Última fase concluída: Fase 0 — Governança, auditoria e documentação.
+- Próxima fase: Fase 2, somente depois do gate integral da Fase 1.
+- Produção alterada por este planejamento: não.
+- Deploy realizado: não.
+
+## Gate para iniciar a Fase 1
+
+- [x] Repositório correto confirmado.
+- [x] Estado atual inventariado.
+- [x] Missão e escopo registrados.
+- [x] Arquitetura alvo registrada.
+- [x] Responsabilidade do Hermes registrada.
+- [x] Política editorial registrada.
+- [x] Critérios de qualidade e segurança registrados.
+- [x] Autorização do responsável para iniciar a Fase 1.
+
+## Checklist da Fase 1
+
+Itens executados exigem evidência; os demais permanecem bloqueados.
+
+- [x] Confirmar ausência de implantação anterior na VPS-alvo; commit implantado:
+  nenhum.
+- [ ] Auditar containers, redes, volumes e portas.
+- [ ] Confirmar DNS, TLS e redirects www/apex.
+- [ ] Inventariar variáveis sem expor valores.
+- [ ] Criar backup pré-mudança.
+- [ ] Verificar restauração do backup.
+- [x] Registrar commit-base local: 5b461252037f6670be7d8cd4095c5d202f97ae5d.
+- [x] Executar npm ci, lint, typecheck e build.
+- [ ] Registrar baseline visual.
+- [x] Remover telefone fictício e tornar o contato configurável.
+- [ ] Confirmar e configurar WhatsApp e e-mail reais.
+- [x] Criar branch feat/portal-phase-1-baseline.
+- [ ] Criar staging protegido/noindex.
+- [x] Criar healthchecks live e ready.
+- [x] Gerar aplicação Next.js em modo standalone.
+- [x] Executar smoke test HTTP da home e dos healthchecks.
+- [x] Validar sintaxe YAML do Docker Compose.
+- [ ] Construir e validar imagem Docker em ambiente com Docker.
+- [ ] Demonstrar rollback.
+- [x] Atualizar auditoria com evidências.
+
+## Evidências locais da Fase 1
+
+| Verificação | Resultado |
+| --- | --- |
+| npm ci | Aprovado, 361 pacotes |
+| ESLint | Aprovado |
+| TypeScript | Aprovado |
+| Next.js build | Aprovado |
+| Rotas | /, /api/health/live e /api/health/ready |
+| Standalone | server.js gerado |
+| Smoke HTTP | Home 200, live ok, ready ready |
+| Contato fictício | Ausente do HTML gerado |
+| Docker Compose | YAML válido; Docker não disponível nesta sessão |
+
+## Evidências iniciais da VPS-alvo — 2026-08-24
+
+| Campo | Evidência |
+| --- | --- |
+| Destino | VPS-alvo confirmada; identificadores mantidos fora do Git público |
+| Implantação anterior | Ausente; instalação será nova |
+| Capacidade | Aprovada para o baseline; margem de memória e disco confirmada |
+| Runtime | Docker e Docker Compose compatíveis |
+| Serviços preservados | Hermes, n8n, Traefik e cargas existentes ativos |
+| Proxy | Portas web públicas e redirect HTTP para HTTPS confirmados |
+| Rede | Integração externa do proxy disponível |
+| Router do domínio | Nenhum conflito encontrado |
+| DNS apex | Ainda aponta para a infraestrutura anterior |
+| HTTPS apex | Falha de validação; certificado não corresponde ao hostname |
+| HTTPS www | Falha de validação; certificado não corresponde ao hostname |
+| Resolver ACME | mytlschallenge por TLS challenge |
+| Compatibilidade do projeto | Labels atuais do site usam o mesmo entrypoint e resolver |
+| Risco preexistente | Processo público fora do Docker documentado no registro privado |
+| Regra de preservação | Não alterar os serviços existentes durante o baseline |
+
+Os identificadores, endereços, métricas e caminhos internos completos ficam em
+`.private/vps-audit-2026-08-24.md`, ignorado pelo Git.
+
+## Registro da sessão 2026-08-23
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-1-baseline |
+| Fase | 1 |
+| Objetivo | Baseline local e endurecimento operacional |
+| Alterações | Contato configurável, healthchecks, standalone e Docker |
+| Validações | npm ci, ESLint, TypeScript, build e smoke HTTP |
+| Riscos | VPS, backup, staging, Docker real e contatos ainda pendentes |
+| Próxima ação | Auditar VPS e confirmar contatos reais |
+
+## Registro da sessão 2026-08-24
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-1-baseline |
+| Fase | 1 |
+| Objetivo | Confirmar a VPS oficial e o estado anterior à implantação |
+| Alterações | VPS-alvo fixada; implantação nova confirmada |
+| Validações | Hostname, /opt e contêineres ativos inspecionados |
+| Riscos | DNS no destino anterior, TLS inválido, risco preexistente privado, volumes e contatos pendentes |
+| Próxima ação | Publicar a branch técnica e preparar implantação controlada |
+
+## Registro por sessão
+
+Ao concluir uma sessão de trabalho, registrar:
+
+| Campo | Conteúdo |
+| --- | --- |
+| Data | AAAA-MM-DD |
+| Branch/commit | Identificador |
+| Fase | Número e nome |
+| Objetivo | Entrega prevista |
+| Alterações | Arquivos e comportamento |
+| Validações | Comandos e resultados |
+| Riscos | Pendências reais |
+| Próxima ação | Um passo objetivo |
+
+## Regras do quadro
+
+- Marcar item somente após evidência.
+- Não substituir evidência por “aparenta funcionar”.
+- Se um item for removido, registrar ADR.
+- Falha reabre o item correspondente.
+- Fase só muda de estado após todos os critérios de saída.
