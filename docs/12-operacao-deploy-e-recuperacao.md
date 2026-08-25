@@ -133,6 +133,19 @@ aplicar o novo hash; produção e PostgreSQL foram preservados. TLS, BasicAuth e
 Admin foram validados. O backup anterior à rotação foi preservado.
 Nenhum hash, senha ou valor de `.env` é registrado no repositório.
 
+### Backup pré-deploy da Fase 2B (staging)
+
+Na Fase 2B foi criado um backup root-only antes do deploy (docs/20):
+
+- Caminho: `/opt/backups/crescimento-vertical/phase2b-predeploy-bdb129f-20260825-025211`.
+- Permissões: diretório 700 e arquivos 600.
+- Conteúdo: bundle Git (main + branch Fase 2B), dump PostgreSQL custom, tar do
+  volume de mídia, imagem `cv-phase2-staging-app`, `Dockerfile`,
+  `docker-compose.phase2.yml`, `.env` (600), `inspect-*.json` e `SHA256SUMS`.
+- Verificações executadas: `sha256sum -c`, `git bundle verify`,
+  `pg_restore --list`, integridade do tar de mídia e `docker load` da imagem sem
+  iniciar container.
+
 ## Recuperação
 
 - RPO: até 6 horas.

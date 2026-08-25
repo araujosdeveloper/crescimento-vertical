@@ -5,9 +5,9 @@ Payload CMS integrado ao Next.js existente, banco PostgreSQL dedicado, modelos
 editoriais, permissões, migrações, testes e CI.
 
 A Fase 2A entrega apenas o que é **implementado em código**. Não estão
-concluídos: deploy, credenciais reais, criação do primeiro usuário administrador
-nem integração Hermes/n8n. Esses itens permanecem pendentes até as fases
-seguintes.
+concluídos: deploy, credenciais reais nem integração Hermes/n8n. Esses itens
+permanecem pendentes até as fases seguintes. O primeiro usuário administrador
+foi criado no staging durante a validação da Fase 2A.
 
 ## Escopo da Fase 2A
 
@@ -27,7 +27,7 @@ Fora do escopo desta fase:
 
 - Páginas públicas do blog e experiência de leitura (Fases 4 e 5).
 - Integração Hermes e n8n (Fases 8 e 9).
-- Seed de conteúdo e primeiro usuário administrador.
+- Seed de conteúdo.
 - Deploy/ativação em staging ou produção.
 - Backup automatizado, observabilidade e hardening de rede (Fase 11).
 
@@ -72,8 +72,8 @@ dependência transitiva do próprio Payload e não é usado pela aplicação.
 
 Autenticação habilitada (`auth`), com `roles` (`admin`, `editor`, `reviewer`,
 `researcher`, `automation`), `name`, `active` e `lastLoginAt`. Rate limit de
-login (`maxLoginAttempts: 5`, `lockTime: 5 min`). O primeiro usuário será criado
-manualmente no staging, posteriormente — não nesta fase.
+login (`maxLoginAttempts: 5`, `lockTime: 5 min`). O primeiro usuário
+administrador foi criado manualmente no staging (validação da Fase 2A).
 
 ### authors
 

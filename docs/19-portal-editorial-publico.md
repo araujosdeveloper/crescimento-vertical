@@ -23,9 +23,11 @@ Incluído:
 Fora do escopo (permanece pendente):
 
 - Integração Hermes e n8n (Fases 8 e 9).
-- Conteúdo editorial real e primeiro usuário administrador.
+- Conteúdo editorial real.
 - Deploy/ativação em produção e homologação visual.
 - Migração de DNS (@ e www).
+
+Staging implantado e validado em docs/20-deploy-phase2b-staging.md.
 
 ## Arquitetura implementada
 
@@ -164,7 +166,7 @@ links, metadata/canonical, JSON-LD, feed, estado vazio e regras da Fase 2A.
 
 ## Não concluído (deliberadamente)
 
-- Deploy e homologação visual.
+- Deploy em produção (staging já implantado — docs/20) e homologação visual.
 - Integração Hermes/n8n.
 - Conteúdo editorial real e produção editorial.
 - Migração de DNS (@ e www).

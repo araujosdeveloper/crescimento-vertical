@@ -263,6 +263,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Deploy, homologação visual, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
 | Próxima ação | Prosseguir para as fases seguintes quando autorizado |
 
+## Registro da sessão 2026-08-25 — deploy do portal editorial público no staging (Fase 2B)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2b-public-editorial @ bdb129f6eb0b7f6d1f4a779ab2005023b515e3d2 |
+| Fase | 2B (deploy isolado no staging blue-green) |
+| Objetivo | Implantar o portal editorial público no candidato, aplicar a migration e validar |
+| Alterações | Backup pré-deploy, migration Fase 2B aplicada, recriação de `cv-phase2-staging-app`, `SITE_NOINDEX` no runtime do compose, imagem marcada `phase2b-staging-bdb129f`, docs/20 |
+| Validações | HTTP interno (200/404, XML, estados vazios), externo (401, TLS, X-Robots-Tag), agregados do banco antes/depois, IDs dos containers, backup (sha256sum, bundle verify, pg_restore --list, docker load) |
+| Riscos | Homologação visual, conteúdo editorial real, produção e DNS ainda não migrados; Hermes/n8n não iniciados |
+| Próxima ação | Inspeção visual e PR em rascunho com CI |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

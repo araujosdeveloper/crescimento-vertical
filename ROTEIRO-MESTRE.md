@@ -129,7 +129,7 @@ Antecipação aprovada da fundação de código da Fase 3, sem deploy. Detalhes 
 ### Não concluído (permanece pendente)
 
 - Deploy em staging/produção e credenciais reais.
-- Primeiro usuário administrador.
+- Primeiro usuário administrador (já criado no staging da Fase 2A).
 - Seed estrutural e backup/restauração do banco.
 - Integração Hermes/n8n e páginas públicas do blog.
 
@@ -156,7 +156,7 @@ SEO técnico) em código, sem deploy e sem integração Hermes/n8n. Detalhes em
 ### Não concluído (permanece pendente)
 
 - Deploy/ativação e homologação visual.
-- Conteúdo editorial real e primeiro usuário administrador.
+- Conteúdo editorial real.
 - Integração Hermes/n8n e produção editorial.
 
 ## Fase 4 — Arquitetura pública e páginas comerciais
