@@ -355,3 +355,23 @@ A Fase 2B foi homologada visualmente pelo operador no staging:
 
 As páginas populadas serão novamente verificadas com o primeiro conteúdo real.
 Produção e DNS permanecem pendentes; Hermes/n8n não foram iniciados.
+
+## Auditoria e contrato Hermes/n8n — 25 de agosto de 2026
+
+A Fase 3A entregou, em documentação (sem integração), a auditoria somente
+leitura e o contrato de integração (docs/21 e docs/22, ADR-016):
+
+- Hermes: contêiner `hermes-agent-sodq-hermes-agent-1`, imagem
+  `ghcr.io/hostinger/hvps-hermes-agent:latest` (gerenciada), com busca web
+  (Tavily), Telegram e Playwright; sem limites de recursos declarados.
+- n8n: `docker.n8n.io/n8nio/n8n:latest` (versão 2.33.7), webhooks habilitados
+  (`WEBHOOK_URL`), exposto via `n8n-traefik-1`; compartilhado com outros
+  projetos (webhook próprio de terceiro).
+- Contrato: webhook autenticado (HMAC-SHA256 sobre corpo bruto + timestamp +
+  versão, janela de replay de 300 s, `Idempotency-Key`, corpo ≤ 1 MiB), dossiê
+  JSON `editorial-dossier.v1` e ciclo `EditorialRun` (CV-01 a CV-04).
+- Nenhum contêiner, credencial, rede ou configuração foi alterado; nenhum
+  segredo foi registrado.
+
+Continuam pendentes: perfil/skill do Hermes, workflows n8n, credenciais de
+serviço e webhook real (Fases 8/9); conteúdo editorial real; produção e DNS.

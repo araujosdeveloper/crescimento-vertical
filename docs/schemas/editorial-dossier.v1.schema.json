@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crescimentovertical.com/schemas/editorial-dossier.v1.schema.json",
+  "title": "Editorial Dossier v1",
+  "description": "Contrato de saída do Hermes Agent para o fluxo editorial (Fase 3A). Versão 1.0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "idempotencyKey",
+    "hermesRunId",
+    "discoveredAt",
+    "contentType",
+    "primaryPillar",
+    "riskLevel",
+    "sources"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hermesRunId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "discoveredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "contentType": {
+      "type": "string",
+      "enum": ["news", "analysis", "guide", "tool", "comparison", "case"]
+    },
+    "primaryPillar": {
+      "type": "string",
+      "enum": [
+        "ai-business",
+        "automation",
+        "sales-attendance",
+        "sites-conversion",
+        "tools-integrations"
+      ]
+    },
+    "riskLevel": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "blocked"]
+    },
+    "title": {
+      "type": "string"
+    },
+    "dek": {
+      "type": "string"
+    },
+    "executiveSummary": {
+      "type": "string"
+    },
+    "businessImpact": {
+      "type": "string"
+    },
+    "draft": {
+      "oneOf": [{ "type": "string" }, { "type": "object" }]
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["url", "publisher", "sourceLevel", "publishedAt", "accessedAt"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "publisher": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceLevel": {
+            "type": "string",
+            "enum": ["A", "B", "C"]
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accessedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "supports": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "text"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sourceUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": ["verified", "unverified"]
+          }
+        }
+      }
+    },
+    "relatedServiceSlug": {
+      "type": ["string", "null"]
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
