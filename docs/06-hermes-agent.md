@@ -37,6 +37,13 @@ perfil foi instalado (docs/23). `config.yaml` restringe a `toolsets: [web]`,
 O perfil `default` permanece ativo; a execução real está desabilitada por dupla
 trava (docs/24).
 
+### Conector n8n (Fase 3C)
+
+O n8n acessa o runner por um node privado `hermesEditorial` (docs/26) com
+assinatura HMAC; o workflow de conectividade é INATIVO e validate-only. A
+execução do Hermes continua desabilitada; o n8n é a única ponte para o Payload
+(ADR-017/ADR-019).
+
 ## Estrutura planejada no repositório
 
 ~~~text

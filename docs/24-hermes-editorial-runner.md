@@ -61,3 +61,10 @@ Erros: 400 (JSON inválido), 401 (assinatura/timestamp), 409 (nonce repetido),
 `services/hermes-editorial-runner/tests/` (32 testes, `unittest`): HMAC, nonce,
 schemas, dupla trava, comando sem shell e integração HTTP (401/409/413/400/422/
 503/404/200). Execução: `python3 -m unittest discover -s tests -t .`.
+
+## Cliente n8n (Fase 3C)
+
+O n8n consome o runner por meio do node privado `hermesEditorial` (docs/26),
+assinando com o mesmo HMAC-SHA256 e usando a credencial
+`crescimentoVerticalHermesApi` (URL interna). A conectividade foi validada com
+health/validate 200, createJob 503 e getJob 404.

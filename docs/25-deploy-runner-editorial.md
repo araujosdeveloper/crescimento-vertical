@@ -49,3 +49,8 @@ docker compose --env-file .env.hermes-editorial \
 
 Execução desabilitada; nenhum workflow n8n, nenhuma credencial Payload, nenhuma
 pesquisa real ou chamada de LLM, nenhum conteúdo criado.
+
+## Integração com o n8n (Fase 3C)
+
+O n8n acessa o runner via node privado e credencial HMAC; ver docs/26 e
+docs/27 para o conector e seu deploy.

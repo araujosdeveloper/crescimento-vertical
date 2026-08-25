@@ -27,6 +27,11 @@ HMAC, nonce anti-replay, schemas (request/dossier), dupla trava de execução,
 comando sem shell e integração HTTP (401/409/413/400/422/503/404/200). Total:
 32 testes.
 
+Testes da Fase 3C (Vitest, `packages/n8n-nodes-crescimento-vertical/test/`):
+vetor HMAC, assinatura de corpo, nonce/timestamp, validação de URL interna,
+validação da requisição, cliente HTTP (timeout, resposta grande, status
+401/409/503, sem segredo em erro), node e credencial. Total: 34 testes.
+
 ### Componentes
 
 - Header e menu.

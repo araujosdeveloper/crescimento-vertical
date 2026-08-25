@@ -81,6 +81,15 @@ Entre o n8n e o Hermes existe o runner interno `cv-hermes-editorial-runner`
 one-shot no perfil isolado `crescimento-vertical-editorial`. Sem acesso a
 Docker Socket, PostgreSQL ou Payload; execução desabilitada por dupla trava.
 
+### Conector n8n (Fase 3C)
+
+O n8n acessa o runner por um node privado `hermesEditorial` (pacote
+`n8n-nodes-crescimento-vertical`, docs/26) carregado via
+`N8N_CUSTOM_EXTENSIONS` na imagem `cv-n8n-hermes-connector`. A credencial
+`crescimentoVerticalHermesApi` aponta exclusivamente para
+`http://cv-hermes-editorial-runner:8100` e é armazenada criptografada. O
+workflow de conectividade é INATIVO e executado uma única vez (health/validate).
+
 ### Telegram
 
 - Interface operacional para pauta, revisão e decisão.

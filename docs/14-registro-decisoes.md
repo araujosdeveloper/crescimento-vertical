@@ -449,6 +449,67 @@ volume `runner-state`; remover o perfil apenas por comando explícito futuro.
 e `docker compose config` aprovados; container `healthy`; smoke tests 200/401/
 503/404; IDs dos 7 contêineres preservados.
 
+## ADR-019 — Conector seguro n8n ↔ Hermes (validate-only)
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 9 (ponte n8n → Hermes), antecipada como "Fase 3C"
+  (conectividade, sem execução)
+
+### Contexto
+
+Era preciso ligar o n8n ao runner editorial do Hermes mantendo a execução
+desabilitada e o Hermes sem credencial do Payload. O n8n é compartilhado e não
+pode ser atualizado nem ter Traefik/portas/volumes alterados.
+
+### Decisão
+
+1. **Node privado** `n8n-nodes-crescimento-vertical` (TypeScript, sem
+   dependências nativas) com a credencial `crescimentoVerticalHermesApi`
+   (`runnerBaseUrl` restrito a `http://cv-hermes-editorial-runner:8100` +
+   `hmacSecret` password) e o node `hermesEditorial` (health, validate, createJob,
+   getJob).
+2. **Imagem customizada** `cv-n8n-hermes-connector` construída a partir do
+   digest exato do n8n em execução, carregando o node via
+   `N8N_CUSTOM_EXTENSIONS=/opt/n8n-custom`.
+3. **Autenticação HMAC-SHA256** com nonce anti-replay, janela de 300 s, corpo
+   ≤ 1 MiB; sem retry automático em 401/409/validação; segredo nunca exposto.
+4. **Execução desabilitada**: `createJob` devolve `503 execution_disabled`; o
+   workflow de conectividade é INATIVO e executado uma única vez.
+
+### Alternativas consideradas
+
+1. Executar a pesquisa real nesta fase — rejeitado: violaria a dupla trava da
+   Fase 3B e exigiria credencial de modelo.
+2. Usar Code node/Execute Command para assinar — rejeitado: exporia o segredo e
+   quebraria a auditoria (nenhum Code/Execute Command no workflow).
+
+### Consequências
+
+- Positivas: conectividade HMAC auditável; node versionado e testado; credencial
+  criptografada em repouso.
+- Riscos: node customizado aparece na auditoria ("Custom nodes"); n8n `:latest`
+  sem pin persistente (resolvido para digest nesta fase).
+
+### Segurança, SEO, custo e operação
+
+- Segurança: HMAC + nonce; sem Docker Socket/Payload; sem porta pública.
+- SEO: sem efeito.
+- Custo: nenhum serviço novo (apenas imagem derivada do n8n existente).
+- Operação: rollback documentado (docs/27).
+
+### Migração e reversão
+
+Reverter restaurando `image: docker.n8n.io/n8nio/n8n` no Compose persistente e
+recriando o n8n; volume e SQLite restauram a partir do backup pré-recreate.
+
+### Critério de validação
+
+34 testes do node; 4 schemas Draft 2020-12; CI `n8n-hermes-connector` aprovado;
+workflow validate-only executado (health 200, validate 200, createJob 503,
+getJob 404); IDs dos 7 contêineres preservados (somente o n8n recriado).
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
