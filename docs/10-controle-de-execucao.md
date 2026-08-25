@@ -311,6 +311,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Execução desabilitada (dupla trava); imagens `:latest`; secret em bind mount legível pelo runner |
 | Próxima ação | Habilitar execução e criar o webhook n8n (Fase 9) quando autorizado |
 
+## Registro da sessão 2026-08-25 — conector n8n ↔ Hermes (Fase 3C)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-3c-n8n-hermes-connector |
+| Fase | 3C (conector n8n → runner, validate-only) |
+| Objetivo | Conectividade/autenticação/validação n8n ↔ Hermes, sem execução |
+| Alterações | Node privado `n8n-nodes-crescimento-vertical`, imagem `cv-n8n-hermes-connector`, Compose n8n, workflow de conectividade, credencial HMAC, CI, docs/26–27, ADR-019 |
+| Validações | 34 testes do node; 4 schemas; CI (3 jobs); workflow validate-only (health 200, validate 200, createJob 503, getJob 404); n8n audit |
+| Riscos | Execução do Hermes desabilitada; n8n `:latest` sem pin persistente; node customizado sinalizado na auditoria |
+| Próxima ação | Habilitar execução e fechar o ciclo editorial (Fase 9) quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

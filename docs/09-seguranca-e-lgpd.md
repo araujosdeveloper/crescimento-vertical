@@ -85,6 +85,14 @@ O runner `cv-hermes-editorial-runner` (docs/24) aplica HMAC-SHA256 sobre
 corpo ≤ 1 MiB e validação Draft 2020-12. Sem Docker Socket, sem PostgreSQL,
 sem Payload; execução desabilitada por dupla trava.
 
+### Conector n8n (Fase 3C)
+
+O node privado `hermesEditorial` (docs/26) assina com o mesmo HMAC; a credencial
+`crescimentoVerticalHermesApi` restringe a URL a
+`http://cv-hermes-editorial-runner:8100` e o segredo é armazenado criptografado
+(encryptV2). Sem Code node/Execute Command para assinar; sem webhook/cron no
+workflow de conectividade.
+
 ## Riscos específicos de IA
 
 - Prompt injection em fontes.

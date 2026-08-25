@@ -1,0 +1,78 @@
+{
+  "name": "CV — Hermes Editorial — Connectivity Validation",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "11111111-1111-4111-8111-111111111111",
+      "name": "When clicked…",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-240, 0]
+    },
+    {
+      "parameters": {
+        "operation": "health"
+      },
+      "id": "22222222-2222-4222-8222-222222222222",
+      "name": "Hermes Editorial Health",
+      "type": "CUSTOM.hermesEditorial",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "credentials": {
+        "crescimentoVerticalHermesApi": {
+          "name": "CV Hermes Editorial Runner — Internal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "validateResearchRequest",
+        "correlationId": "connectivity-validation-fixture",
+        "idempotencyKey": "connectivity-validation-fixture-001",
+        "topic": "Validação de conectividade (fixture técnica, sem conteúdo editorial)",
+        "primaryPillar": "ai-business",
+        "searchIntent": "teste de contrato de integração",
+        "maxSources": 5
+      },
+      "id": "33333333-3333-4333-8333-333333333333",
+      "name": "Hermes Editorial Validate",
+      "type": "CUSTOM.hermesEditorial",
+      "typeVersion": 1,
+      "position": [240, 0],
+      "credentials": {
+        "crescimentoVerticalHermesApi": {
+          "name": "CV Hermes Editorial Runner — Internal"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicked…": {
+      "main": [
+        [
+          {
+            "node": "Hermes Editorial Health",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hermes Editorial Health": {
+      "main": [
+        [
+          {
+            "node": "Hermes Editorial Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "44444444-4444-4444-8444-444444444444",
+  "id": "55555555-5555-4555-8555-555555555555",
+  "pinData": {}
+}

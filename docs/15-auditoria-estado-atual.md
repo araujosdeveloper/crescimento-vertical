@@ -414,3 +414,25 @@ A Fase 3B entregou, em código e infraestrutura isolada (sem integração):
 
 Continuam pendentes: workflows n8n, credenciais de serviço e webhook real
 (Fase 9); conteúdo editorial real; produção e DNS.
+
+## Conector n8n ↔ Hermes — 25 de agosto de 2026
+
+A Fase 3C entregou a conectividade n8n → runner (validate-only, sem execução):
+
+- Node privado `n8n-nodes-crescimento-vertical` (TypeScript, sem dependências
+  nativas) com o node `hermesEditorial` (health/validate/createJob/getJob) e a
+  credencial `crescimentoVerticalHermesApi` (URL interna + HMAC password).
+- Imagem `cv-n8n-hermes-connector` a partir do digest exato do n8n (2.33.7,
+  `3989d9b8…`), carregando o node via `N8N_CUSTOM_EXTENSIONS`.
+- Recreate controlado **apenas** do n8n (ID `833934a5416e` → `ecd2475f6600`);
+  Traefik, runner, Hermes, Payload, PostgreSQL, produção e staging preservados.
+- Dados do n8n preservados: `users=1`, `workflows=3` (3 ativos), `credentials=5`
+  (antes) → `credentials=6` (após, a nova credencial criptografada).
+- Workflow `CV — Hermes Editorial — Connectivity Validation` (INATIVO) executado
+  uma única vez: health 200, validate 200; `createJob` 503 e `getJob` 404.
+- Auditoria n8n: custom node (esperado), instância desatualizada (esperado),
+  credencial sem workflow ativo (esperado); demais achados pré-existentes.
+- 34 testes do node; CI com 3 jobs aprovado.
+
+Continuam pendentes: execução editorial real, webhook de produção e conteúdo
+(Fase 9); produção e DNS.

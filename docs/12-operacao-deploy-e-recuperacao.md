@@ -188,6 +188,14 @@ Reverter o runner sem afetar o Hermes ou o n8n (docs/25): parar/remover apenas
 remover o perfil `crescimento-vertical-editorial` somente por comando explícito
 futuro; confirmar `default` e o gateway (PID 153) intactos.
 
+### Conector n8n (Fase 3C)
+
+Reverter o n8n (docs/27): restaurar `image: docker.n8n.io/n8nio/n8n` no
+Compose persistente e recriar apenas `n8n`; restaurar o volume `n8n_data` e o
+SQLite a partir do backup pré-recreate (`/opt/backups/crescimento-vertical/
+phase3c-pre-n8n-*`). Traefik, runner, Hermes, Payload, PostgreSQL, produção e
+staging permanecem intactos.
+
 ## Rotina operacional
 
 ### Diária

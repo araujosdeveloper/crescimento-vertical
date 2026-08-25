@@ -212,6 +212,30 @@ o runner **sem execução**. Detalhes em
 - Habilitação da execução e webhook n8n (Fase 9).
 - Conteúdo editorial e produção editorial.
 
+## Fase 3C — Conector seguro n8n ↔ Hermes (validate-only)
+
+Antecipação aprovada da conectividade n8n → runner (Fase 9), **sem execução**.
+Detalhes em [docs/26-conector-n8n-hermes.md](docs/26-conector-n8n-hermes.md),
+[docs/27-deploy-conector-n8n-hermes.md](docs/27-deploy-conector-n8n-hermes.md) e
+[ADR-019](docs/14-registro-decisoes.md).
+
+### Entregas implementadas
+
+- Node privado `n8n-nodes-crescimento-vertical` (`hermesEditorial` +
+  credencial `crescimentoVerticalHermesApi`), HMAC-SHA256, sem dependências
+  nativas; 34 testes.
+- Imagem `cv-n8n-hermes-connector` (base n8n pinada por digest) carregando o
+  node via `N8N_CUSTOM_EXTENSIONS`.
+- Recreate controlado apenas do n8n; credencial HMAC criptografada; workflow de
+  conectividade INATIVO executado uma única vez (health/validate 200,
+  createJob 503, getJob 404).
+- CI com job `n8n-hermes-connector`.
+
+### Não concluído (permanece pendente)
+
+- Execução editorial real e webhook de produção (Fase 9).
+- Conteúdo editorial e produção editorial.
+
 ## Fase 4 — Arquitetura pública e páginas comerciais
 
 ### Atividades
@@ -431,3 +455,17 @@ O registro deve ser feito em docs/14-registro-decisoes.md antes da implementaç�
   registrada no ADR-018; responsável Crescimento Vertical.
 - Data: 2026-08-25.
 - Fases afetadas: 8/9 (ponte Hermes → n8n), antecipadas sem execução.
+
+### Alteração 2026-08-25 — Fase 3C
+
+- Problema: ligar o n8n ao runner editorial com autenticação HMAC e validação,
+  sem executar o Hermes e sem atualizar o n8n.
+- Impacto: node privado, imagem n8n derivada, credencial criptografada e
+  workflow de conectividade INATIVO; apenas o n8n foi recriado; sem impacto em
+  produção, DNS, Traefik, Hermes, Payload ou PostgreSQL.
+- Alternativa rejeitada: assinar requisições via Code node/Execute Command
+  (exporia o segredo e quebraria a auditoria).
+- Decisão e responsável: executar a “Fase 3C” em código + infraestrutura,
+  registrada no ADR-019; responsável Crescimento Vertical.
+- Data: 2026-08-25.
+- Fases afetadas: 9 (ponte n8n → Hermes), antecipada sem execução.

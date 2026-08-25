@@ -153,7 +153,8 @@ Sem campos `command`, `prompt`, `shell`, `tool` ou `credentials`.
 
 Esta requisição é enviada ao runner (`cv-hermes-editorial-runner`, docs/24),
 que valida o schema e, em fase futura, executa o Hermes one-shot. Nesta fase a
-execução está desabilitada (`/v1/jobs` → 503).
+execução está desabilitada (`/v1/jobs` → 503). O envio é feito pelo node privado
+`hermesEditorial` do n8n (docs/26), com o mesmo HMAC-SHA256 do webhook.
 
 ## 3. Ciclo EditorialRun
 
