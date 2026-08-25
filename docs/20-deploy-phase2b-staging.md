@@ -111,10 +111,19 @@ Reverter o candidato: restaurar a imagem `cv-phase2-staging-app` do backup ou
 reapontar `PHASE2_TRAEFIK_ENABLE=false` (docs/12 e docs/18). O banco e os volumes
 do candidate estão preservados; a migration da Fase 2B é reversível (`down`).
 
+## Homologação visual
+
+Aprovada pelo operador em 25 de agosto de 2026:
+
+- home homologada visualmente;
+- `/conteudos` homologado no estado vazio;
+- responsividade aprovada (360, 390, 768, 1024 e 1440 px);
+- ausência de conteúdo fictício.
+
+As páginas populadas serão novamente verificadas com o primeiro conteúdo real.
+
 ## Pendências
 
-- Homologação visual ainda pendente (inspeção manual em 360, 390, 768, 1024 e
-  1440 px).
 - Conteúdo editorial real ainda pendente.
 - Produção e DNS (@ e www) ainda não migrados.
 - Integração Hermes/n8n não iniciada.

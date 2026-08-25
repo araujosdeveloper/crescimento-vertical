@@ -275,6 +275,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Homologação visual, conteúdo editorial real, produção e DNS ainda não migrados; Hermes/n8n não iniciados |
 | Próxima ação | Inspeção visual e PR em rascunho com CI |
 
+## Registro da sessão 2026-08-25 — homologação visual da Fase 2B
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2b-public-editorial @ 3855f32 (runtime homologado) |
+| Fase | 2B (fechamento — aceite visual) |
+| Objetivo | Registrar o aceite visual do portal editorial público no staging |
+| Alterações | Somente documentação (docs/10, docs/15, docs/19 e docs/20) |
+| Validações | Home e `/conteudos` (estado vazio) homologados; responsividade aprovada em 360/390/768/1024/1440 px; ausência de conteúdo fictício |
+| Riscos | Páginas populadas serão reavaliadas com o primeiro conteúdo real; produção e DNS permanecem pendentes; Hermes/n8n não iniciados |
+| Próxima ação | Validar PR/CI e executar merge protegido da Fase 2B |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

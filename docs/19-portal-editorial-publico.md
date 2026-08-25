@@ -166,7 +166,7 @@ links, metadata/canonical, JSON-LD, feed, estado vazio e regras da Fase 2A.
 
 ## Não concluído (deliberadamente)
 
-- Deploy em produção (staging já implantado — docs/20) e homologação visual.
+- Deploy em produção (staging já implantado e homologado visualmente — docs/20).
 - Integração Hermes/n8n.
 - Conteúdo editorial real e produção editorial.
 - Migração de DNS (@ e www).

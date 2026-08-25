@@ -343,3 +343,15 @@ A Fase 2B foi implantada e validada no candidato de staging (docs/20):
 
 Continuam pendentes: homologação visual, conteúdo editorial real, produção
 editorial, migração de DNS (@ e www) e integração Hermes/n8n.
+
+## Homologação visual da Fase 2B — 25 de agosto de 2026
+
+A Fase 2B foi homologada visualmente pelo operador no staging:
+
+- Home homologada visualmente.
+- `/conteudos` homologado no estado vazio (sem conteúdo fictício).
+- Responsividade aprovada em 360, 390, 768, 1024 e 1440 px.
+- Ausência de conteúdo fictício confirmada.
+
+As páginas populadas serão novamente verificadas com o primeiro conteúdo real.
+Produção e DNS permanecem pendentes; Hermes/n8n não foram iniciados.
