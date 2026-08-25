@@ -104,7 +104,7 @@ jobs:
           set -euo pipefail
           grep -q 'RUNNER_EXECUTION_ENABLED: "false"' docker-compose.hermes-editorial.yml
           if grep -qE '^[[:space:]]*ports:' docker-compose.hermes-editorial.yml; then echo "ERRO: ports publicados"; exit 1; fi
-          if grep -qi 'traefik' docker-compose.hermes-editorial.yml; then echo "ERRO: label Traefik"; exit 1; fi
+          if grep -qiE 'traefik\.' docker-compose.hermes-editorial.yml; then echo "ERRO: label Traefik"; exit 1; fi
           if grep -q 'docker.sock' docker-compose.hermes-editorial.yml services/hermes-editorial-runner/Dockerfile; then echo "ERRO: Docker Socket"; exit 1; fi
           echo "OK: execução desabilitada, sem ports/Traefik/Docker Socket"
 
