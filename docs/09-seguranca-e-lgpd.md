@@ -78,6 +78,13 @@ apaga usuários e não altera permissões.
 - Resposta sem stack trace.
 - Dead-letter operacional para falhas.
 
+### Runner editorial (Fase 3B)
+
+O runner `cv-hermes-editorial-runner` (docs/24) aplica HMAC-SHA256 sobre
+`{timestamp}.{nonce}.{body}`, janela de replay de 300 s, nonce anti-replay,
+corpo ≤ 1 MiB e validação Draft 2020-12. Sem Docker Socket, sem PostgreSQL,
+sem Payload; execução desabilitada por dupla trava.
+
 ## Riscos específicos de IA
 
 - Prompt injection em fontes.

@@ -34,6 +34,10 @@ yarn-error.log*
 .env*
 !.env.example
 !.env.staging.example
+!.env.hermes-editorial.example
+
+# secrets locais do runner editorial (nunca versionar)
+/.secrets/
 
 # vercel
 .vercel
@@ -47,3 +51,7 @@ next-env.d.ts
 
 # Logs visuais do Next/Codex
 .next-visual*.log
+
+# python
+__pycache__/
+*.pyc

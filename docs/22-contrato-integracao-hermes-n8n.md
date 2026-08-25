@@ -143,6 +143,18 @@ Regras: proíbe `status: published` (o `const "draft"` rejeita qualquer outro
 valor); não contém credenciais, campos de permissão ou instrução de publicação
 automática (`additionalProperties: false`).
 
+## 2.3 Requisição de pesquisa v1
+
+Schema `docs/schemas/editorial-research-request.v1.schema.json` (Draft 2020-12,
+`additionalProperties: false`). Exige: `schemaVersion`, `correlationId`,
+`idempotencyKey`, `topic`, `primaryPillar`, `searchIntent`, `language`
+(`pt-BR`), `requestedAt`, `maxSources` (2–10) e `seedSources` opcional (HTTPS).
+Sem campos `command`, `prompt`, `shell`, `tool` ou `credentials`.
+
+Esta requisição é enviada ao runner (`cv-hermes-editorial-runner`, docs/24),
+que valida o schema e, em fase futura, executa o Hermes one-shot. Nesta fase a
+execução está desabilitada (`/v1/jobs` → 503).
+
 ## 3. Ciclo EditorialRun
 
 | Etapa | Responsável | Resultado |

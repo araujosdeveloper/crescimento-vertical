@@ -387,6 +387,68 @@ Schemas `editorial-dossier.v1`, `source-record.v1` e `article-draft.v1`
 validados com Draft 2020-12 (válidos aceitos, inválidos rejeitados); nenhum
 perfil criado; nenhum gateway reiniciado; nenhum workflow/credencial criado.
 
+## ADR-018 — Runner editorial isolado com execução desabilitada
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 8/9 (ponte Hermes → n8n), antecipada como "Fase 3B" (código
+  + perfil, sem integração)
+
+### Contexto
+
+Era preciso uma ponte controlada entre o n8n e o Hermes, mantendo o Hermes sem
+credencial do Payload e sem acesso a Docker Socket/PostgreSQL. O Hermes
+existente é compartilhado e seu gateway (PID 153) não pode ser alterado.
+
+### Decisão
+
+1. **Perfil isolado** `crescimento-vertical-editorial` via distribuição
+   versionada (`hermes/crescimento-vertical-editorial/`), com `toolsets: [web]`,
+   `terminal.home_mode: profile`, sem credencial de modelo e sem gateway/cron.
+2. **Runner HTTP interno** (`services/hermes-editorial-runner/`) com HMAC-SHA256,
+   nonce anti-replay, janela de 300 s, corpo ≤ 1 MiB e validação Draft 2020-12.
+3. **Execução desabilitada por dupla trava**: `RUNNER_EXECUTION_ENABLED=false`
+   e ausência de `/run/secrets/execution-enable`. O endpoint `/v1/jobs` devolve
+   `503 execution_disabled`; nenhum subprocesso Hermes é iniciado.
+4. **Container** `cv-hermes-editorial-runner` isolado (sem `ports`, sem Traefik,
+   sem Docker Socket, `read_only`, `cap_drop ALL`, non-root, limites de
+   CPU/memória/pids).
+
+### Alternativas consideradas
+
+1. Dar ao Hermes acesso direto ao Payload via webhook — rejeitado (viola o
+   ADR-017: n8n é a única ponte).
+2. Usar o gateway do Hermes como executor — rejeitado: processo persistente
+   compartilhado, mais superfície que o one-shot.
+
+### Consequências
+
+- Positivas: fronteira auditável e determinística; Hermes sem credencial;
+  execução desligada por padrão.
+- Riscos: `-z` auto-bypassa approvals (a skill precisa de fail-safe próprio);
+  imagens `:latest` sem pin; segredo HMAC em bind mount legível pelo runner.
+
+### Segurança, SEO, custo e operação
+
+- Segurança: HMAC + nonce + janela; sem sockets privilegiados; sem segredos em
+  log.
+- SEO: sem efeito.
+- Custo: um container leve (~24 MiB residente) com limites.
+- Operação: execução futura exige as duas travas simultaneamente.
+
+### Migração e reversão
+
+Perfil criado via `hermes profile install` (sem clone, sem alias, sem gateway).
+Rollback (docs/25): parar/remover `cv-hermes-editorial-runner`, preservar o
+volume `runner-state`; remover o perfil apenas por comando explícito futuro.
+
+### Critério de validação
+
+32 testes do runner aprovados; 4 schemas Draft 2020-12 válidos; build da imagem
+e `docker compose config` aprovados; container `healthy`; smoke tests 200/401/
+503/404; IDs dos 7 contêineres preservados.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

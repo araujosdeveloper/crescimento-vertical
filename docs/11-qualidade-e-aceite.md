@@ -22,6 +22,11 @@ campos internos, filtro de publicados (draft/agendado/publicado), paginação,
 exigência de imagem/fonte na publicação, segurança de links, metadata/canonical,
 JSON-LD, feed RSS e estado vazio. Total: 60 testes.
 
+Testes da Fase 3B (Python `unittest`, `services/hermes-editorial-runner/tests/`):
+HMAC, nonce anti-replay, schemas (request/dossier), dupla trava de execução,
+comando sem shell e integração HTTP (401/409/413/400/422/503/404/200). Total:
+32 testes.
+
 ### Componentes
 
 - Header e menu.

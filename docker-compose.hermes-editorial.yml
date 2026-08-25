@@ -1,0 +1,73 @@
+# =============================================================================
+# Fase 3B — Runner editorial isolado do Hermes.
+#
+# Projeto exclusivo: crescimento-vertical-hermes-editorial
+#   - cv-hermes-editorial-runner
+#
+# Regras: sem ports publicados, sem labels Traefik, sem Docker Socket,
+# sem acesso a Payload/PostgreSQL. Execução desabilitada nesta fase.
+# =============================================================================
+name: crescimento-vertical-hermes-editorial
+
+services:
+  cv-hermes-editorial-runner:
+    build:
+      context: .
+      dockerfile: services/hermes-editorial-runner/Dockerfile
+    image: cv-hermes-editorial-runner:latest
+    container_name: cv-hermes-editorial-runner
+    restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      RUNNER_EXECUTION_ENABLED: "false"
+      SCHEMAS_DIR: /app/schemas
+      HERMES_HOME: /home/hermes/editorial-profile
+    volumes:
+      - type: bind
+        source: ${EDITORIAL_PROFILE_PATH}
+        target: /home/hermes/editorial-profile
+        read_only: true
+      - type: bind
+        source: ./.secrets/hmac-secret
+        target: /run/secrets/hmac-secret
+        read_only: true
+      - runner-state:/state
+    expose:
+      - "8100"
+    networks:
+      - n8n_default
+    healthcheck:
+      test:
+        - CMD
+        - /opt/hermes/.venv/bin/python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8100/health', timeout=5)"
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 768M
+          pids: 64
+
+networks:
+  n8n_default:
+    external: true
+
+volumes:
+  runner-state:
