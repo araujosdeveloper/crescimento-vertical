@@ -36,6 +36,7 @@
 - [Deploy do runner editorial](25-deploy-runner-editorial.md)
 - [Conector n8n ↔ Hermes](26-conector-n8n-hermes.md)
 - [Deploy do conector n8n ↔ Hermes](27-deploy-conector-n8n-hermes.md)
+- [Hardening do repositório público](28-hardening-repositorio-publico.md)
 
 ### Contratos de integração (schemas JSON)
 

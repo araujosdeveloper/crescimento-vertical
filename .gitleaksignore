@@ -1,0 +1,4 @@
+# Fixtures de PAYLOAD_SECRET em teste: uma válida e outra curta de propósito.
+# Exceções por fingerprint histórico exato; ocorrências futuras continuam bloqueadas.
+7c83d881d84cb7a399a67c5bcf7bade44858d10a:tests/env.test.ts:generic-api-key:10
+7c83d881d84cb7a399a67c5bcf7bade44858d10a:tests/env.test.ts:generic-api-key:25

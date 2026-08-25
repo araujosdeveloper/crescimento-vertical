@@ -37,6 +37,15 @@ apaga usuários e não altera permissões.
 - Segredos distintos por ambiente.
 - Credencial do Hermes não pode administrar CMS.
 
+### Repositório público
+
+- A `main` exige pull request e os quatro checks do CI.
+- Gitleaks varre todo o histórico em cada PR e push da `main`.
+- Actions externas usam SHA imutável de 40 caracteres.
+- Checkouts não persistem credenciais e o workflow usa `contents: read`.
+- Falso positivo só admite exceção estreita, comprovada e documentada.
+- Force-push e exclusão da `main` permanecem bloqueados.
+
 ## Rede
 
 - Somente Traefik expõe 80/443.
