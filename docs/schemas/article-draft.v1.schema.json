@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crescimentovertical.com/schemas/article-draft.v1.schema.json",
+  "title": "Article Draft v1",
+  "description": "Rascunho de artigo produzido pela automação para revisão humana. O status é fixo em 'draft'; publicação exige decisão humana no CMS.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "correlationId",
+    "idempotencyKey",
+    "dossierId",
+    "proposedTitle",
+    "proposedSlug",
+    "summary",
+    "contentOutline",
+    "seoTitle",
+    "seoDescription",
+    "primaryPillar",
+    "sourceIds",
+    "commercialIntent",
+    "suggestedCTA",
+    "automationDisclosure",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dossierId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "proposedTitle": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "proposedSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contentOutline": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "seoTitle": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60
+    },
+    "seoDescription": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "primaryPillar": {
+      "type": "string",
+      "enum": [
+        "ai-business",
+        "automation",
+        "sales-attendance",
+        "sites-conversion",
+        "tools-integrations"
+      ]
+    },
+    "sourceIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "commercialIntent": {
+      "type": "boolean"
+    },
+    "suggestedCTA": {
+      "type": ["string", "null"]
+    },
+    "automationDisclosure": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "const": "draft"
+    }
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crescimentovertical.com/schemas/source-record.v1.schema.json",
+  "title": "Source Record v1",
+  "description": "Registro rastreável de uma fonte consultada pelo fluxo editorial. Contém apenas metadados e hash — nunca o conteúdo integral da fonte.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "sourceId",
+    "canonicalUrl",
+    "title",
+    "publisher",
+    "sourceType",
+    "language",
+    "publishedAt",
+    "retrievedAt",
+    "verified",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "sourceId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonicalUrl": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "publisher": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "sourceType": {
+      "type": "string",
+      "enum": [
+        "documentation",
+        "release",
+        "news",
+        "technical-article",
+        "scientific-paper",
+        "dataset",
+        "social-media",
+        "forum",
+        "other"
+      ]
+    },
+    "language": {
+      "type": "string",
+      "pattern": "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,8})*$"
+    },
+    "publishedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "retrievedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "verified": {
+      "type": "boolean"
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

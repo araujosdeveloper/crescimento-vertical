@@ -159,6 +159,34 @@ SEO técnico) em código, sem deploy e sem integração Hermes/n8n. Detalhes em
 - Conteúdo editorial real.
 - Integração Hermes/n8n e produção editorial.
 
+## Fase 3A — Auditoria e contrato da integração Hermes/n8n (documental)
+
+Antecipação aprovada da parte de **auditoria e contrato** das Fases 8/9, sem
+integração. Detalhes em
+[docs/21-auditoria-integracao-hermes-n8n.md](docs/21-auditoria-integracao-hermes-n8n.md),
+[docs/22-contrato-integracao-hermes-n8n.md](docs/22-contrato-integracao-hermes-n8n.md)
+e [ADR-016](docs/14-registro-decisoes.md).
+
+### Entregas documentais
+
+- Auditoria somente leitura do Hermes e do n8n existentes na VPS (versões,
+  imagens, redes, montagens, pontos de integração).
+- Contrato de integração versionado: webhook autenticado (HMAC, janela de
+  replay, idempotência), dossiê JSON v1 e ciclo `EditorialRun` (CV-01 a CV-04).
+- Mecanismo de perfis e execução comprovado na versão instalada (v0.20.4):
+  `profile create/list/show`, `-p/--profile`, `terminal.home_mode:profile`,
+  one-shot `-z` + `--usage-file`, gateway por perfil.
+- JSON Schemas `editorial-dossier.v1`, `source-record.v1` e `article-draft.v1`
+  (`docs/schemas/`), validados com Draft 2020-12.
+- Decisão de transporte (ADR-017): one-shot determinístico; Hermes sem credencial
+  do Payload; n8n única ponte; `automation` nunca publica.
+
+### Não concluído (permanece pendente)
+
+- Criação do perfil `crescimento-vertical-editorial` e skill (Fase 8).
+- Workflows n8n, credenciais de serviço e webhook real (Fase 9).
+- Conteúdo editorial e produção editorial.
+
 ## Fase 4 — Arquitetura pública e páginas comerciais
 
 ### Atividades
@@ -350,3 +378,17 @@ O registro deve ser feito em docs/14-registro-decisoes.md antes da implementaç�
 - Data: 2026-08-25.
 - Fases afetadas: 4/5/6 (arquitetura pública, portal editorial e SEO técnico),
   antecipadas parcialmente em código.
+
+### Alteração 2026-08-25 — Fase 3A
+
+- Problema: fixar, antes de qualquer integração, o estado real do Hermes/n8n na
+  VPS e o contrato de integração com o CMS, sem criar credenciais, skills ou
+  workflows.
+- Impacto: entrega antecipada documental (auditoria + contrato); sem impacto em
+  produção, DNS, Hermes, n8n ou deploy.
+- Alternativa rejeitada: integrar diretamente sem auditar nem fixar contrato.
+- Decisão e responsável: executar a “Fase 3A” documental, registrada no
+  ADR-016; responsável Crescimento Vertical.
+- Data: 2026-08-25.
+- Fases afetadas: 8/9 (Hermes e n8n/aprovação), antecipadas em auditoria e
+  contrato.

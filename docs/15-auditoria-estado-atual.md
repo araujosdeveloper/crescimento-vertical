@@ -355,3 +355,39 @@ A Fase 2B foi homologada visualmente pelo operador no staging:
 
 As páginas populadas serão novamente verificadas com o primeiro conteúdo real.
 Produção e DNS permanecem pendentes; Hermes/n8n não foram iniciados.
+
+## Auditoria e contrato Hermes/n8n — 25 de agosto de 2026
+
+A Fase 3A entregou, em documentação (sem integração), a auditoria somente
+leitura e o contrato de integração (docs/21 e docs/22, ADR-016):
+
+- Hermes: contêiner `hermes-agent-sodq-hermes-agent-1`, imagem
+  `ghcr.io/hostinger/hvps-hermes-agent:latest` (gerenciada), com busca web
+  (Tavily), Telegram e Playwright; sem limites de recursos declarados.
+- n8n: `docker.n8n.io/n8nio/n8n:latest` (versão 2.33.7), webhooks habilitados
+  (`WEBHOOK_URL`), exposto via `n8n-traefik-1`; compartilhado com outros
+  projetos (webhook próprio de terceiro).
+- Contrato: webhook autenticado (HMAC-SHA256 sobre corpo bruto + timestamp +
+  versão, janela de replay de 300 s, `Idempotency-Key`, corpo ≤ 1 MiB), dossiê
+  JSON `editorial-dossier.v1` e ciclo `EditorialRun` (CV-01 a CV-04).
+- Nenhum contêiner, credencial, rede ou configuração foi alterado; nenhum
+  segredo foi registrado.
+
+### Lacunas fechadas (26 de agosto de 2026)
+
+- **Versão e perfis comprovados**: Hermes v0.20.4 (2026.8.18); `profile
+  create/list/show` existem; `-p/--profile` define `HERMES_HOME` por invocação
+  sem mutar o padrão; perfis em `/opt/data/profiles/<nome>/`;
+  `terminal.home_mode:profile` existe (atual `auto`).
+- **Execução comprovada**: não interativa via `-z/--oneshot` (e `chat -q`);
+  JSON via `--usage-file` e `send --json`; gateway por perfil suportado.
+- **Transporte decidido (ADR-017)**: one-shot determinístico, sem daemon;
+  Hermes sem credencial do Payload; n8n única ponte; `automation` nunca publica.
+- **Schemas fechados**: `editorial-dossier.v1` (revisado com `correlationId`,
+  `confidence`, `contradictions`, `missingInformation`, `riskFlags`),
+  `source-record.v1` e `article-draft.v1` (status `const draft`), validados com
+  Draft 2020-12.
+
+Continuam pendentes: criação do perfil `crescimento-vertical-editorial` e skill
+(Fase 8), workflows n8n, credenciais de serviço e webhook real (Fase 9);
+conteúdo editorial real; produção e DNS.

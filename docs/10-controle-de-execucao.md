@@ -287,6 +287,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Páginas populadas serão reavaliadas com o primeiro conteúdo real; produção e DNS permanecem pendentes; Hermes/n8n não iniciados |
 | Próxima ação | Validar PR/CI e executar merge protegido da Fase 2B |
 
+## Registro da sessão 2026-08-25 — auditoria e contrato Hermes/n8n (Fase 3A)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-3a-hermes-n8n-audit-contract |
+| Fase | 3A (auditoria e contrato da integração Hermes/n8n, documental) |
+| Objetivo | Auditar Hermes/n8n e fixar o contrato de integração, sem integrar |
+| Alterações | ADR-016, docs/21 (auditoria), docs/22 (contrato), JSON Schema `editorial-dossier.v1`, docs/00, docs/15, ROTEIRO-MESTRE |
+| Validações | Auditoria somente leitura dos contêineres Hermes/n8n; JSON Schema válido; nenhum contêiner/credencial/configuração alterado |
+| Riscos | Serviços compartilhados (isolamento lógico necessário); imagens `:latest`; perfis do Hermes a confirmar na Fase 8 |
+| Próxima ação | Criar perfil/skill do Hermes e workflows n8n (Fases 8/9) quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

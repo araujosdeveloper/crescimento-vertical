@@ -29,6 +29,14 @@
 - [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 - [Portal editorial público](19-portal-editorial-publico.md)
 - [Deploy do portal editorial público no staging](20-deploy-phase2b-staging.md)
+- [Auditoria da integração Hermes/n8n](21-auditoria-integracao-hermes-n8n.md)
+- [Contrato de integração Hermes/n8n](22-contrato-integracao-hermes-n8n.md)
+
+### Contratos de integração (schemas JSON)
+
+- [Dossiê editorial v1](schemas/editorial-dossier.v1.schema.json)
+- [Registro de fonte v1](schemas/source-record.v1.schema.json)
+- [Rascunho de artigo v1](schemas/article-draft.v1.schema.json)
 
 ## Templates
 

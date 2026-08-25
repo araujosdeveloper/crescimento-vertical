@@ -251,6 +251,142 @@ sem dados a preservar.
 `migrate`/`migrate:status` em PostgreSQL descartável, `next build`, `git diff
 --check` e auditoria de segredos aprovados.
 
+## ADR-016 — Auditoria e contrato da integração Hermes/n8n (Fase 3A)
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 8/9 (Hermes Agent e n8n/aprovação), antecipadas em sua parte
+  de **auditoria e contrato** como "Fase 3A" (documentação, sem integração)
+
+### Contexto
+
+A fundação editorial (2A) e o portal público (2B) estão implantados no staging.
+A próxima etapa editorial depende do Hermes (pesquisa/redação) e do n8n
+(validação/aprovação/publicação), ambos já operantes na VPS para outros
+projetos. Antes de integrar, é necessário (1) auditar o estado real desses
+serviços e (2) fixar o contrato de integração que os ligará ao CMS — sem criar
+credenciais, skills, workflows ou conteúdo.
+
+### Decisão
+
+1. **Auditar (somente leitura)** o Hermes e o n8n existentes na VPS e registrar
+   versões, imagens, redes, montagens e pontos de integração em
+   `docs/21-auditoria-integracao-hermes-n8n.md`, sem expor segredos.
+2. **Fixar o contrato de integração** em `docs/22-contrato-integracao-hermes-n8n.md`
+   e no JSON Schema versionado `docs/schemas/editorial-dossier.v1.schema.json`:
+   - webhook autenticado (HMAC-SHA256 sobre corpo bruto + timestamp + versão,
+     janela de replay, `Idempotency-Key` única, corpo máximo, schema estrito);
+   - dossiê JSON versionado (contrato de saída v1 do Hermes);
+   - ciclo `EditorialRun` (CV-01 a CV-04) com o CMS como fonte de verdade;
+   - fronteira de permissões: Hermes usa somente a role `automation` (nunca
+     publica).
+3. **Não integrar** nesta fase: não criar o perfil/skill do Hermes, workflows
+   n8n, credenciais de serviço, webhook real ou conteúdo.
+
+### Alternativas consideradas
+
+1. Integrar diretamente (skill + workflows + credenciais) sem auditar nem fixar
+   contrato — rejeitado: exporia o ambiente compartilhado a erros de escopo e a
+   mudanças de configuração não auditadas.
+2. Duplicar o n8n/Hermes com instâncias dedicadas — rejeitado: contraria o
+   ADR-013 (reutilizar os serviços existentes com isolamento lógico).
+
+### Consequências
+
+#### Positivas
+
+- Contrato versionado e auditável antes de qualquer código de integração.
+- Evidência do estado real dos serviços (versões, redes, limites).
+- Reduz retrabalho e risco ao iniciar as Fases 8/9.
+
+#### Negativas e riscos
+
+- A auditoria é um retrato de 2026-08-25; pode divergir se os serviços mudarem
+  antes da integração.
+- O n8n é compartilhado com outros projetos (webhook próprio já existente), o
+  que exige isolamento estrito por segredo/assinatura.
+
+### Segurança, SEO, custo e operação
+
+- Segurança: somente leitura; nenhum segredo registrado; contrato exige HMAC,
+  janela de replay e idempotência.
+- SEO: sem efeito.
+- Custo: nenhum novo serviço.
+- Operação: contrato pronto para as Fases 8/9.
+
+### Migração e reversão
+
+Fase apenas documental. Reverter removendo a branch; nenhum dado ou serviço é
+alterado.
+
+### Critério de validação
+
+Documentos `docs/21` e `docs/22` e o JSON Schema versionado criados e ligados
+ao índice; nenhum contêiner, credencial ou configuração alterado; nenhum segredo
+no diff.
+
+## ADR-017 — Transporte e fronteira de credenciais da integração editorial
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 8/9 (Hermes e n8n/aprovação)
+
+### Contexto
+
+A auditoria (docs/21) comprovou, na versão instalada (Hermes v0.20.4), o
+mecanismo de perfis (`-p/--profile` define `HERMES_HOME`, perfis em
+`/opt/data/profiles/<nome>/`, `terminal.home_mode:profile`) e o modo não
+interativo (`-z/--oneshot` + `--usage-file`). Era preciso fixar a fronteira de
+credenciais e o método de transporte antes das Fases 8/9.
+
+### Decisão
+
+1. **Hermes nunca terá credencial do Payload.** O Hermes não autentica nem
+   escreve no CMS diretamente.
+2. **n8n é a única ponte para o Payload** (REST autenticado com a role
+   `automation`), recebendo o dossiê via webhook HMAC (docs/22).
+3. **`automation` nunca publica** (regra já em código na Fase 2A).
+4. **O transporte Hermes → n8n será baseado somente no mecanismo comprovado**:
+   execução one-shot (`-z` + `-p` + `--usage-file`), não interativa e sem daemon;
+   gateway/API e cron ficam como alternativas a avaliar nas Fases 8/9.
+5. **A criação do perfil `crescimento-vertical-editorial` permanece pendente**
+   (Fase 8); nenhum perfil foi criado nesta fase.
+6. **Limitações registradas**: `-z` auto-bypassa approvals (a skill editorial
+   precisa de fail-safe próprio); a saída de conteúdo do `-z` é texto plano (JSON
+   estrito apenas em `--usage-file` e `send --json`); imagens `:latest` sem pin.
+
+### Alternativas consideradas
+
+1. Dar credencial de serviço do CMS ao Hermes — rejeitado: violaria o privilégio
+   mínimo e o ADR-005 (Hermes não publica).
+2. Usar o gateway/API do Hermes como única via — rejeitado: processo persistente
+   compartilhado, mais superfície que o one-shot determinístico.
+
+### Consequências
+
+- Positivas: fronteira clara de credenciais; transporte auditável e sem daemon.
+- Riscos: one-shot sem approvals exige disciplina da skill; a integração
+  depende de a skill emitir JSON válido para o webhook.
+
+### Segurança, SEO, custo e operação
+
+- Segurança: Hermes sem credencial; HMAC no webhook; `automation` sem publicação.
+- SEO: sem efeito.
+- Custo: nenhum novo serviço; one-shot sob demanda.
+- Operação: contrato pronto para as Fases 8/9.
+
+### Migração e reversão
+
+Documental. Reverter removendo a branch; nenhum serviço alterado.
+
+### Critério de validação
+
+Schemas `editorial-dossier.v1`, `source-record.v1` e `article-draft.v1`
+validados com Draft 2020-12 (válidos aceitos, inválidos rejeitados); nenhum
+perfil criado; nenhum gateway reiniciado; nenhum workflow/credencial criado.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
