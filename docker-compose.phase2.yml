@@ -47,6 +47,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       PAYLOAD_MEDIA_DIR: /app/media
+      SITE_NOINDEX: ${SITE_NOINDEX}
     depends_on:
       postgres:
         condition: service_healthy
