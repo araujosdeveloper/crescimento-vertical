@@ -6,6 +6,7 @@ import {
   taxonomyDelete,
   taxonomyUpdate,
 } from "../access";
+import { revalidateEditorialContent } from "../hooks/revalidate";
 
 export const Authors: CollectionConfig = {
   slug: "authors",
@@ -18,6 +19,9 @@ export const Authors: CollectionConfig = {
     create: taxonomyCreate,
     update: taxonomyUpdate,
     delete: taxonomyDelete,
+  },
+  hooks: {
+    afterChange: [revalidateEditorialContent],
   },
   fields: [
     {

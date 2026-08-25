@@ -32,6 +32,7 @@ export interface PublicationInput {
   title?: unknown;
   excerpt?: unknown;
   content?: unknown;
+  heroImage?: unknown;
   author?: unknown;
   category?: unknown;
 }
@@ -114,6 +115,9 @@ export function validatePublication(input: PublicationInput): string[] {
   }
   if (input.content == null) {
     missing.push("content");
+  }
+  if (input.heroImage == null) {
+    missing.push("heroImage");
   }
   if (input.author == null) {
     missing.push("author");

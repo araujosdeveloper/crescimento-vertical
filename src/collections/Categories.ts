@@ -6,6 +6,7 @@ import {
   taxonomyDelete,
   taxonomyUpdate,
 } from "../access";
+import { revalidateEditorialContent } from "../hooks/revalidate";
 
 export const Categories: CollectionConfig = {
   slug: "categories",
@@ -18,6 +19,9 @@ export const Categories: CollectionConfig = {
     create: taxonomyCreate,
     update: taxonomyUpdate,
     delete: taxonomyDelete,
+  },
+  hooks: {
+    afterChange: [revalidateEditorialContent],
   },
   fields: [
     {

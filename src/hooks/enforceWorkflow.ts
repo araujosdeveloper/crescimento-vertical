@@ -9,6 +9,10 @@ import {
   type SourceLike,
   type WorkflowStatus,
 } from "../lib/editorial";
+import {
+  SEO_META_DESCRIPTION_MAX,
+  SEO_META_TITLE_MAX,
+} from "../lib/editorial/constants";
 import type { Role } from "../lib/roles";
 
 function rolesOf(user: unknown): Role[] {
@@ -86,6 +90,7 @@ export const enforceWorkflowRules: CollectionBeforeChangeHook = async ({
       title: data?.title,
       excerpt: data?.excerpt,
       content: data?.content,
+      heroImage: data?.heroImage,
       author: data?.author,
       category: data?.category,
     });
@@ -93,6 +98,25 @@ export const enforceWorkflowRules: CollectionBeforeChangeHook = async ({
     if (missing.length > 0) {
       throw new Error(
         `Campos obrigatórios ausentes para publicação: ${missing.join(", ")}`,
+      );
+    }
+
+    const seoTitle =
+      typeof data?.seo?.seoTitle === "string" ? data.seo.seoTitle.trim() : "";
+    const seoDescription =
+      typeof data?.seo?.seoDescription === "string"
+        ? data.seo.seoDescription.trim()
+        : "";
+
+    if (seoTitle.length > SEO_META_TITLE_MAX) {
+      throw new Error(
+        `seoTitle excede ${SEO_META_TITLE_MAX} caracteres (recomendado).`,
+      );
+    }
+
+    if (seoDescription.length > SEO_META_DESCRIPTION_MAX) {
+      throw new Error(
+        `seoDescription excede ${SEO_META_DESCRIPTION_MAX} caracteres (recomendado).`,
       );
     }
 

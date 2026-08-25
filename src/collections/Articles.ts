@@ -10,6 +10,7 @@ import {
 import { auditWorkflowChange } from "../hooks/audit";
 import { enforceWorkflowRules } from "../hooks/enforceWorkflow";
 import { ensureSlug } from "../hooks/ensureSlug";
+import { revalidateEditorialContent } from "../hooks/revalidate";
 import { WORKFLOW_STATUSES } from "../lib/editorial";
 
 export const Articles: CollectionConfig = {
@@ -29,7 +30,7 @@ export const Articles: CollectionConfig = {
   },
   hooks: {
     beforeChange: [ensureSlug, enforceWorkflowRules],
-    afterChange: [auditWorkflowChange],
+    afterChange: [auditWorkflowChange, revalidateEditorialContent],
   },
   fields: [
     {
@@ -92,6 +93,16 @@ export const Articles: CollectionConfig = {
       relationTo: "research-dossiers",
       admin: {
         position: "sidebar",
+      },
+    },
+    {
+      name: "featured",
+      type: "checkbox",
+      defaultValue: false,
+      admin: {
+        position: "sidebar",
+        description:
+          "Marca o artigo como destaque editorial (curadoria manual).",
       },
     },
     {

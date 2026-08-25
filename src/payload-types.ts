@@ -324,6 +324,10 @@ export interface Article {
     | null;
   sources?: (number | Source)[] | null;
   dossier?: (number | null) | ResearchDossier;
+  /**
+   * Marca o artigo como destaque editorial (curadoria manual).
+   */
+  featured?: boolean | null;
   publishedAt?: string | null;
   workflowStatus: 'draft' | 'in_review' | 'approved' | 'published' | 'archived';
   seo?: {
@@ -601,6 +605,7 @@ export interface ArticlesSelect<T extends boolean = true> {
       };
   sources?: T;
   dossier?: T;
+  featured?: T;
   publishedAt?: T;
   workflowStatus?: T;
   seo?:

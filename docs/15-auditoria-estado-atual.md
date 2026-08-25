@@ -284,3 +284,74 @@ Validação documental (somente leitura) do staging blue-green da Fase 2A:
 
 Continuam pendentes: páginas públicas do blog, conteúdo editorial real,
 integração Hermes/n8n, produção editorial e migração de @ e www.
+
+## Portal editorial público implementado em código — 25 de agosto de 2026
+
+A Fase 2B implementou, em código (sem deploy), o portal editorial público sobre
+a fundação da Fase 2A (docs/19-portal-editorial-publico.md):
+
+- Camada pública server-only `src/lib/editorial/` com DTOs estritos e Payload
+  Local API (`overrideAccess:false`, `draft:false`, filtro de publicados).
+- Rotas `/conteudos`, `/conteudos/[slug]`, `/categorias/[slug]`,
+  `/autores/[slug]`, `/feed.xml`, `sitemap.xml` e not-found editorial; seção
+  "Conteúdos para crescer" na home.
+- SEO técnico (canonical, Open Graph, Twitter, JSON-LD Article/BreadcrumbList,
+  sitemap e RSS) e cache com revalidação sob demanda.
+- Campo `featured` em articles + migration `20260825_013756_add_article_featured`.
+- Publicação passou a exigir `heroImage` e tetos de meta title/description.
+- 60 testes (Vitest); lint, typecheck e build aprovados; migrações validadas em
+  PostgreSQL descartável.
+
+Estado anteriormente pendente que passou a existir em código:
+
+| Item | Estado |
+| --- | --- |
+| Páginas públicas do blog | Implementadas em código (sem deploy) |
+| SEO técnico por rota | Implementado em código |
+| Cache/revalidação editorial | Implementado em código |
+
+Continuam pendentes: deploy/ativação, homologação visual, conteúdo editorial
+real, integração Hermes/n8n, produção editorial e migração de DNS (@ e www).
+Produção, staging antigo e containers blue-green da Fase 2A permanecem
+running/healthy sem recriação. O primeiro usuário administrador já existe no
+staging.
+
+## Deploy do portal editorial público no staging — 25 de agosto de 2026
+
+A Fase 2B foi implantada e validada no candidato de staging (docs/20):
+
+- HEAD implantado: `bdb129f6eb0b7f6d1f4a779ab2005023b515e3d2`; imagem marcada
+  `crescimento-vertical:phase2b-staging-bdb129f`.
+- Migration `20260825_013756_add_article_featured` aplicada; Fase 2A e Fase 2B
+  presentes em `migrate:status`; nenhuma pendente.
+- Backup pré-deploy em
+  `/opt/backups/crescimento-vertical/phase2b-predeploy-bdb129f-20260825-025211`
+  (700/600), validado por `sha256sum -c`, `git bundle verify`, `pg_restore --list`
+  e `docker load`.
+- Validação interna: `/`, `/conteudos`, healthcheck live/ready, `/admin`,
+  `/feed.xml`, `/sitemap.xml` e `/robots.txt` = 200; rotas inexistentes = 404;
+  feed/sitemap sem artigos; home sem cards editoriais; nenhum 500.
+- Validação externa: 401 sem BasicAuth, TLS válido, `X-Robots-Tag: noindex,
+  nofollow, noarchive`, sem novas portas e Traefik apontando ao candidato.
+- Dados preservados: `users=1`, admin ativo `=1`, demais coleções `=0`.
+- IDs: produção `1af439f02200`, staging antigo `58f2c01c2220` e PostgreSQL
+  `886c99b1b922` inalterados; apenas o candidato foi recriado (`b495fbc09ee7`
+  → `8ba86f676f44`).
+- Correção: `SITE_NOINDEX` passou a ser repassado ao runtime do serviço `app`
+  (`docker-compose.phase2.yml`), garantindo sitemap vazio e meta `noindex` nas
+  rotas dinâmicas.
+
+Continuam pendentes: homologação visual, conteúdo editorial real, produção
+editorial, migração de DNS (@ e www) e integração Hermes/n8n.
+
+## Homologação visual da Fase 2B — 25 de agosto de 2026
+
+A Fase 2B foi homologada visualmente pelo operador no staging:
+
+- Home homologada visualmente.
+- `/conteudos` homologado no estado vazio (sem conteúdo fictício).
+- Responsividade aprovada em 360, 390, 768, 1024 e 1440 px.
+- Ausência de conteúdo fictício confirmada.
+
+As páginas populadas serão novamente verificadas com o primeiro conteúdo real.
+Produção e DNS permanecem pendentes; Hermes/n8n não foram iniciados.

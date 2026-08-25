@@ -173,6 +173,84 @@ banco é novo e não contém dados a preservar.
 `npm ci`, lint, typecheck, 38 testes, `migrate`/`migrate:status`, `generate:types`
 e `next build` aprovados em banco PostgreSQL descartável.
 
+## ADR-015 — DTO público, cache e revalidação do portal editorial
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 4/5/6 (arquitetura pública, portal editorial e SEO técnico,
+  antecipadas como "Fase 2B" em código)
+
+### Contexto
+
+A Fase 2A entregou a fundação editorial (Payload + PostgreSQL, workflow e
+permissões). Era necessário expor esse conteúdo publicamente sem vazar campos
+internos e com controle de cache para não servir conteúdo desatualizado após
+publicar/retirar artigos.
+
+### Decisão
+
+1. **DTO público estrito.** Toda leitura pública passa por `src/lib/editorial/`
+   (server-only) que converte documentos Payload em DTOs explícitos
+   (`mappers.ts`). Nenhum documento Payload completo é enviado a componentes
+   client-side; campos de autenticação, auditoria, workflow, e-mail e permissão
+   nunca são mapeados. Fontes e dossiês permanecem não públicos.
+2. **Leitura defensiva.** Consultas usam `overrideAccess:false`, `draft:false`,
+   filtro `_status=published` + `workflowStatus=published` + `publishedAt<=now`
+   e revalidação do predicado `isPubliclyReadable` em profundidade.
+3. **Cache com revalidação sob demanda.** Consultas usam `unstable_cache` com
+   `revalidate` (TTL 300 s) e tags; `revalidateEditorialContent` (hook
+   `afterChange` de articles/authors/categories) revalida as tags e os caminhos
+   `/`, `/conteudos`, `/conteudos/[slug]`, `/feed.xml` e `/sitemap.xml`. A
+   revalidação é melhor esforço. Admin e APIs autenticadas não são cacheados.
+4. **Publicação mais estrita.** `heroImage` passa a ser obrigatório e
+   `seoTitle`/`seoDescription` respeitam os tetos de 60/160 caracteres na
+   publicação.
+5. **GraphQL permanece desativado.**
+
+### Alternativas consideradas
+
+1. Expor o documento Payload integralmente e filtrar no cliente — rejeitado:
+   vazaria campos internos e violaria a regra de segurança editorial.
+2. Usar `push` de schema para o campo `featured` — rejeitado: migrações
+   versionadas são obrigatórias (ADR-014, docs/07).
+3. Cachear apenas por TTL sem revalidação sob demanda — rejeitado: publicaria
+   conteúdo atrasado após publicar/retirar artigos.
+
+### Consequências
+
+#### Positivas
+
+- Fronteira clara entre dados internos e públicos; menor risco de vazamento.
+- Conteúdo publicado aparece com cache controlado e invalidação determinística.
+- Sitemap/RSS derivam apenas de artigos publicados.
+
+#### Negativas e riscos
+
+- `unstable_cache` e `revalidateTag` são APIs do Next 16 ainda em evolução; a
+  revalidação foi encapsulada e é melhor esforço, com TTL como fallback.
+- Sitemap/feed limitam-se a 500 artigos por varredura (suficiente para a fase
+  atual; revisar antes de escalar).
+
+### Segurança, SEO, custo e operação
+
+- Segurança: sem `overrideAccess:true`, sem GraphQL, links externos sanitizados.
+- SEO: canonical, OG, Twitter, JSON-LD, sitemap e RSS; `SITE_NOINDEX` preservado.
+- Custo: nenhum novo serviço; cache em memória no processo Next.js.
+- Operação: revalidação automática via hooks, sem tarefa manual.
+
+### Migração e reversão
+
+`migrations/20260825_013756_add_article_featured` (adiciona `featured`, com
+`down` reversível). Reverter a fase removendo a branch; banco continua novo e
+sem dados a preservar.
+
+### Critério de validação
+
+`npm ci`, lint, typecheck, 60 testes, `generate:types`, `generate:importmap`,
+`migrate`/`migrate:status` em PostgreSQL descartável, `next build`, `git diff
+--check` e auditoria de segredos aprovados.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
