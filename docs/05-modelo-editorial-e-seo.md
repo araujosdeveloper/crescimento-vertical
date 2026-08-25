@@ -192,3 +192,20 @@ O Hermes pode sinalizar envelhecimento; somente o CMS registra a revisão oficia
 - [Next.js: geração de sitemap](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/sitemap)
 - [Next.js: geração de robots.txt](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/robots)
 - [Next.js: arquivos de metadata](https://nextjs.org/docs/app/api-reference/file-conventions/metadata)
+
+## Implementação pública (Fase 2B)
+
+A Fase 2B implementou, em código, a exposição pública do conteúdo editorial
+(detalhes em docs/19):
+
+- DTOs públicos estritos (`src/lib/editorial/`) — nunca o documento Payload
+  completo; fontes e dossiês não são públicos.
+- Leitura defensiva: `overrideAccess:false`, `draft:false`, `_status=published`,
+  `workflowStatus=published` e `publishedAt<=now`.
+- Publicação exige imagem destacada e respeita os tetos de `metaTitle` (60) e
+  `metaDescription` (160).
+- SEO técnico por rota: `generateMetadata`, canonical, Open Graph, Twitter,
+  JSON-LD `Article` e `BreadcrumbList`, sitemap dinâmico e RSS, tudo derivado
+  apenas de artigos publicados.
+- `SITE_NOINDEX` preservado: staging permanece noindex; produção só indexa com
+  `SITE_NOINDEX=false`.

@@ -133,6 +133,32 @@ Antecipação aprovada da fundação de código da Fase 3, sem deploy. Detalhes 
 - Seed estrutural e backup/restauração do banco.
 - Integração Hermes/n8n e páginas públicas do blog.
 
+## Fase 2B — Portal editorial público (implementado em código)
+
+Antecipação aprovada das Fases 4/5/6 (arquitetura pública, portal editorial e
+SEO técnico) em código, sem deploy e sem integração Hermes/n8n. Detalhes em
+[docs/19-portal-editorial-publico.md](docs/19-portal-editorial-publico.md) e
+[ADR-015](docs/14-registro-decisoes.md).
+
+### Entregas implementadas em código
+
+- Camada pública server-only `src/lib/editorial/` (Payload Local API com
+  `overrideAccess:false`, `draft:false`, filtro defensivo e DTOs públicos).
+- Rotas `/conteudos`, `/conteudos/[slug]`, `/categorias/[slug]`,
+  `/autores/[slug]`, `/feed.xml`, `sitemap.xml` e not-found editorial.
+- Seção "Conteúdos para crescer" na home.
+- SEO técnico (metadata, canonical, Open Graph, Twitter, JSON-LD, sitemap, RSS).
+- Cache com revalidação sob demanda.
+- Campo `featured` em articles + migration versionada.
+- Publicação exige imagem destacada e tetos de SEO (60/160 caracteres).
+- 60 testes (Vitest).
+
+### Não concluído (permanece pendente)
+
+- Deploy/ativação e homologação visual.
+- Conteúdo editorial real e primeiro usuário administrador.
+- Integração Hermes/n8n e produção editorial.
+
 ## Fase 4 — Arquitetura pública e páginas comerciais
 
 ### Atividades
@@ -311,3 +337,16 @@ O registro deve ser feito em docs/14-registro-decisoes.md antes da implementaç�
   ADR-014; responsável Crescimento Vertical.
 - Data: 2026-08-24.
 - Fases afetadas: 3 (fundação de CMS/banco), antecipada parcialmente em código.
+
+### Alteração 2026-08-25 — Fase 2B
+
+- Problema: expor o conteúdo editorial publicamente (com SEO e cache) sobre a
+  fundação da Fase 2A, sem aguardar o gate integral das Fases 4/5/6.
+- Impacto: entrega antecipada de código (portal editorial público, SEO, cache);
+  sem impacto em produção, DNS, Hermes, n8n ou deploy.
+- Alternativa rejeitada: aguardar a sequência estrita, adiando o portal público.
+- Decisão e responsável: implementar a “Fase 2B” em código, registrada no
+  ADR-015; responsável Crescimento Vertical.
+- Data: 2026-08-25.
+- Fases afetadas: 4/5/6 (arquitetura pública, portal editorial e SEO técnico),
+  antecipadas parcialmente em código.

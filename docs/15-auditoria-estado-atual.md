@@ -284,3 +284,33 @@ Validação documental (somente leitura) do staging blue-green da Fase 2A:
 
 Continuam pendentes: páginas públicas do blog, conteúdo editorial real,
 integração Hermes/n8n, produção editorial e migração de @ e www.
+
+## Portal editorial público implementado em código — 25 de agosto de 2026
+
+A Fase 2B implementou, em código (sem deploy), o portal editorial público sobre
+a fundação da Fase 2A (docs/19-portal-editorial-publico.md):
+
+- Camada pública server-only `src/lib/editorial/` com DTOs estritos e Payload
+  Local API (`overrideAccess:false`, `draft:false`, filtro de publicados).
+- Rotas `/conteudos`, `/conteudos/[slug]`, `/categorias/[slug]`,
+  `/autores/[slug]`, `/feed.xml`, `sitemap.xml` e not-found editorial; seção
+  "Conteúdos para crescer" na home.
+- SEO técnico (canonical, Open Graph, Twitter, JSON-LD Article/BreadcrumbList,
+  sitemap e RSS) e cache com revalidação sob demanda.
+- Campo `featured` em articles + migration `20260825_013756_add_article_featured`.
+- Publicação passou a exigir `heroImage` e tetos de meta title/description.
+- 60 testes (Vitest); lint, typecheck e build aprovados; migrações validadas em
+  PostgreSQL descartável.
+
+Estado anteriormente pendente que passou a existir em código:
+
+| Item | Estado |
+| --- | --- |
+| Páginas públicas do blog | Implementadas em código (sem deploy) |
+| SEO técnico por rota | Implementado em código |
+| Cache/revalidação editorial | Implementado em código |
+
+Continuam pendentes: deploy/ativação, homologação visual, conteúdo editorial
+real, primeiro usuário administrador, integração Hermes/n8n, produção editorial
+e migração de DNS (@ e www). Produção, staging antigo e containers blue-green da
+Fase 2A permanecem running/healthy sem recriação.

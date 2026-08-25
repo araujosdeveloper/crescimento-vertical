@@ -17,6 +17,11 @@ permissões, transições editoriais, bloqueio de publicação por automation/ed
 exigência de fonte validada, acesso público somente a publicados e validação das
 variáveis obrigatórias. Execução: `npm test`.
 
+Testes da Fase 2B (Vitest, `tests/editorial-public.test.ts`): DTOs não expõem
+campos internos, filtro de publicados (draft/agendado/publicado), paginação,
+exigência de imagem/fonte na publicação, segurança de links, metadata/canonical,
+JSON-LD, feed RSS e estado vazio. Total: 60 testes.
+
 ### Componentes
 
 - Header e menu.

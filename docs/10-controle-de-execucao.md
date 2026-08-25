@@ -251,6 +251,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Páginas públicas, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
 | Próxima ação | Prosseguir para a Fase 3 quando autorizado |
 
+## Registro da sessão 2026-08-25 — portal editorial público (Fase 2B)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2b-public-editorial |
+| Fase | 2B (portal editorial público em código) |
+| Objetivo | Expor o conteúdo editorial publicamente, com SEO, cache e segurança, sem Hermes/n8n |
+| Alterações | Camada pública server-only (`src/lib/editorial/`), DTOs, rotas `/conteudos`, `/categorias/[slug]`, `/autores/[slug]`, `/feed.xml`, sitemap, seção na home, campo `featured` + migration, cache/revalidação, testes |
+| Validações | npm ci, lint, typecheck, 60 testes, generate:types/importmap, migrate/migrate:status em PostgreSQL descartável, next build, git diff --check, auditoria de segredos |
+| Riscos | Deploy, homologação visual, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
+| Próxima ação | Prosseguir para as fases seguintes quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

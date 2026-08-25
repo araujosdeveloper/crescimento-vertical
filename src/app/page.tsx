@@ -1,6 +1,7 @@
 import { CTASection } from "@/components/cta-section";
 import { AuthoritySection } from "@/components/authority-section";
 import { DifferentialsSection } from "@/components/differentials-section";
+import { EditorialSection } from "@/components/editorial-section";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Hero } from "@/components/hero";
@@ -8,8 +9,14 @@ import { ProblemSection } from "@/components/problem-section";
 import { ProcessSection } from "@/components/process-section";
 import { ServicesSection } from "@/components/services-section";
 import { FloatingWhatsAppButton } from "@/components/floating-whatsapp-button";
+import { getRecentArticles } from "@/lib/editorial/data";
+import { HOME_ARTICLE_COUNT } from "@/lib/editorial/constants";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const articles = await getRecentArticles(HOME_ARTICLE_COUNT);
+
   return (
     <main className="overflow-hidden">
       <Header />
@@ -19,6 +26,7 @@ export default function Home() {
       <ProblemSection />
       <ProcessSection />
       <DifferentialsSection />
+      <EditorialSection articles={articles} />
       <CTASection />
       <Footer />
       <FloatingWhatsAppButton />

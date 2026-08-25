@@ -15,6 +15,18 @@ papéis implementados são `admin`, `editor`, `reviewer`, `researcher` e
 As demais coleções (services, cases, ctas, leads, newsletter, editorialRuns,
 redirects, pages) permanecem previstas para as fases seguintes.
 
+## Estado implementado (Fase 2B)
+
+A Fase 2B adicionou a camada pública de leitura (docs/19):
+
+- `src/lib/editorial/` (server-only): Payload Local API com `overrideAccess:false`,
+  `draft:false`, filtro defensivo de publicados e DTOs públicos estritos.
+- Campo `featured` em `articles` (migration `20260825_013756_add_article_featured`).
+- Publicação passou a exigir `heroImage` e tetos de SEO (60/160 caracteres).
+- Cache com revalidação sob demanda via `unstable_cache` + `revalidateTag`
+  (tags `editorial-articles/authors/categories`).
+- GraphQL continua desativado; nenhum `overrideAccess:true` em consulta pública.
+
 ## Coleções
 
 ### users

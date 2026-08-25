@@ -52,6 +52,22 @@ contextos relevantes.
 | /autor/[slug] | Perfil e publicações |
 | /busca | Busca interna |
 
+### Rotas editoriais públicas implementadas (Fase 2B)
+
+A taxonomia acima permanece como alvo. Na Fase 2B foram implementadas, em
+código, as rotas públicas iniciais (detalhes em docs/19):
+
+| Rota | Finalidade |
+| --- | --- |
+| /conteudos | Hub editorial paginado (12 artigos por página) |
+| /conteudos/[slug] | Artigo completo |
+| /categorias/[slug] | Conteúdos publicados da categoria |
+| /autores/[slug] | Perfil público seguro e artigos do autor |
+| /feed.xml | RSS somente com publicados |
+
+As páginas por tipo de conteúdo (notícias, análises, guias, ferramentas e
+comparativos) e a busca permanecem previstas para fases posteriores.
+
 ### Confiança e legais
 
 | Rota | Finalidade |

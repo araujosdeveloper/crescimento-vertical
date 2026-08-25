@@ -82,6 +82,7 @@ describe("requisitos de publicação", () => {
         title: "Título",
         excerpt: "Resumo",
         content: {},
+        heroImage: "id-imagem",
         author: "id-autor",
         category: "id-categoria",
       }),
@@ -94,10 +95,11 @@ describe("requisitos de publicação", () => {
         title: "",
         excerpt: null,
         content: null,
+        heroImage: null,
         author: null,
         category: null,
       }),
-    ).toEqual(["title", "excerpt", "content", "author", "category"]);
+    ).toEqual(["title", "excerpt", "content", "heroImage", "author", "category"]);
   });
 });
 
