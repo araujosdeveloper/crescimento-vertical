@@ -159,6 +159,10 @@ Conteúdo externo é tratado como dado não confiável:
 
 ## Permissões
 
+O CMS implementa em código a role `automation` com estas restrições
+(ver docs/17-fundacao-editorial-payload.md). Hermes usará exclusivamente essa
+role e jamais publicará diretamente.
+
 Hermes pode:
 
 - pesquisar e extrair fontes;

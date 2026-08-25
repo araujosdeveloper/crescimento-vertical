@@ -62,6 +62,13 @@ central.
 
 Transições são persistidas. Não é permitido saltar de discovered para published.
 
+### Mapeamento no CMS
+
+A fundação editorial (docs/17-fundacao-editorial-payload.md) implementa no campo
+`workflowStatus` dos artigos os estados `draft`, `in_review`, `approved`,
+`published` e `archived`, com transições validadas no servidor. Publicação exige
+título, resumo, conteúdo, autor, categoria e ao menos uma fonte validada.
+
 ## Estrutura editorial obrigatória
 
 ### Notícias

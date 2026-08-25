@@ -208,3 +208,79 @@ b71b52a8c0cdd4442a1c6244e61a53f8f57b532c. Backup pré-mudança, restauração e
 rollback operacional local foram comprovados, e o staging protegido foi ativado
 e validado. Redes, DNS, TLS de produção, contatos reais e cópia off-site
 permanecem pendentes.
+
+## Fundação editorial implementada em código — 24 de agosto de 2026
+
+A Fase 2A implementou, em código (sem deploy), a fundação editorial descrita em
+docs/17-fundacao-editorial-payload.md:
+
+- Payload 3.88.0 integrado ao Next.js 16.2.9 (rotas `/admin` e `/api`,
+  `withPayload`, `output: standalone` preservado).
+- PostgreSQL 16 dedicado com migrações versionadas e `push` desativado.
+- Coleções users, authors, categories, media, sources, research-dossiers e
+  articles, com drafts/versões.
+- Papéis admin, editor, reviewer, researcher e automation, com acesso e hooks no
+  servidor (workflow editorial e exigência de fonte validada).
+- Migration inicial versionada, `payload-types.ts` gerado, testes (Vitest) e CI
+  (GitHub Actions com PostgreSQL efêmero).
+
+Estado anteriormente “ausente” que passou a existir em código:
+
+| Item | Estado |
+| --- | --- |
+| Banco | PostgreSQL (adapter dedicado, código + Compose de validação) |
+| CMS | Payload integrado ao Next.js |
+| Testes | Vitest (38 testes) |
+| CI | GitHub Actions |
+| Migrações | Migration inicial versionada |
+
+Continuam pendentes: deploy, credenciais reais, primeiro usuário administrador,
+seed estrutural, backup/restauração do banco, integração Hermes/n8n e páginas
+públicas do blog. Produção e staging ativos não foram recriados.
+
+## Staging blue-green ativado — 24 de agosto de 2026
+
+A fundação editorial foi ativada no staging em arquitetura blue-green
+(docs/18-deploy-phase2-staging.md), sem alterar produção nem o staging antigo:
+
+- Projeto `crescimento-vertical-phase2-staging` com containers
+  `cv-phase2-staging-app` e `cv-phase2-staging-postgres` (running/healthy).
+- PostgreSQL 16 dedicado com migration inicial aplicada (`migrate:status` = Ran).
+- Roteamento por `PHASE2_TRAEFIK_ENABLE`, router com prioridade superior ao
+  staging antigo, BasicAuth e `X-Robots-Tag`.
+- Sem dados editoriais: users, authors, categories, media, sources,
+  research_dossiers e articles com zero registros.
+- Produção e staging antigo permaneceram running/healthy sem recriação.
+
+## Validação final da Fase 2A no staging — 24 de agosto de 2026
+
+Validação documental (somente leitura) do staging blue-green da Fase 2A:
+
+- Git: `HEAD 8db0090`, working tree limpa e branch
+  `feat/portal-phase-2-editorial-foundation` sincronizada com origin.
+- Containers running/healthy: `crescimento-vertical` (produção),
+  `crescimento-vertical-staging` (staging antigo), `cv-phase2-staging-app`
+  (candidate) e `cv-phase2-staging-postgres` (PostgreSQL).
+- Payload Admin acessível (`/admin` retorna 200) e healthchecks live/ready 200.
+- Primeiro administrador criado manualmente; um único usuário ativo com role
+  `admin`.
+- Coleções editoriais vazias: authors=0, categories=0, media=0, sources=0,
+  research_dossiers=0 e articles=0.
+- Migração aplicada: `20260824_191516_initial_foundation`.
+- Backup integral em
+  `/opt/backups/crescimento-vertical/phase2a-staging-8db0090-20260824-231850`
+  (aproximadamente 196 MB, permissões 700/600), com SHA-256 conferido, bundle
+  Git verificado, `pg_restore --list` e `payload-media.tar.gz` validados sem
+  restaurar nem extrair.
+- Produção e staging antigo preservados; rollback disponível.
+- BasicAuth: rotação após exposição do hash anterior concluída. O backup
+  pré-rotação (hash anterior) difere do estado atual, e o novo hash é idêntico
+  em `.env.staging`, em `.env.phase2.staging` e nos labels BasicAuth dos dois
+  containers. Staging antigo e candidate foram recriados exclusivamente para
+  aplicar o novo hash; produção e PostgreSQL foram preservados; TLS, BasicAuth e
+  Admin validados.
+- Nenhum e-mail administrativo, senha, hash, `DATABASE_URL`, IP ou conteúdo de
+  `.env` foi versionado.
+
+Continuam pendentes: páginas públicas do blog, conteúdo editorial real,
+integração Hermes/n8n, produção editorial e migração de @ e www.

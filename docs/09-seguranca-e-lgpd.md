@@ -21,6 +21,13 @@
 - Revogação imediata de usuário desligado.
 - Usuários de serviço sem login interativo quando possível.
 
+### Implementado na Fase 2A
+
+Papéis, controle de acesso, rate limit de login, transições editoriais e
+validação de publicação estão implementados em código no servidor
+(docs/17-fundacao-editorial-payload.md). A role `automation` não publica, não
+apaga usuários e não altera permissões.
+
 ## Segredos
 
 - Variáveis em arquivo protegido ou gerenciador de segredos.

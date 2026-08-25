@@ -124,8 +124,10 @@ testes funcionais destrutivos.
 
 O Payload atual suporta integração no projeto Next.js existente e adaptador
 PostgreSQL. Drafts e versões serão usados para manter rascunhos separados do
-conteúdo publicado. A implantação será feita na Fase 3, depois que a base,
-backup e staging estiverem comprovados.
+conteúdo publicado. A fundação em código foi implementada na Fase 2A
+(ver docs/17-fundacao-editorial-payload.md): Payload 3.88.0 integrado, PostgreSQL
+dedicado com migrações versionadas, coleções, papéis e controle de acesso no
+servidor. O deploy e a ativação permanecem para a Fase 3.
 
 ## Decisões de simplicidade
 

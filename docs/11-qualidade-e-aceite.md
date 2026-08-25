@@ -12,6 +12,11 @@
 
 Ferramenta planejada: Vitest.
 
+Testes editoriais já implementados na Fase 2A (Vitest, `tests/`): matriz de
+permissões, transições editoriais, bloqueio de publicação por automation/editor,
+exigência de fonte validada, acesso público somente a publicados e validação das
+variáveis obrigatórias. Execução: `npm test`.
+
 ### Componentes
 
 - Header e menu.

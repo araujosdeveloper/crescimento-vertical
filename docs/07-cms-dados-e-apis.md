@@ -5,6 +5,16 @@
 Payload CMS integrado ao Next.js com adaptador PostgreSQL. O CMS fornece painel,
 controle de acesso, drafts, versões, preview e API sem criar um segundo frontend.
 
+## Estado implementado (Fase 2A)
+
+A fundação em código está em docs/17-fundacao-editorial-payload.md. As coleções
+implementadas são: `users`, `authors`, `categories`, `media`, `sources`,
+`research-dossiers` e `articles` (equivalente ao “posts” descrito abaixo). Os
+papéis implementados são `admin`, `editor`, `reviewer`, `researcher` e
+`automation` (substituindo os nomes provisórios `commercial`/`hermes-service`).
+As demais coleções (services, cases, ctas, leads, newsletter, editorialRuns,
+redirects, pages) permanecem previstas para as fases seguintes.
+
 ## Coleções
 
 ### users
@@ -231,13 +241,15 @@ Leads nunca são retornados em API pública.
 
 ## Controle de acesso
 
+Papéis implementados na Fase 2A (ver docs/17 para a matriz completa):
+
 | Papel | Conteúdo | Publicar | Usuários | Leads | Configuração |
 | --- | --- | --- | --- | --- | --- |
-| admin | Total | Sim | Sim | Sim | Sim |
-| editor | Criar/editar | Sim | Não | Não | Parcial |
-| reviewer | Revisar/decidir | Não por padrão | Não | Não | Não |
-| commercial | Não | Não | Não | Leitura/gestão | Não |
-| hermes-service | Draft limitado | Não | Não | Não | Não |
+| admin | Total | Sim | Sim | Sim (futuro) | Sim |
+| editor | Criar/editar artigos | Não | Não | Não | Não |
+| reviewer | Revisar/decidir | Sim | Não | Não | Não |
+| researcher | Dossiês e fontes | Não | Não | Não | Não |
+| automation | Dossiês e rascunhos | Não | Não | Não | Não |
 
 Permissões serão implementadas no servidor. Ocultar botão no painel não substitui
 controle de acesso.

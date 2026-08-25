@@ -108,6 +108,71 @@ apagar o histórico.
 - Regra operacional: preservar todos os contêineres existentes durante o
   baseline e integrar somente por contratos autenticados.
 
+## ADR-014 — Adoção de Payload 3 + PostgreSQL para a fundação editorial
+
+- Data: 2026-08-24
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 3 (fundação de CMS/banco, antecipada como “Fase 2A” em código)
+
+### Contexto
+
+A base usa Next.js 16.2.9 (App Router) sem CMS ou banco. A arquitetura alvo
+(docs/03) prevê Payload + PostgreSQL como fonte de verdade editorial, mas
+detalhes de implementação permaneciam abertos: versões dos pacotes, adaptador,
+estratégia de migração e papéis.
+
+### Decisão
+
+Adotar **Payload 3.88.0** integrado ao Next.js existente, com adaptador
+**`@payloadcms/db-postgres` (PostgreSQL 16)** e editor **Lexical**. Uso de
+migrações versionadas com `push: false` (sem `push` automático de schema), tipos
+gerados em `src/payload-types.ts`, e papéis `admin`, `editor`, `reviewer`,
+`researcher` e `automation`. GraphQL não é utilizado. O armazenamento de mídia
+inicial é volume persistente local, evoluindo para S3 compatível (ADR-010).
+
+### Alternativas consideradas
+
+1. MongoDB — rejeitado: a arquitetura alvo e a documentação já determinavam
+   PostgreSQL relacional para conteúdo e auditoria.
+2. `push` automático de schema em todos os ambientes — rejeitado: migrações
+   versionadas são exigidas por docs/07 e docs/12.
+3. Dois frontends (site e CMS separados) — rejeitado: duplicaria tipos, layout e
+   deploy (ADR-004, docs/03).
+
+### Consequências
+
+#### Positivas
+
+- Fonte de verdade editorial com drafts, versões, controle de acesso e auditoria.
+- Permissões aplicadas no servidor; `automation` nunca publica nem administra.
+- Migrações versionadas e reproduzíveis em CI com banco efêmero.
+
+#### Negativas e riscos
+
+- Aumenta a superfície de dependências e a complexidade do build (sharp, ESM).
+- O primeiro usuário admin e o deploy real ainda não existem (fases seguintes).
+
+### Segurança, SEO, custo e operação
+
+- Segurança: `push: false`, rate limit de login, API com profundidade limitada,
+  fontes e dossiês não públicos.
+- SEO: `noindex` e `canonicalUrl` no modelo `seo` dos artigos (consumidos nas
+  Fases 4/5).
+- Custo: nenhum novo serviço gerenciado; PostgreSQL e mídia na VPS atual.
+- Operação: scripts `payload`, `generate:types`, `migrate*` documentados.
+
+### Migração e reversão
+
+Adotar via migração inicial `migrations/20260824_191516_initial_foundation`.
+Reverter removendo a aplicação e restaurando o backup do baseline (Fase 1);
+banco é novo e não contém dados a preservar.
+
+### Critério de validação
+
+`npm ci`, lint, typecheck, 38 testes, `migrate`/`migrate:status`, `generate:types`
+e `next build` aprovados em banco PostgreSQL descartável.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

@@ -108,6 +108,31 @@ registrada.
 - Administrador consegue criar, revisar, visualizar e publicar um artigo em
   staging; visitante nunca acessa rascunhos; restauração do banco é comprovada.
 
+## Fase 2A — Fundação editorial (implementada em código)
+
+Antecipação aprovada da fundação de código da Fase 3, sem deploy. Detalhes em
+[docs/17-fundacao-editorial-payload.md](docs/17-fundacao-editorial-payload.md) e
+[ADR-014](docs/14-registro-decisoes.md).
+
+### Entregas implementadas em código
+
+- Payload 3.88.0 integrado ao Next.js existente (`/admin`, `/api`, `withPayload`).
+- PostgreSQL 16 dedicado com migrações versionadas (`push` desativado).
+- Coleções: users, authors, categories, media, sources, research-dossiers e
+  articles, com drafts/versões.
+- Roles admin, editor, reviewer, researcher e automation com acesso no servidor.
+- Workflow editorial (draft → in_review → approved → published → archived) com
+  transições bloqueadas no servidor e publicação exigindo fonte validada.
+- Tipos gerados, migration inicial, Dockerfile (sharp/mídia), Compose de
+  validação, testes (Vitest) e CI (GitHub Actions).
+
+### Não concluído (permanece pendente)
+
+- Deploy em staging/produção e credenciais reais.
+- Primeiro usuário administrador.
+- Seed estrutural e backup/restauração do banco.
+- Integração Hermes/n8n e páginas públicas do blog.
+
 ## Fase 4 — Arquitetura pública e páginas comerciais
 
 ### Atividades
@@ -274,3 +299,15 @@ Qualquer mudança nesta sequência precisa registrar:
 - fases afetadas.
 
 O registro deve ser feito em docs/14-registro-decisoes.md antes da implementação.
+
+### Alteração 2026-08-24 — Fase 2A
+
+- Problema: preparar a fundação editorial em código sem esperar o gate integral
+  das Fases 1/2, preservando produção e staging ativos.
+- Impacto: entrega antecipada de código (CMS, banco, permissões, migrações,
+  testes, CI); sem impacto em produção, DNS, credenciais ou deploy.
+- Alternativa rejeitada: aguardar a sequência estrita, adiando a fundação.
+- Decisão e responsável: implementar a “Fase 2A” em código, registrada no
+  ADR-014; responsável Crescimento Vertical.
+- Data: 2026-08-24.
+- Fases afetadas: 3 (fundação de CMS/banco), antecipada parcialmente em código.

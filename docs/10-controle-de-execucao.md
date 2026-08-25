@@ -203,6 +203,54 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | DNS @/www ainda na infraestrutura anterior; homologação visual pendente |
 | Próxima ação | Inspeção visual e homologação do staging |
 
+## Registro da sessão 2026-08-24 — fundação editorial (Fase 2A)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation |
+| Fase | 2A (fundação editorial em código) |
+| Objetivo | Integrar Payload + PostgreSQL, coleções, permissões, migrações, testes e CI |
+| Alterações | Payload 3.88.0, adaptador Postgres, 7 coleções, papéis, workflow, migração inicial, tipos, Dockerfile, Compose de validação, Vitest, GitHub Actions, documentação |
+| Validações | npm ci, lint, typecheck, 38 testes, generate:types, migrate/migrate:status em banco descartável, docker compose config, next build |
+| Riscos | Deploy, credenciais reais, primeiro usuário admin e integração Hermes/n8n permanecem pendentes |
+| Próxima ação | Gate da Fase 1/2 e preparação do deploy da Fase 3 quando autorizado |
+
+## Registro da sessão 2026-08-24 — deploy blue-green do staging (Fase 2A)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation |
+| Fase | 2A (ativação no staging em blue-green) |
+| Objetivo | Subir Payload + PostgreSQL em staging isolado, sem tocar produção/staging antigo |
+| Alterações | Dockerfile (alvo migrate + npm pinado), docker-compose.phase2.yml (blue-green, hardening, Traefik toggle), docs |
+| Validações | compose config, build, postgres healthy, migrate + migrate:status, app healthy, HTTP interno (200/403), público 401 + X-Robots-Tag + TLS, ausência de dados editoriais |
+| Riscos | Teste autenticado e primeiro usuário admin permanecem manuais; rollback não executado (documentado) |
+| Próxima ação | Operador: teste autenticado e criação do primeiro administrador no /admin |
+
+## Registro da sessão 2026-08-24 — validação final da Fase 2A no staging
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation @ 8db009006701a7ab51d6e8ee623cfa90e4906cf1 |
+| Fase | 2A (validação final no staging) |
+| Objetivo | Registrar documentalmente a validação da fundação editorial ativada no staging |
+| Alterações | Nenhuma em aplicação, containers, banco, credenciais ou configuração; somente documentação |
+| Validações | Git local/remoto sincronizado, State/Health dos quatro containers, backup integral (700/600, SHA-256, bundle verify, pg_restore --list, tar), coleções vazias (users=1 admin, demais=0), migrations aplicadas, rotação BasicAuth |
+| Riscos | Rotação BasicAuth pendente; páginas públicas, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
+| Próxima ação | Confirmar rotação BasicAuth e prosseguir para a Fase 3 quando autorizado |
+
+## Registro da sessão 2026-08-24 — conclusão da rotação BasicAuth
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/portal-phase-2-editorial-foundation |
+| Fase | 2A (pós-validação — operação) |
+| Objetivo | Registrar a conclusão efetiva da rotação BasicAuth |
+| Alterações | Nenhuma em aplicação, banco, containers ou credenciais; somente documentação |
+| Validações | Backup pré-rotação difere do estado atual; novo hash idêntico em `.env.staging` e `.env.phase2.staging` e nos labels BasicAuth dos dois containers; TLS válido, 401 sem autenticação; produção, staging antigo, candidate e PostgreSQL running/healthy |
+| Riscos | Páginas públicas, conteúdo real, Hermes/n8n, produção editorial e migração @/www permanecem pendentes |
+| Próxima ação | Prosseguir para a Fase 3 quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:
