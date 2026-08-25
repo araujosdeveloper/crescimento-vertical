@@ -203,7 +203,38 @@ jobs:
 
       - name: Docker build da imagem n8n customizada (digest pinado)
         run: |
-          docker build -f services/n8n-crescimento-vertical/Dockerfile -t cv-n8n-hermes-connector:ci .
+          set -o pipefail
+          build_log="$(mktemp)"
+          trap 'rm -f "$build_log"' EXIT
+
+          for attempt in 1 2 3 4; do
+            echo "Tentativa ${attempt} de 4 do docker build n8n"
+            : > "$build_log"
+
+            if docker build -f services/n8n-crescimento-vertical/Dockerfile -t cv-n8n-hermes-connector:ci . 2>&1 | tee "$build_log"; then
+              exit 0
+            else
+              build_status=$?
+            fi
+
+            if ! grep -Eqi 'HTTP 429|Too Many Requests|toomanyrequests|rate limit' "$build_log"; then
+              echo "Docker build falhou por erro não relacionado a rate limit; sem retry."
+              exit "$build_status"
+            fi
+
+            if [ "$attempt" -eq 4 ]; then
+              echo "Docker build falhou após 4 ocorrências de rate limit."
+              exit "$build_status"
+            fi
+
+            case "$attempt" in
+              1) wait_seconds=60 ;;
+              2) wait_seconds=120 ;;
+              3) wait_seconds=240 ;;
+            esac
+            echo "Rate limit transitório detectado; nova tentativa em ${wait_seconds}s."
+            sleep "$wait_seconds"
+          done
 
   secret-scan:
     name: secret-scan (gitleaks full history)

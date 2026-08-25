@@ -31,6 +31,12 @@ da versão humana. Todos os checkouts usam `persist-credentials: false`. O
 workflow e o job de Gitleaks declaram somente `contents: read`; o token padrão é
 usado apenas pelo action, sem licença por se tratar de repositório pessoal.
 
+O build da imagem n8n mantém o mesmo Dockerfile e o mesmo digest pinado. Para
+indisponibilidade transitória do registry, o CI repete esse build no máximo
+quatro vezes, com esperas progressivas de 60, 120 e 240 segundos, somente quando
+o log identifica rate limit HTTP 429. Qualquer outro erro falha imediatamente;
+a quarta ocorrência também permanece como falha do job.
+
 ## Falsos positivos
 
 Não existe allowlist ampla. Toda ocorrência deve ser inspecionada sem imprimir
