@@ -181,6 +181,13 @@ Reverter para o staging antigo sem apagar dados: definir
 Banco e volumes do candidate permanecem preservados. Detalhes em
 docs/18-deploy-phase2-staging.md.
 
+### Runner editorial (Fase 3B)
+
+Reverter o runner sem afetar o Hermes ou o n8n (docs/25): parar/remover apenas
+`cv-hermes-editorial-runner`; preservar o volume `runner-state` para análise;
+remover o perfil `crescimento-vertical-editorial` somente por comando explícito
+futuro; confirmar `default` e o gateway (PID 153) intactos.
+
 ## Rotina operacional
 
 ### Diária

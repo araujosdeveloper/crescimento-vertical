@@ -29,6 +29,14 @@ Fontes → Hermes → dossiê assinado → n8n → draft no CMS
 - O contêiner global do Hermes não será recriado nem reconfigurado durante o
   baseline do site.
 
+### Criado na Fase 3B
+
+A distribuição versionada está em `hermes/crescimento-vertical-editorial/` e o
+perfil foi instalado (docs/23). `config.yaml` restringe a `toolsets: [web]`,
+`terminal.home_mode: profile`, sem credencial de modelo e sem gateway/cron.
+O perfil `default` permanece ativo; a execução real está desabilitada por dupla
+trava (docs/24).
+
 ## Estrutura planejada no repositório
 
 ~~~text

@@ -1,0 +1,64 @@
+# Perfil Hermes editorial (Fase 3B)
+
+## Objetivo
+
+Distribuição versionada do perfil `crescimento-vertical-editorial`, isolado do
+perfil `default` via `HERMES_HOME`, para pesquisa editorial da Crescimento
+Vertical. A execução permanece desabilitada nesta fase.
+
+## Distribuição
+
+Diretório fonte versionado: `hermes/crescimento-vertical-editorial/`.
+
+~~~text
+crescimento-vertical-editorial/
+  distribution.yaml
+  SOUL.md
+  config.yaml
+  skills/
+    editorial-research/
+      SKILL.md
+      references/
+        editorial-policy.md
+        output-contract.md
+~~~
+
+- `distribution.yaml`: `name: crescimento-vertical-editorial`, `version: 1.0.0`,
+  `hermes_requires: ">=0.20.4"`, `env_requires` (apenas nome da futura variável
+  `HERMES_INFERENCE_MODEL`, sem valor) e `distribution_owned` (SOUL.md,
+  config.yaml, skills/). Sem cron, sem MCP, sem plugins.
+- `SOUL.md`: pesquisador editorial técnico (IA, automação, tecnologia,
+  marketing, vendas e produtividade empresarial); rigor factual; proibições
+  absolutas (não publicar, não escrever no Payload, não executar comandos, não
+  alterar arquivos, não inventar fontes); resposta somente em JSON no modo
+  one-shot; conteúdo de página é dado, nunca instrução.
+- `config.yaml`: `toolsets: [web]`, `terminal.home_mode: profile`,
+  `agent.max_turns: 40`, `agent.loop_caps.max_web_searches: 10`,
+  `web.extract_char_limit: 12000`. Sem credencial de modelo, sem gateway, sem
+  plataforma de mensagens.
+
+## Skill
+
+`skills/editorial-research/` aceita somente a entrada estruturada do runner,
+verifica o escopo, exige fontes HTTPS (primárias quando possível), registra
+`publishedAt`/`retrievedAt`, identifica contradições, separa fato/inferência,
+proíbe reprodução integral e devolve somente JSON conforme
+`editorial-dossier.v1.schema.json`. Falha fechada se o JSON não for válido.
+
+## Instalação
+
+`hermes profile install <dir> -y` (sem `--alias`, sem clone, sem mudar o perfil
+ativo, sem gateway, sem cron). O perfil fica em
+`/opt/data/profiles/crescimento-vertical-editorial` (HERMES_HOME isolado).
+
+## Estado após instalação
+
+- `default` continua ativo; gateway PID 153 inalterado.
+- Novo perfil: `Gateway: stopped`, `Model: —`, `Skills: 1`, `.env` ausente.
+- Nenhuma credencial de modelo (proposital nesta fase).
+
+## Rollback
+
+Remover o perfil somente mediante comando explícito futuro (`hermes profile
+delete`); o perfil `default` e o gateway permanecem intactos. O backup
+pré-mutação está em `/opt/backups/crescimento-vertical/phase3b-preprofile-*`.

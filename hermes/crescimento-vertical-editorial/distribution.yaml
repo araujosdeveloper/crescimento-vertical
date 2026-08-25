@@ -1,0 +1,13 @@
+name: crescimento-vertical-editorial
+version: 1.0.0
+description: "Pesquisador editorial técnico da Crescimento Vertical — IA, automação, tecnologia, marketing, vendas e produtividade empresarial. Produz somente dossiê JSON para revisão humana."
+hermes_requires: ">=0.20.4"
+author: "Crescimento Vertical"
+env_requires:
+  - name: HERMES_INFERENCE_MODEL
+    description: "Modelo de inferência para a pesquisa editorial (fixado na Fase 8)"
+    required: false
+distribution_owned:
+  - SOUL.md
+  - config.yaml
+  - skills/

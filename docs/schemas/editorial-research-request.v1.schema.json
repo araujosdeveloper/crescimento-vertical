@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crescimentovertical.com/schemas/editorial-research-request.v1.schema.json",
+  "title": "Editorial Research Request v1",
+  "description": "Requisição estruturada de pesquisa editorial enviada ao runner (HMAC). Não contém comandos, prompts arbitrários ou credenciais.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "correlationId",
+    "idempotencyKey",
+    "topic",
+    "primaryPillar",
+    "searchIntent",
+    "language",
+    "requestedAt",
+    "maxSources"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "correlationId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "primaryPillar": {
+      "type": "string",
+      "enum": [
+        "ai-business",
+        "automation",
+        "sales-attendance",
+        "sites-conversion",
+        "tools-integrations"
+      ]
+    },
+    "searchIntent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "language": {
+      "const": "pt-BR"
+    },
+    "requestedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "maxSources": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 10
+    },
+    "seedSources": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      }
+    }
+  }
+}

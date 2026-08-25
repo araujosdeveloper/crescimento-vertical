@@ -391,3 +391,26 @@ leitura e o contrato de integração (docs/21 e docs/22, ADR-016):
 Continuam pendentes: criação do perfil `crescimento-vertical-editorial` e skill
 (Fase 8), workflows n8n, credenciais de serviço e webhook real (Fase 9);
 conteúdo editorial real; produção e DNS.
+
+## Perfil Hermes editorial e runner isolado — 25 de agosto de 2026
+
+A Fase 3B entregou, em código e infraestrutura isolada (sem integração):
+
+- Perfil `crescimento-vertical-editorial` instalado via distribuição versionada
+  (`hermes/crescimento-vertical-editorial/`), isolado por HERMES_HOME
+  (`/opt/data/profiles/crescimento-vertical-editorial`), com `toolsets: [web]`,
+  `home_mode: profile`, sem credencial de modelo, sem gateway (stopped) e sem
+  cron. O `default` continua ativo e o gateway PID 153 foi preservado.
+- Runner `cv-hermes-editorial-runner` (imagem Hermes pinada por digest, rede
+  `n8n_default`, sem ports/Traefik/Docker Socket, `read_only`, `cap_drop ALL`,
+  non-root, 768 MiB/0.50 CPU/pids 64), com endpoints `/health`, `/v1/validate`,
+  `/v1/jobs` e `/v1/jobs/{id}` protegidos por HMAC-SHA256 + nonce.
+- Execução desabilitada por dupla trava (`RUNNER_EXECUTION_ENABLED=false` +
+  ausência de `/run/secrets/execution-enable`); `/v1/jobs` → `503`.
+- Schema `editorial-research-request.v1` criado; 4 schemas Draft 2020-12
+  validados; 32 testes do runner aprovados; smoke tests 200/401/503/404.
+- Backup pré-mutação em `/opt/backups/crescimento-vertical/phase3b-preprofile-*`
+  (bundle, export do default e do novo perfil sem `.env`/auth.json).
+
+Continuam pendentes: workflows n8n, credenciais de serviço e webhook real
+(Fase 9); conteúdo editorial real; produção e DNS.

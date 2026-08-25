@@ -187,6 +187,31 @@ e [ADR-016](docs/14-registro-decisoes.md).
 - Workflows n8n, credenciais de serviço e webhook real (Fase 9).
 - Conteúdo editorial e produção editorial.
 
+## Fase 3B — Perfil Hermes editorial e executor interno seguro
+
+Antecipação aprovada da ponte Hermes → n8n (Fases 8/9), com o perfil isolado e
+o runner **sem execução**. Detalhes em
+[docs/23-perfil-hermes-editorial.md](docs/23-perfil-hermes-editorial.md),
+[docs/24-hermes-editorial-runner.md](docs/24-hermes-editorial-runner.md),
+[docs/25-deploy-runner-editorial.md](docs/25-deploy-runner-editorial.md) e
+[ADR-018](docs/14-registro-decisoes.md).
+
+### Entregas implementadas
+
+- Distribuição versionada `hermes/crescimento-vertical-editorial/` (SOUL.md,
+  config.yaml restrito a `toolsets: [web]` + `home_mode: profile`, skill
+  editorial com fail-safe e anti-prompt-injection).
+- Perfil instalado isolado por `HERMES_HOME` (`/opt/data/profiles/...`), sem
+  clone, sem alias, sem gateway, sem cron, sem credencial de modelo.
+- Runner `cv-hermes-editorial-runner` (HMAC-SHA256 + nonce, janela 300 s, corpo
+  ≤ 1 MiB, Draft 2020-12), endpoints `/health`, `/v1/validate`, `/v1/jobs`.
+- Schema `editorial-research-request.v1`; execução desabilitada por dupla trava.
+
+### Não concluído (permanece pendente)
+
+- Habilitação da execução e webhook n8n (Fase 9).
+- Conteúdo editorial e produção editorial.
+
 ## Fase 4 — Arquitetura pública e páginas comerciais
 
 ### Atividades
@@ -392,3 +417,17 @@ O registro deve ser feito em docs/14-registro-decisoes.md antes da implementaç�
 - Data: 2026-08-25.
 - Fases afetadas: 8/9 (Hermes e n8n/aprovação), antecipadas em auditoria e
   contrato.
+
+### Alteração 2026-08-25 — Fase 3B
+
+- Problema: construir a ponte controlada Hermes → n8n (perfil isolado + runner)
+  sem habilitar execução, preservando o Hermes compartilhado e o gateway ativo.
+- Impacto: perfil editorial instalado, runner isolado em container próprio e
+  schema de requisição; execução desabilitada por dupla trava; sem impacto em
+  produção, DNS, Hermes, n8n ou deploy.
+- Alternativa rejeitada: dar acesso direto do Hermes ao Payload (violaria o
+  ADR-017).
+- Decisão e responsável: executar a “Fase 3B” em código + infraestrutura,
+  registrada no ADR-018; responsável Crescimento Vertical.
+- Data: 2026-08-25.
+- Fases afetadas: 8/9 (ponte Hermes → n8n), antecipadas sem execução.

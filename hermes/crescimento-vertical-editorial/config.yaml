@@ -1,0 +1,23 @@
+# Configuração do perfil crescimento-vertical-editorial
+#
+# Perfil de pesquisa editorial em modo somente-leitura de rede (web).
+# Nenhuma credencial de modelo é definida aqui — a execução real permanece
+# desabilitada nesta fase.
+
+# Apenas o toolset de pesquisa web (web_search / web_extract).
+# Terminal, shell, edição, filesystem, browser, code_execution e mensagens
+# ficam desabilitados por ausência de toolset.
+toolsets:
+  - web
+
+terminal:
+  home_mode: profile
+  cwd: .
+
+agent:
+  max_turns: 40
+  loop_caps:
+    max_web_searches: 10
+
+web:
+  extract_char_limit: 12000

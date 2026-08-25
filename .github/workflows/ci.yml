@@ -66,3 +66,56 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  hermes-editorial-runner:
+    name: hermes-editorial-runner (Python, schemas, docker build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Instalar jsonschema 4.26.0 (pinado)
+        run: pip install "jsonschema==4.26.0"
+
+      - name: Testes do runner (unittest)
+        run: |
+          cd services/hermes-editorial-runner
+          python -m unittest discover -s tests -t .
+
+      - name: Validar quatro schemas (Draft 2020-12)
+        run: |
+          python - << 'PY'
+          import json, glob
+          from jsonschema import Draft202012Validator
+          for p in sorted(glob.glob("docs/schemas/*.schema.json")):
+              Draft202012Validator.check_schema(json.load(open(p)))
+              print("OK", p)
+          PY
+
+      - name: Verificar execução desabilitada (sem ports/Traefik/Docker Socket)
+        run: |
+          set -euo pipefail
+          grep -q 'RUNNER_EXECUTION_ENABLED: "false"' docker-compose.hermes-editorial.yml
+          if grep -qE '^[[:space:]]*ports:' docker-compose.hermes-editorial.yml; then echo "ERRO: ports publicados"; exit 1; fi
+          if grep -qiE 'traefik\.' docker-compose.hermes-editorial.yml; then echo "ERRO: label Traefik"; exit 1; fi
+          if grep -q 'docker.sock' docker-compose.hermes-editorial.yml services/hermes-editorial-runner/Dockerfile; then echo "ERRO: Docker Socket"; exit 1; fi
+          echo "OK: execução desabilitada, sem ports/Traefik/Docker Socket"
+
+      - name: Compose config (valores fictícios, secret temporário)
+        env:
+          EDITORIAL_PROFILE_PATH: /tmp/fake-profile
+        run: |
+          mkdir -p .secrets /tmp/fake-profile
+          printf 'ci-fake-hmac-secret-not-used-anywhere-1234567890' > .secrets/hmac-secret
+          docker compose -f docker-compose.hermes-editorial.yml config --quiet
+
+      - name: Docker build do runner (imagem Hermes pinada por digest)
+        run: |
+          docker build -f services/hermes-editorial-runner/Dockerfile -t cv-hermes-editorial-runner:ci .

@@ -299,6 +299,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Serviços compartilhados (isolamento lógico necessário); imagens `:latest`; perfis do Hermes a confirmar na Fase 8 |
 | Próxima ação | Criar perfil/skill do Hermes e workflows n8n (Fases 8/9) quando autorizado |
 
+## Registro da sessão 2026-08-25 — perfil Hermes editorial e runner (Fase 3B)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-3b-hermes-editorial-runner |
+| Fase | 3B (perfil Hermes editorial + runner interno isolado) |
+| Objetivo | Criar a distribuição do perfil, a skill, o runner HMAC e o container, sem execução |
+| Alterações | Distribuição `hermes/crescimento-vertical-editorial/`, skill editorial, schema `editorial-research-request.v1`, runner `services/hermes-editorial-runner/`, `docker-compose.hermes-editorial.yml`, segredos locais, docs/23–25, ADR-018 |
+| Validações | 32 testes do runner; 4 schemas Draft 2020-12; build da imagem; `docker compose config`; container healthy; smoke 200/401/503/404; IDs dos 7 contêineres preservados |
+| Riscos | Execução desabilitada (dupla trava); imagens `:latest`; secret em bind mount legível pelo runner |
+| Próxima ação | Habilitar execução e criar o webhook n8n (Fase 9) quando autorizado |
+
 ## Registro por sessão
 
 Ao concluir uma sessão de trabalho, registrar:

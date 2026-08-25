@@ -73,6 +73,14 @@ interface S3 compatível é uma decisão arquitetural.
 - Aplicação da aprovação.
 - Alertas e reprocessamento controlado.
 
+### Runner editorial (Fase 3B)
+
+Entre o n8n e o Hermes existe o runner interno `cv-hermes-editorial-runner`
+(docs/24, docs/25): recebe requisições assinadas por HMAC, valida o schema
+`editorial-research-request.v1` e, em fase futura, executa o Hermes em modo
+one-shot no perfil isolado `crescimento-vertical-editorial`. Sem acesso a
+Docker Socket, PostgreSQL ou Payload; execução desabilitada por dupla trava.
+
 ### Telegram
 
 - Interface operacional para pauta, revisão e decisão.
