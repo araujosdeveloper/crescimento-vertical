@@ -173,11 +173,18 @@ e [ADR-016](docs/14-registro-decisoes.md).
   imagens, redes, montagens, pontos de integração).
 - Contrato de integração versionado: webhook autenticado (HMAC, janela de
   replay, idempotência), dossiê JSON v1 e ciclo `EditorialRun` (CV-01 a CV-04).
-- JSON Schema `editorial-dossier.v1` (`docs/schemas/`).
+- Mecanismo de perfis e execução comprovado na versão instalada (v0.20.4):
+  `profile create/list/show`, `-p/--profile`, `terminal.home_mode:profile`,
+  one-shot `-z` + `--usage-file`, gateway por perfil.
+- JSON Schemas `editorial-dossier.v1`, `source-record.v1` e `article-draft.v1`
+  (`docs/schemas/`), validados com Draft 2020-12.
+- Decisão de transporte (ADR-017): one-shot determinístico; Hermes sem credencial
+  do Payload; n8n única ponte; `automation` nunca publica.
 
 ### Não concluído (permanece pendente)
 
-- Perfil/skill do Hermes, workflows n8n, credenciais de serviço e webhook real.
+- Criação do perfil `crescimento-vertical-editorial` e skill (Fase 8).
+- Workflows n8n, credenciais de serviço e webhook real (Fase 9).
 - Conteúdo editorial e produção editorial.
 
 ## Fase 4 — Arquitetura pública e páginas comerciais

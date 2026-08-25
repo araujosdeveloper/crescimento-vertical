@@ -326,6 +326,67 @@ Documentos `docs/21` e `docs/22` e o JSON Schema versionado criados e ligados
 ao índice; nenhum contêiner, credencial ou configuração alterado; nenhum segredo
 no diff.
 
+## ADR-017 — Transporte e fronteira de credenciais da integração editorial
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 8/9 (Hermes e n8n/aprovação)
+
+### Contexto
+
+A auditoria (docs/21) comprovou, na versão instalada (Hermes v0.20.4), o
+mecanismo de perfis (`-p/--profile` define `HERMES_HOME`, perfis em
+`/opt/data/profiles/<nome>/`, `terminal.home_mode:profile`) e o modo não
+interativo (`-z/--oneshot` + `--usage-file`). Era preciso fixar a fronteira de
+credenciais e o método de transporte antes das Fases 8/9.
+
+### Decisão
+
+1. **Hermes nunca terá credencial do Payload.** O Hermes não autentica nem
+   escreve no CMS diretamente.
+2. **n8n é a única ponte para o Payload** (REST autenticado com a role
+   `automation`), recebendo o dossiê via webhook HMAC (docs/22).
+3. **`automation` nunca publica** (regra já em código na Fase 2A).
+4. **O transporte Hermes → n8n será baseado somente no mecanismo comprovado**:
+   execução one-shot (`-z` + `-p` + `--usage-file`), não interativa e sem daemon;
+   gateway/API e cron ficam como alternativas a avaliar nas Fases 8/9.
+5. **A criação do perfil `crescimento-vertical-editorial` permanece pendente**
+   (Fase 8); nenhum perfil foi criado nesta fase.
+6. **Limitações registradas**: `-z` auto-bypassa approvals (a skill editorial
+   precisa de fail-safe próprio); a saída de conteúdo do `-z` é texto plano (JSON
+   estrito apenas em `--usage-file` e `send --json`); imagens `:latest` sem pin.
+
+### Alternativas consideradas
+
+1. Dar credencial de serviço do CMS ao Hermes — rejeitado: violaria o privilégio
+   mínimo e o ADR-005 (Hermes não publica).
+2. Usar o gateway/API do Hermes como única via — rejeitado: processo persistente
+   compartilhado, mais superfície que o one-shot determinístico.
+
+### Consequências
+
+- Positivas: fronteira clara de credenciais; transporte auditável e sem daemon.
+- Riscos: one-shot sem approvals exige disciplina da skill; a integração
+  depende de a skill emitir JSON válido para o webhook.
+
+### Segurança, SEO, custo e operação
+
+- Segurança: Hermes sem credencial; HMAC no webhook; `automation` sem publicação.
+- SEO: sem efeito.
+- Custo: nenhum novo serviço; one-shot sob demanda.
+- Operação: contrato pronto para as Fases 8/9.
+
+### Migração e reversão
+
+Documental. Reverter removendo a branch; nenhum serviço alterado.
+
+### Critério de validação
+
+Schemas `editorial-dossier.v1`, `source-record.v1` e `article-draft.v1`
+validados com Draft 2020-12 (válidos aceitos, inválidos rejeitados); nenhum
+perfil criado; nenhum gateway reiniciado; nenhum workflow/credencial criado.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

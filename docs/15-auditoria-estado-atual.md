@@ -373,5 +373,21 @@ leitura e o contrato de integração (docs/21 e docs/22, ADR-016):
 - Nenhum contêiner, credencial, rede ou configuração foi alterado; nenhum
   segredo foi registrado.
 
-Continuam pendentes: perfil/skill do Hermes, workflows n8n, credenciais de
-serviço e webhook real (Fases 8/9); conteúdo editorial real; produção e DNS.
+### Lacunas fechadas (26 de agosto de 2026)
+
+- **Versão e perfis comprovados**: Hermes v0.20.4 (2026.8.18); `profile
+  create/list/show` existem; `-p/--profile` define `HERMES_HOME` por invocação
+  sem mutar o padrão; perfis em `/opt/data/profiles/<nome>/`;
+  `terminal.home_mode:profile` existe (atual `auto`).
+- **Execução comprovada**: não interativa via `-z/--oneshot` (e `chat -q`);
+  JSON via `--usage-file` e `send --json`; gateway por perfil suportado.
+- **Transporte decidido (ADR-017)**: one-shot determinístico, sem daemon;
+  Hermes sem credencial do Payload; n8n única ponte; `automation` nunca publica.
+- **Schemas fechados**: `editorial-dossier.v1` (revisado com `correlationId`,
+  `confidence`, `contradictions`, `missingInformation`, `riskFlags`),
+  `source-record.v1` e `article-draft.v1` (status `const draft`), validados com
+  Draft 2020-12.
+
+Continuam pendentes: criação do perfil `crescimento-vertical-editorial` e skill
+(Fase 8), workflows n8n, credenciais de serviço e webhook real (Fase 9);
+conteúdo editorial real; produção e DNS.

@@ -80,7 +80,8 @@ estrutura interna.
 ## 2. Dossiê JSON v1
 
 Contrato de saída do Hermes (docs/06), formalizado no schema
-`docs/schemas/editorial-dossier.v1.schema.json`.
+`docs/schemas/editorial-dossier.v1.schema.json` (Draft 2020-12,
+`additionalProperties: false`).
 
 Campos do envelope:
 
@@ -89,10 +90,15 @@ Campos do envelope:
 | `schemaVersion` | `"1.0"` | Sim |
 | `idempotencyKey` | string | Sim |
 | `hermesRunId` | string | Sim |
+| `correlationId` | string | Não |
 | `discoveredAt` | ISO-8601 | Sim |
 | `contentType` | enum | Sim |
 | `primaryPillar` | enum | Sim |
 | `riskLevel` | enum (`low`/`medium`/`high`/`blocked`) | Sim |
+| `riskFlags[]` | enum | Não |
+| `confidence` | número 0–1 | Não |
+| `contradictions[]` | string | Não |
+| `missingInformation[]` | string | Não |
 | `title` | string | Não |
 | `dek` | string | Não |
 | `executiveSummary` | string | Não |
@@ -110,6 +116,32 @@ Campos do envelope:
 `source`: `url`, `publisher`, `sourceLevel` (`A`/`B`/`C`), `publishedAt`,
 `accessedAt`, `supports[]`. `claim`: `id`, `text`, `sourceUrls[]`, `status`
 (`verified`/`unverified`).
+
+Rastreabilidade: `idempotencyKey` + `hermesRunId` + `correlationId` +
+`discoveredAt` + `sources`/`claims` ligados por `supports`/`sourceUrls` garantem
+a trilha do fato até a fonte. `confidence`, `contradictions`,
+`missingInformation` e `riskFlags` registram incerteza e lacunas (docs/06).
+
+## 2.1 Registro de fonte v1
+
+Schema `docs/schemas/source-record.v1.schema.json` (Draft 2020-12,
+`additionalProperties: false`). Exige: `schemaVersion`, `sourceId`,
+`canonicalUrl` (HTTPS), `title`, `publisher`, `sourceType` (enum), `language`,
+`publishedAt`, `retrievedAt`, `verified`, `contentHash` (SHA-256, `^[a-f0-9]{64}$`).
+Registra **apenas metadados + hash** — nenhuma cópia integral da fonte.
+
+## 2.2 Rascunho de artigo v1
+
+Schema `docs/schemas/article-draft.v1.schema.json` (Draft 2020-12,
+`additionalProperties: false`). Exige: `schemaVersion`, `correlationId`,
+`idempotencyKey`, `dossierId`, `proposedTitle`, `proposedSlug` (slug válido),
+`summary`, `contentOutline`, `seoTitle` (≤ 60), `seoDescription` (≤ 160),
+`primaryPillar`, `sourceIds` (≥ 1), `commercialIntent`, `suggestedCTA`,
+`automationDisclosure` e `status` com único valor `draft` (`const`).
+
+Regras: proíbe `status: published` (o `const "draft"` rejeita qualquer outro
+valor); não contém credenciais, campos de permissão ou instrução de publicação
+automática (`additionalProperties: false`).
 
 ## 3. Ciclo EditorialRun
 
@@ -135,11 +167,23 @@ válido, título/resumo/conteúdo/autor/categoria/imagem e fonte verificada.
 
 ## 5. Fronteira de permissões
 
+- **Hermes nunca terá credencial do Payload.** Toda escrita no CMS passa pelo
+  n8n (única ponte), via REST autenticado com a role `automation`.
 - Hermes/n8n usam a role `automation` (docs/17): criam/atualizam **draft**,
   criam `EditorialRun`; nunca publicam, apagam, administram usuários, leem leads
   ou alteram configuração.
+- `automation` nunca publica (regra já aplicada em código na Fase 2A).
 - O segredo do webhook não concede acesso administrativo ao CMS.
 - `sources` e `research-dossiers` permanecem não públicos.
+
+## 5.1 Transporte Hermes → n8n
+
+Comprovado na versão instalada (v0.20.4, docs/21): o método recomendado é a
+**execução one-shot** do Hermes (`-z/--oneshot` + `-p/--profile` +
+`--usage-file`), não interativa e sem daemon, com entrega do dossiê ao webhook
+HMAC do n8n. Gateway/API e cron são alternativas que dependem do gateway
+persistente e ficam para as Fases 8/9. A decisão está registrada em docs/14
+(ADR-017).
 
 ## 6. Falha segura
 
