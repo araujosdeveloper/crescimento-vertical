@@ -5,9 +5,9 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: Fase 1 — Baseline técnico e segurança de implantação.
-- Última fase concluída: Fase 0 — Governança, auditoria e documentação.
-- Próxima fase: Fase 2, somente depois do gate integral da Fase 1.
+- Fase ativa: Fase 2 — Fundação do portal e design system.
+- Última fase concluída: Fase 1 — Baseline técnico e segurança de implantação.
+- Próxima fase: Fase 3, somente depois do gate integral e da homologação da Fase 2.
 - Produção alterada por este planejamento: não.
 - Deploy realizado: não.
 
@@ -28,16 +28,16 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 
 - [x] Confirmar ausência de implantação anterior na VPS-alvo; commit implantado:
   nenhum.
-- [ ] Auditar containers, redes, volumes e portas.
-- [ ] Confirmar DNS, TLS e redirects www/apex.
-- [ ] Inventariar variáveis sem expor valores.
+- [x] Auditar containers, redes, volumes e portas.
+- [x] Confirmar DNS, TLS e redirects www/apex.
+- [x] Inventariar variáveis sem expor valores.
 - [x] Criar backup pré-mudança.
 - [x] Verificar restauração do backup.
 - [x] Registrar commit-base local: 5b461252037f6670be7d8cd4095c5d202f97ae5d.
 - [x] Executar npm ci, lint, typecheck e build.
-- [ ] Registrar baseline visual.
+- [x] Registrar baseline visual.
 - [x] Remover telefone fictício e tornar o contato configurável.
-- [ ] Confirmar e configurar WhatsApp e e-mail reais.
+- [x] Confirmar e configurar ao menos um canal real (e-mail; WhatsApp opcional).
 - [x] Criar branch feat/portal-phase-1-baseline.
 - [x] Criar staging protegido/noindex.
 - [x] Criar healthchecks live e ready.
@@ -47,6 +47,25 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 - [x] Construir e validar imagem Docker em ambiente com Docker.
 - [x] Demonstrar rollback.
 - [x] Atualizar auditoria com evidências.
+
+## Fechamento formal da Fase 1 — 26 de agosto de 2026
+
+| Gate | Evidência atual |
+| --- | --- |
+| Containers | Oito containers-alvo inspecionados; todos `running`; cinco `healthy` e três sem healthcheck declarado |
+| Redes e portas | Seis redes e quinze volumes inventariados; PostgreSQL, app, staging, runner e Hermes sem porta pública nova |
+| DNS/TLS | Staging resolve, redireciona HTTP→HTTPS e possui TLS válido; apex/www continuam na infraestrutura anterior e permanecem fora desta migração |
+| Variáveis | Chaves obrigatórias inventariadas por nome; valores não registrados |
+| Contato | E-mail operacional válido configurado no staging; WhatsApp ausente e opcional |
+| Baseline visual | Home e `/conteudos` homologados em 360/390/768/1024/1440 px em 25/08; imagens e identidade atuais preservadas como referência |
+| Staging | 401 sem autenticação, `X-Robots-Tag` presente; home, admin e healthchecks internos 200 |
+| Backup/rollback | Dois backups da Fase 1 com SHA-256 e bundles verificados novamente |
+| Dados | Um administrador preservado; coleções editoriais vazias |
+
+O 502/certificado incompatível atualmente observado em apex/www pertence à
+infraestrutura anterior, já registrada, e não ao staging da VPS. A migração
+de produção/DNS continua fora do escopo. As antecipações 2A–3C permanecem
+válidas, mas não foram usadas como substitutas automáticas deste gate.
 
 ## Evidências locais da Fase 1
 

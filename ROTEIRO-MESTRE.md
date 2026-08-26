@@ -19,8 +19,8 @@ um portal editorial e comercial orientado à geração de receita.
 | Fase | Entrega | Dependência | Estado |
 | --- | --- | --- | --- |
 | 0 | Governança, auditoria e documentação | Nenhuma | Concluída |
-| 1 | Baseline técnico e segurança de implantação | Fase 0 | Em execução |
-| 2 | Fundação do portal e design system | Fase 1 | Pendente |
+| 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
+| 2 | Fundação do portal e design system | Fase 1 | Em execução |
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Pendente |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Pendente |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
@@ -34,6 +34,11 @@ um portal editorial e comercial orientado à geração de receita.
 
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
+
+As antecipações aprovadas 2A, 2B, 3A, 3B e 3C permanecem entregues e
+preservadas. Elas adicionaram capacidades de fases posteriores, mas não
+substituem automaticamente os gates sequenciais das Fases 1, 2 e seguintes.
+A reconciliação do roteiro está registrada no ADR-021.
 
 ## Fase 0 — Governança, auditoria e documentação
 

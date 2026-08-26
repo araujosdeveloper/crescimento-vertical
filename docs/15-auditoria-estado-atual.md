@@ -2,6 +2,39 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Reauditoria e conclusão formal da Fase 1 — 26 de agosto de 2026
+
+- `main`, `origin/main` e a tag `repository-hardening-2026-08-26` resolvem para
+  `b716e4b4fa7b993eebee711739cdbd83de45aa04`; árvore limpa no preflight.
+- Oito containers-alvo foram inspecionados por ID, estado e health sem reinício:
+  todos estão `running`; app de produção, dois stagings, PostgreSQL e runner
+  estão `healthy`; n8n, Traefik e Hermes não declaram healthcheck.
+- Seis redes e quinze volumes Docker foram inventariados. O PostgreSQL permanece
+  somente na rede interna; app candidato, staging antigo, produção, runner e
+  Hermes não ganharam porta publicada. As publicações preexistentes de n8n e
+  Traefik não foram alteradas.
+- As chaves de ambiente obrigatórias foram verificadas somente por nome. O
+  staging possui e-mail operacional com formato válido; WhatsApp não está
+  configurado e é opcional. Nenhum valor foi registrado.
+- `staging.crescimentovertical.com` resolve, redireciona HTTP para HTTPS, possui
+  TLS válido, retorna 401 sem BasicAuth e envia `X-Robots-Tag`. Internamente,
+  `/`, `/conteudos`, `/admin`, live, ready, robots e sitemap retornam 200.
+- Apex e www permanecem na infraestrutura anterior e atualmente retornam 502,
+  com incompatibilidade de hostname observada pelo cliente HTTPS. Essa pendência
+  conhecida não altera o staging e será tratada apenas na migração autorizada.
+- A homologação visual de 25/08 em 360, 390, 768, 1024 e 1440 px constitui o
+  baseline vigente da home e do estado vazio de `/conteudos`; identidade,
+  logotipo e imagens atuais são a referência da Fase 2.
+- Os backups `phase1-8f9d82d` e `phase1-final-ea801b1-20260824-182845` tiveram
+  `SHA256SUMS` e bundles Git verificados novamente. O rollback documentado
+  permanece disponível.
+- Banco do staging preservado: um usuário administrador e zero registros nas
+  coleções editoriais. A execução do Hermes continua desabilitada.
+
+Com essas evidências, o critério de saída da Fase 1 está atendido. As entregas
+antecipadas 2A, 2B, 3A, 3B e 3C permanecem registradas, mas não substituem os
+gates formais seguintes.
+
 ## VPS oficial confirmada em 24 de agosto de 2026
 
 - O identificador e o endereço da VPS ficam no registro privado ignorado pelo

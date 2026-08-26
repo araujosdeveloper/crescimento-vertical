@@ -558,6 +558,38 @@ PR e CI do merge aprovados; quatro checks verdes também na `main`; proteção
 relida pela API com PR, strict, enforce_admins, conversas, force-push e exclusão
 nos estados definidos; bundle e evidências verificadas por SHA-256.
 
+## ADR-021 — Reconciliação dos gates formais e início da Fase 2
+
+- Data: 2026-08-26
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 1 e 2; preserva as antecipações 2A–3C
+
+### Contexto e decisão
+
+A execução antecipou capacidades editoriais e de integração antes de fechar
+documentalmente todos os itens do gate sequencial da Fase 1. A reauditoria
+comprovou base reproduzível, staging protegido, canal operacional, baseline
+visual, backup e rollback. A Fase 1 fica concluída e a Fase 2 passa a ser a
+única fase em execução. As entregas 2A, 2B, 3A, 3B e 3C continuam válidas,
+mas não concluem automaticamente qualquer gate formal posterior.
+
+### Consequências, validação e reversão
+
+A Fase 2 pode organizar o layout público, design system, acessibilidade e testes
+sem criar páginas comerciais ou habilitar integrações. O apex/www continuam
+na infraestrutura anterior; staging é o único destino de implantação desta
+fase. A validação exige CI, viewports, backup e rollback antes da homologação.
+Reverter por novo commit documental que reabra o item de gate cuja evidência
+deixar de ser verdadeira; nenhuma reversão autoriza alterar produção.
+
+### Dependências de teste
+
+Os testes de interação do menu e foco usarão Testing Library com ambiente
+jsdom, em versões exatas no `package-lock.json`. A adição é limitada a
+devDependencies e evita implementar um simulador DOM próprio ou adicionar uma
+segunda ferramenta de testes; Vitest permanece como runner único.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
