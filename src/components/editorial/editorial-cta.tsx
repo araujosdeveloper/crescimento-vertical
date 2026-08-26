@@ -16,7 +16,7 @@ export function EditorialCTA() {
         automação e performance.
       </p>
       <ContactLink className="button-primary">
-        {PRIMARY_CONTACT_LABEL} <ArrowRight size={18} />
+        {PRIMARY_CONTACT_LABEL} <ArrowRight aria-hidden="true" size={18} />
       </ContactLink>
     </aside>
   );

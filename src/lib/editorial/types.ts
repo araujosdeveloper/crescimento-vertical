@@ -72,8 +72,3 @@ export interface PaginatedArticles {
   hasNextPage: boolean;
   hasPrevPage: boolean;
 }
-
-export interface Crumb {
-  name: string;
-  href: string;
-}

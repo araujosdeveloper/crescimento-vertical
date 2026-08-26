@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { ArticleCard } from "@/components/editorial/article-card";
-import { EmptyState } from "@/components/editorial/empty-state";
+import { EmptyState } from "@/components/ui/interface-state";
 import { Pagination } from "@/components/editorial/pagination";
 import { getPublishedArticles } from "@/lib/editorial/data";
 import { normalizePage } from "@/lib/editorial/pagination";
@@ -23,8 +21,7 @@ export default async function ConteudosPage({ searchParams }: PageProps) {
   const data = await getPublishedArticles(page);
 
   return (
-    <main className="overflow-hidden">
-      <Header />
+    <>
       <section className="section-pad editorial-page">
         <div className="container-shell">
           <header className="editorial-page-head">
@@ -60,7 +57,6 @@ export default async function ConteudosPage({ searchParams }: PageProps) {
           )}
         </div>
       </section>
-      <Footer />
-    </main>
+    </>
   );
 }

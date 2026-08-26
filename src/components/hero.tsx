@@ -1,4 +1,5 @@
 import { ArrowDownRight, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { ContactLink } from "@/components/contact-link";
 import { PRIMARY_CONTACT_LABEL } from "@/lib/site";
 
@@ -19,11 +20,11 @@ export function Hero() {
           <p>Sites, automações, tráfego pago e IA trabalhando juntos para transformar sua presença digital em uma estrutura real de crescimento.</p>
           <div className="hero-actions">
             <ContactLink className="button-primary">
-              {PRIMARY_CONTACT_LABEL} <ArrowRight size={18} />
+              {PRIMARY_CONTACT_LABEL} <ArrowRight aria-hidden="true" size={18} />
             </ContactLink>
-            <a className="button-secondary" href="#solucoes">
-              Conhecer soluções <ArrowDownRight size={18} />
-            </a>
+            <Link className="button-secondary" href="/#solucoes">
+              Conhecer soluções <ArrowDownRight aria-hidden="true" size={18} />
+            </Link>
           </div>
           <div className="hero-manifesto">
             <span />

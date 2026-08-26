@@ -6,10 +6,10 @@ import {
 } from "./constants";
 import type {
   ArticleDetail,
-  Crumb,
   PublicAuthor,
   PublicCategory,
 } from "./types";
+import type { BreadcrumbItem } from "@/types/public";
 
 const DEFAULT_SITE_URL = "https://crescimentovertical.com";
 const SITE_NAME = "Crescimento Vertical";
@@ -228,7 +228,7 @@ export function articleJsonLd(article: ArticleDetail): Record<string, unknown> {
   };
 }
 
-export function breadcrumbJsonLd(items: Crumb[]): Record<string, unknown> {
+export function breadcrumbJsonLd(items: BreadcrumbItem[]): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

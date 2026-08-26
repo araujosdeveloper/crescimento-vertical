@@ -1,8 +1,8 @@
 import Link from "next/link";
 
-import type { Crumb } from "@/lib/editorial/types";
+import type { BreadcrumbItem } from "@/types/public";
 
-export function Breadcrumbs({ items }: { items: Crumb[] }) {
+export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
     <nav className="editorial-breadcrumbs" aria-label="Trilha de navegação">
       <ol>

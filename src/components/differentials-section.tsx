@@ -24,7 +24,7 @@ export function DifferentialsSection() {
         <div className="differentials-grid">
           {items.map(([Icon, title], index) => {
             const ItemIcon = Icon as typeof Waypoints;
-            return <article className={`differential-card ${index === items.length - 1 ? "differential-card-wide" : ""}`} key={title as string}><span className="differential-icon"><ItemIcon size={19} /></span><p>{title as string}</p><small>0{index + 1}</small></article>;
+            return <article className={`differential-card ${index === items.length - 1 ? "differential-card-wide" : ""}`} key={title as string}><span className="differential-icon"><ItemIcon aria-hidden="true" size={19} /></span><p>{title as string}</p><small>0{index + 1}</small></article>;
           })}
         </div>
       </div>

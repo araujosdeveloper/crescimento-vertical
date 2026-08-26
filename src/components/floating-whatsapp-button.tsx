@@ -14,7 +14,7 @@ export function FloatingWhatsAppButton() {
       rel="noreferrer"
       aria-label="Fale conosco pelo WhatsApp"
     >
-      <MessageCircle size={21} />
+      <MessageCircle aria-hidden="true" size={21} />
       <span>Fale conosco</span>
     </a>
   );

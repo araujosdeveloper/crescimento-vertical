@@ -148,6 +148,13 @@ servidor. O deploy e a ativação permanecem para a Fase 3.
 
 ## Decisões de simplicidade
 
+### Layout público consolidado (Fase 2)
+
+As rotas visuais existentes usam o route group `(public)` e compartilham um
+`SiteShell`. A home e o grupo `(editorial)` recebem Header, Footer, SkipLink e
+um único `main`; `(payload)`, APIs, healthchecks, feed, robots e sitemap
+permanecem fora desse layout. Route groups preservam todas as URLs públicas.
+
 - Um único projeto Next.js/Payload reduz duplicação de tipos, layouts e deploy.
 - PostgreSQL concentra conteúdo e relações; estado interno do Hermes não substitui
   o banco.

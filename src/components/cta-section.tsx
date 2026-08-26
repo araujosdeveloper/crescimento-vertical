@@ -14,11 +14,11 @@ export function CTASection() {
               <p className="section-kicker">Diagnóstico estratégico</p>
               <h2>Crescimento não acontece por improviso. <span>Ele precisa de estrutura.</span></h2>
               <p>Vamos analisar o momento da sua empresa e identificar quais estruturas digitais podem gerar mais oportunidades de venda.</p>
-              <ContactLink className="button-primary">{PRIMARY_CONTACT_LABEL} <ArrowRight size={18} /></ContactLink>
+              <ContactLink className="button-primary">{PRIMARY_CONTACT_LABEL} <ArrowRight aria-hidden="true" size={18} /></ContactLink>
             </div>
             <div className="cta-visual" aria-hidden="true">
-              <div className="cta-orbit"><Sparkles size={28} /></div>
-              <div className="cta-scan"><ScanSearch size={24} /><span>Diagnóstico</span><small>Estrutura • Automação • Performance</small></div>
+              <div className="cta-orbit"><Sparkles aria-hidden="true" size={28} /></div>
+              <div className="cta-scan"><ScanSearch aria-hidden="true" size={24} /><span>Diagnóstico</span><small>Estrutura • Automação • Performance</small></div>
             </div>
           </div>
         </div>
@@ -28,11 +28,11 @@ export function CTASection() {
         <div className="final-cta-grid" />
         <div className="final-glow" />
         <div className="container-shell relative text-center">
-          <span className="final-icon"><MessageSquareText size={25} /></span>
+          <span className="final-icon"><MessageSquareText aria-hidden="true" size={25} /></span>
           <p className="section-kicker">Vamos conversar</p>
           <h2>Pronto para estruturar o crescimento digital da sua empresa?</h2>
           <p>Fale com a Crescimento Vertical e descubra como transformar sua presença digital em uma operação mais inteligente, automatizada e preparada para vender mais.</p>
-          <ContactLink className="button-primary">{PRIMARY_CONTACT_LABEL} <ArrowRight size={18} /></ContactLink>
+          <ContactLink className="button-primary">{PRIMARY_CONTACT_LABEL} <ArrowRight aria-hidden="true" size={18} /></ContactLink>
         </div>
       </section>
     </>

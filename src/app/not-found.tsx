@@ -1,12 +1,10 @@
 import Link from "next/link";
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
+import { SiteShell } from "@/components/layout/site-shell";
 
 export default function NotFound() {
   return (
-    <main className="overflow-hidden">
-      <Header />
+    <SiteShell>
       <section className="section-pad">
         <div className="container-shell">
           <div className="editorial-empty editorial-not-found">
@@ -21,7 +19,6 @@ export default function NotFound() {
           </div>
         </div>
       </section>
-      <Footer />
-    </main>
+    </SiteShell>
   );
 }

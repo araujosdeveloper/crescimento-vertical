@@ -37,6 +37,7 @@
 - [Conector n8n ↔ Hermes](26-conector-n8n-hermes.md)
 - [Deploy do conector n8n ↔ Hermes](27-deploy-conector-n8n-hermes.md)
 - [Hardening do repositório público](28-hardening-repositorio-publico.md)
+- [Fase 2 — Fundação do portal e design system](29-fase-2-fundacao-portal-design-system.md)
 
 ### Contratos de integração (schemas JSON)
 
