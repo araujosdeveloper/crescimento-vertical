@@ -11,10 +11,14 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check:
     name: lint, typecheck, test, migrate e build
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     env:
       # Valores descartáveis de CI — nunca usar segredos reais neste workflow.
@@ -39,10 +43,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "22"
           cache: npm
@@ -74,10 +80,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.13"
 
@@ -127,10 +135,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: "24"
           cache: npm
@@ -193,4 +203,56 @@ jobs:
 
       - name: Docker build da imagem n8n customizada (digest pinado)
         run: |
-          docker build -f services/n8n-crescimento-vertical/Dockerfile -t cv-n8n-hermes-connector:ci .
+          set -o pipefail
+          build_log="$(mktemp)"
+          trap 'rm -f "$build_log"' EXIT
+
+          for attempt in 1 2 3 4; do
+            echo "Tentativa ${attempt} de 4 do docker build n8n"
+            : > "$build_log"
+
+            if docker build -f services/n8n-crescimento-vertical/Dockerfile -t cv-n8n-hermes-connector:ci . 2>&1 | tee "$build_log"; then
+              exit 0
+            else
+              build_status=$?
+            fi
+
+            if ! grep -Eqi 'HTTP 429|Too Many Requests|toomanyrequests|rate limit' "$build_log"; then
+              echo "Docker build falhou por erro não relacionado a rate limit; sem retry."
+              exit "$build_status"
+            fi
+
+            if [ "$attempt" -eq 4 ]; then
+              echo "Docker build falhou após 4 ocorrências de rate limit."
+              exit "$build_status"
+            fi
+
+            case "$attempt" in
+              1) wait_seconds=60 ;;
+              2) wait_seconds=120 ;;
+              3) wait_seconds=240 ;;
+            esac
+            echo "Rate limit transitório detectado; nova tentativa em ${wait_seconds}s."
+            sleep "$wait_seconds"
+          done
+
+  secret-scan:
+    name: secret-scan (gitleaks full history)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout com histórico completo
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Gitleaks no histórico completo
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"

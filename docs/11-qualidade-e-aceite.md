@@ -79,6 +79,11 @@ Ordem obrigatória:
 
 Falha em qualquer etapa bloqueia merge.
 
+Após o hardening do repositório público, quatro jobs são obrigatórios: pipeline
+Node/Payload, runner editorial, conector n8n/Hermes e
+`secret-scan (gitleaks full history)`. O Gitleaks usa o histórico completo; toda
+action externa é pinada por SHA e os checkouts não persistem credenciais.
+
 ## Critérios por página
 
 - Status HTTP correto.

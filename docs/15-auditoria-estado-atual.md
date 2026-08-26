@@ -436,3 +436,15 @@ A Fase 3C entregou a conectividade n8n → runner (validate-only, sem execução
 
 Continuam pendentes: execução editorial real, webhook de produção e conteúdo
 (Fase 9); produção e DNS.
+
+## Hardening do repositório público — 25 de agosto de 2026
+
+Controle transversal pós-Fase 3C, sem iniciar a Fase 4: o CI passa a possuir
+quatro jobs, incluindo Gitleaks sobre todo o histórico. Actions externas ficam
+pinadas por SHA, checkouts não persistem credenciais e as permissões são
+limitadas a leitura de conteúdo. Após CI verde no PR e no merge commit, a
+`main` deve exigir PR, quatro checks atualizados, conversas resolvidas e regras
+para administradores, bloqueando force-push e exclusão. Produção, staging e os
+oito containers permanecem inalterados; a execução do Hermes continua
+desabilitada. Duas ocorrências históricas do Gitleaks foram confirmadas como
+fixtures de teste e recebem exceção exclusivamente por fingerprint exato.

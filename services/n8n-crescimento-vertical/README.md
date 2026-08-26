@@ -5,7 +5,8 @@
 Imagem reproduzível do n8n (versão instalada, sem atualização) com o node
 privado `hermesEditorial` compilado em `/opt/n8n-custom`.
 
-- Base: `docker.n8n.io/n8nio/n8n@sha256:3989d9b8…` (digest exato em execução).
+- Base de build: `ghcr.io/n8n-io/n8n@sha256:3989d9b8…` (digest exato da
+  versão 2.33.7).
 - Copia apenas `packages/n8n-nodes-crescimento-vertical/dist/`.
 - Define `N8N_CUSTOM_EXTENSIONS=/opt/n8n-custom`.
 - Mantém o usuário `node` e o entrypoint original (`tini`).

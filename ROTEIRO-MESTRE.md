@@ -236,6 +236,14 @@ Detalhes em [docs/26-conector-n8n-hermes.md](docs/26-conector-n8n-hermes.md),
 - Execução editorial real e webhook de produção (Fase 9).
 - Conteúdo editorial e produção editorial.
 
+## Controle transversal pós-Fase 3C — hardening do repositório público
+
+Atividade de segurança autorizada sem iniciar a Fase 4: CI com quatro jobs,
+Gitleaks obrigatório sobre todo o histórico, actions externas pinadas por SHA e
+proteção da `main` com PR e checks obrigatórios. Detalhes em
+[docs/28-hardening-repositorio-publico.md](docs/28-hardening-repositorio-publico.md)
+e [ADR-020](docs/14-registro-decisoes.md). Nenhum runtime da VPS é alterado.
+
 ## Fase 4 — Arquitetura pública e páginas comerciais
 
 ### Atividades

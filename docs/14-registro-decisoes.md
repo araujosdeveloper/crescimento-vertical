@@ -510,6 +510,54 @@ recriando o n8n; volume e SQLite restauram a partir do backup pré-recreate.
 workflow validate-only executado (health 200, validate 200, createJob 503,
 getJob 404); IDs dos 7 contêineres preservados (somente o n8n recriado).
 
+## ADR-020 — Hardening do repositório público
+
+- Data: 2026-08-25
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: controle transversal pós-Fase 3C; nenhuma fase funcional iniciada
+
+### Contexto
+
+Com o repositório público, alterações diretas na `main`, actions referenciadas
+por tags mutáveis e ausência de varredura integral de segredos aumentam o risco
+de supply chain e exposição histórica.
+
+### Decisão
+
+1. Exigir pull request e quatro checks reais para a `main`, com base atualizada,
+   conversas resolvidas e regras aplicadas ao administrador.
+2. Bloquear force-push e exclusão da `main`, sem exigir aprovação adicional em
+   repositório de proprietário único.
+3. Executar Gitleaks sobre todo o histórico em PRs e pushes da `main`, sem
+   allowlist ampla; as duas fixtures históricas confirmadas usam somente
+   fingerprints exatos em `.gitleaksignore`.
+4. Fixar actions externas por SHA completo, desabilitar persistência de
+   credenciais no checkout e limitar permissões a `contents: read`.
+5. Preservar evidências em backup documental sem segredos.
+
+### Alternativas consideradas
+
+1. Confiar apenas na revisão manual — rejeitada por não cobrir histórico nem
+   impedir alteração direta.
+2. Usar tags de versão das actions — rejeitada por serem referências mutáveis.
+3. Ignorar fixtures ou diretórios amplos no Gitleaks — rejeitada por reduzir a
+   cobertura e poder ocultar segredo real.
+
+### Consequências e reversão
+
+O merge passa a depender dos quatro checks e da disponibilidade do GitHub
+Actions. Falsos positivos exigem exceção estreita e documentada. Se uma regra
+impedir o fluxo legítimo, a correção ocorre por novo PR e ajuste auditável da
+proteção, sem admin bypass e sem retirar o Gitleaks. Não há deploy nem alteração
+do runtime da VPS.
+
+### Critério de validação
+
+PR e CI do merge aprovados; quatro checks verdes também na `main`; proteção
+relida pela API com PR, strict, enforce_admins, conversas, force-push e exclusão
+nos estados definidos; bundle e evidências verificadas por SHA-256.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

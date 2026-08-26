@@ -325,6 +325,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 
 ## Registro por sessão
 
+## Registro da sessão 2026-08-25 — hardening do repositório público
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | chore/public-repository-hardening |
+| Fase | Controle transversal pós-Fase 3C; Fase 4 não iniciada |
+| Objetivo | Proteger a main, fixar actions por SHA e tornar o Gitleaks obrigatório sobre todo o histórico |
+| Alterações | CI, documentação, ADR-020 e proteção remota da main após merge verde |
+| Validações | YAML, `uses:`, diff, segredos, quatro jobs no PR e na main, releitura da proteção e backup documental |
+| Riscos | Secret scanning/push protection dependem da disponibilidade da API/plano; runtime da VPS permanece fora do escopo |
+| Próxima ação | Nenhuma fase funcional iniciada; manter os controles e tratar alertas de segurança |
+
 Ao concluir uma sessão de trabalho, registrar:
 
 | Campo | Conteúdo |
