@@ -344,6 +344,19 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 
 ## Registro por sessão
 
+## Registro da sessão 2026-08-27 — fundação do portal em staging
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation @ ac7eb19 (imagem) |
+| Fase | 2 — Fundação do portal e design system |
+| Objetivo | Consolidar layout, navegação, tokens, acessibilidade, testes e candidato de staging |
+| Alterações | Route groups públicos, SiteShell, componentes estruturais/estados, contratos TypeScript, tokens semânticos e testes DOM |
+| Validações | 69 testes Node/Payload/Fase 2; runner 32; conector 34; lint, typecheck, build, generate, migrations descartáveis, Compose; quatro checks verdes; staging healthy e smoke HTTP |
+| Backup/rollback | phase2-foundation-predeploy-ac7eb19-20260827-011500 validado; restaurar a imagem anterior e recriar somente app |
+| Riscos | 14 avisos do npm audit herdados exigem triagem posterior; homologação visual humana nos cinco viewports pendente |
+| Próxima ação | Homologar visualmente o PR draft; não fazer merge nem alterar produção |
+
 ## Registro da sessão 2026-08-25 — hardening do repositório público
 
 | Campo | Conteúdo |

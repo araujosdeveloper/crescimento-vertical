@@ -75,6 +75,31 @@ Git, banco, mídia, configuração e imagem atual. Não há nova migration. Roll
 restaurar a imagem exportada e recriar exclusivamente o serviço `app`; banco e
 volumes permanecem preservados.
 
+### Candidato implantado em 27 de agosto de 2026
+
+- PR draft: `#8`; os quatro checks obrigatórios ficaram verdes antes do deploy.
+- Commit da imagem: `ac7eb19`; tag
+  `crescimento-vertical:phase2-foundation-staging-ac7eb19`; image ID
+  `sha256:85110b839241...`.
+- Backup pré-deploy:
+  `/opt/backups/crescimento-vertical/phase2-foundation-predeploy-ac7eb19-20260827-011500`,
+  com bundle, dump, mídia, configuração e imagem validados por SHA-256; diretório
+  700 e arquivos 600.
+- Nenhuma migration nova; somente `cv-phase2-staging-app` foi recriado. Seu ID
+  mudou de `8ba86f676f44` para `af7129c2402c`; os outros sete containers do
+  escopo mantiveram os IDs.
+- Internamente, `/`, `/conteudos`, `/admin`, live, ready, robots e sitemap
+  retornaram 200; uma rota inexistente retornou 404. Robots bloqueia indexação e
+  o sitemap contém zero URLs.
+- Externamente, TLS validou, acesso sem BasicAuth retornou 401 e
+  `X-Robots-Tag` permaneceu `noindex, nofollow, noarchive`.
+- Banco preservado: um usuário e zero registros nas coleções editoriais.
+
+A inspeção automatizada não dispõe de navegador no host/container. A validação
+visual nos cinco viewports permanece como gate humano deste PR draft; o aceite
+anterior da Fase 2B é o baseline comparativo, não aprovação automática desta
+mudança.
+
 ## Fora do escopo
 
 - produção, DNS e Traefik global;

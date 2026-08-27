@@ -35,6 +35,23 @@ Com essas evidências, o critério de saída da Fase 1 está atendido. As entreg
 antecipadas 2A, 2B, 3A, 3B e 3C permanecem registradas, mas não substituem os
 gates formais seguintes.
 
+## Candidato da fundação do portal em staging — 27 de agosto de 2026
+
+Após os quatro checks verdes do PR draft `#8`, a imagem da fundação do portal
+foi construída e implantada somente em `cv-phase2-staging-app`. O backup
+pré-deploy `phase2-foundation-predeploy-ac7eb19-20260827-011500` contém Git,
+PostgreSQL, mídia, configuração e imagem anterior, com permissões 700/600,
+SHA-256 e validações de bundle, dump e arquivos tar. Não existia migration nova.
+
+O candidato passou de `8ba86f676f44` para `af7129c2402c` e ficou healthy. Os
+IDs de produção, staging antigo, PostgreSQL, n8n, Traefik, Hermes e runner não
+mudaram. Home, hub editorial, Admin, live/ready, robots e sitemap responderam
+200 internamente; 404 respondeu corretamente; sitemap permaneceu vazio. O
+acesso externo sem autenticação respondeu 401, TLS validou e o header noindex
+foi preservado. O banco continua com um usuário e coleções editoriais vazias.
+Produção e integrações não foram alteradas; homologação visual humana permanece
+pendente antes de qualquer merge.
+
 ## VPS oficial confirmada em 24 de agosto de 2026
 
 - O identificador e o endereço da VPS ficam no registro privado ignorado pelo
