@@ -52,6 +52,24 @@ foi preservado. O banco continua com um usuário e coleções editoriais vazias.
 Produção e integrações não foram alteradas; homologação visual humana permanece
 pendente antes de qualquer merge.
 
+## Constituição e reconciliação documental — 27 de agosto de 2026
+
+A Constituição sanitizada foi integrada à raiz como norma permanente, com
+`AGENTS.md` preservado como porta automática de entrada. O README foi
+reconciliado com a stack e as capacidades já existentes, e docs/06 passou a
+tratar a árvore antiga do Hermes como planejamento substituído pela antecipação
+aprovada da Fase 3B. O ADR-022 registra o protocolo transversal sem iniciar nova
+fase nem alterar runtime.
+
+O `npm audit` do estado atual registra 14 vulnerabilidades pendentes: 1 baixa,
+6 moderadas, 6 altas e 1 crítica. Nenhuma dependência foi alterada e
+`npm audit fix` não foi executado nesta sessão documental. A vulnerabilidade
+crítica deve ser triada antes do merge do PR #8.
+
+A Fase 2 continua em execução e a homologação visual humana permanece como
+próxima ação. Produção, staging, banco, containers, integrações e execução do
+Hermes não foram alterados.
+
 ## VPS oficial confirmada em 24 de agosto de 2026
 
 - O identificador e o endereço da VPS ficam no registro privado ignorado pelo

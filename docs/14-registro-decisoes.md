@@ -590,6 +590,51 @@ jsdom, em versões exatas no `package-lock.json`. A adição é limitada a
 devDependencies e evita implementar um simulador DOM próprio ou adicionar uma
 segunda ferramenta de testes; Vitest permanece como runner único.
 
+## ADR-022 — Constituição operacional e protocolo obrigatório de execução
+
+- Data: 2026-08-27
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: controle transversal; nenhuma fase iniciada
+
+### Contexto
+
+As regras permanentes do produto e da operação estavam distribuídas entre
+prompts, documentos técnicos e histórico de execução. Era necessário criar uma
+fonte normativa estável sem mover para ela o estado efêmero do projeto nem o
+inventário privado da infraestrutura.
+
+### Decisão
+
+1. Manter `CONSTITUICAO-DO-PROJETO.md` na raiz como norma operacional
+   permanente.
+2. Manter `AGENTS.md` como porta automática de entrada para pessoas, agentes de
+   IA e automações.
+3. Exigir leitura integral dos documentos obrigatórios antes das execuções e um
+   preflight curto que confronte escopo, fase, riscos e evidências atuais.
+4. Conceder autonomia dentro do escopo autorizado e fazer perguntas somente
+   diante das condições de parada registradas.
+5. Manter o estado dinâmico no Roteiro Mestre, em docs/10, docs/15, no Git e no
+   CI.
+6. Manter o inventário operacional detalhado fora do Git público.
+
+### Alternativas rejeitadas
+
+1. Repetir todo o memorial em cada prompt — aumenta ruído e risco de versões
+   divergentes.
+2. Depender apenas da memória da conversa — não oferece persistência nem
+   rastreabilidade.
+3. Colocar estado efêmero em `AGENTS.md` — tornaria a porta de entrada obsoleta
+   a cada execução.
+4. Permitir que cada agente redefina o processo — reduziria consistência,
+   segurança e auditabilidade.
+
+### Consequências e reversão
+
+Execuções passam a ter um protocolo comum e verificável, sem publicar detalhes
+operacionais. Qualquer mudança material desta decisão exige novo registro; uma
+reversão documental não autoriza alterar runtime, dados ou fases.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

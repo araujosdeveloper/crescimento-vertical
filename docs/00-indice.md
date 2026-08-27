@@ -2,6 +2,7 @@
 
 ## Documentos de direção
 
+- [Constituição do Projeto](../CONSTITUICAO-DO-PROJETO.md)
 - [Roteiro Mestre](../ROTEIRO-MESTRE.md)
 - [Visão e objetivos](01-visao-e-objetivos.md)
 - [Escopo e requisitos](02-escopo-e-requisitos.md)

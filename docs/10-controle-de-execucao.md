@@ -357,6 +357,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | 14 avisos do npm audit herdados exigem triagem posterior; homologação visual humana nos cinco viewports pendente |
 | Próxima ação | Homologar visualmente o PR draft; não fazer merge nem alterar produção |
 
+## Registro da sessão 2026-08-27 — Constituição e reconciliação documental
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation |
+| Fase | 2 — Fundação do portal e design system, em execução |
+| Objetivo | Integrar a Constituição sanitizada e reconciliar a documentação do estado atual |
+| Alterações | Constituição na raiz, protocolo em AGENTS.md, índice, README, Hermes, ADR-022 e auditoria reconciliados |
+| Validações | SHA-256 e identidade de bytes, links Markdown, ordem de leitura, escopo do diff, whitespace e auditorias de segredos/inventário operacional |
+| Riscos | Homologação visual humana pendente; vulnerabilidades do npm exigem triagem antes do merge |
+| Próxima ação | Homologação visual humana do candidato de staging |
+
 ## Registro da sessão 2026-08-25 — hardening do repositório público
 
 | Campo | Conteúdo |
