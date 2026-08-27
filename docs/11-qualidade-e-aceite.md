@@ -42,6 +42,11 @@ validação da requisição, cliente HTTP (timeout, resposta grande, status
 
 Ferramentas planejadas: Testing Library e axe.
 
+Na Fase 2, Testing Library foi adotada com Vitest/jsdom para Header,
+MobileNavigation, teclado/foco, SkipLink, Breadcrumbs, estados e SiteShell. As
+versões ficam fixadas no lockfile; axe continua planejado, sem criar um segundo
+runner de testes.
+
 ### Integração
 
 - Payload + PostgreSQL.
