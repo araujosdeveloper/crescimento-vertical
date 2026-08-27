@@ -381,6 +381,20 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Riscos | Secret scanning/push protection dependem da disponibilidade da API/plano; runtime da VPS permanece fora do escopo |
 | Próxima ação | Nenhuma fase funcional iniciada; manter os controles e tratar alertas de segurança |
 
+## Registro da sessão 2026-08-27 — remediação de dependências do PR #8
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation |
+| Fase | 2 — Fundação do portal e design system, em execução |
+| Objetivo | Remediar advisories confirmados sem mudança major, override ou alteração funcional |
+| Alterações | Next.js e eslint-config-next 16.2.9 → 16.3.0; Vitest 4.0.18 → 4.1.0; Vite 7.3.6 fixado como dependência direta de desenvolvimento; js-yaml, brace-expansion, PostCSS e Sharp atualizados pela resolução legítima dos pacotes pais; Payload preservado em 3.88.0 e React em 19.2.7 |
+| Audit antes/depois | Completo: 42 (2 baixas, 8 moderadas, 31 altas, 1 crítica) → 11 (5 baixas, 6 moderadas, 0 altas, 0 críticas). `--omit=dev`: 21 (2 baixas, 5 moderadas, 14 altas) → 11 (5 baixas, 6 moderadas, 0 altas, 0 críticas) |
+| Validações | `npm ci`; `npm ls --all` sem invalid/extraneous; lint; typecheck; 69 testes da aplicação; 32 do runner; 34 do conector; generate:types/importmap; migrations e status em PostgreSQL 16 descartável; build Next/Webpack; build Docker runner; Compose; standalone sem Vitest; smokes HTTP e Sharp |
+| Riscos | Restam somente achados baixos/moderados transitivos do Payload 3.88.0: DOMPurify 3.4.8 fixado pelo Monaco 0.56.0 e esbuild 0.18.20 da cadeia drizzle-kit; sem versão pai compatível corrigida e sem servidor vulnerável exposto pelo projeto |
+| Estado do PR | PR #8 deve permanecer aberto e draft; homologação visual humana nos cinco viewports continua pendente |
+| Próxima ação | Aguardar os quatro checks do novo HEAD; não fazer merge nem alterar runtime |
+
 Ao concluir uma sessão de trabalho, registrar:
 
 | Campo | Conteúdo |

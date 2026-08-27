@@ -516,3 +516,61 @@ para administradores, bloqueando force-push e exclusão. Produção, staging e o
 oito containers permanecem inalterados; a execução do Hermes continua
 desabilitada. Duas ocorrências históricas do Gitleaks foram confirmadas como
 fixtures de teste e recebem exceção exclusivamente por fingerprint exato.
+
+## Remediação de advisories do PR #8 — 27 de agosto de 2026
+
+A triagem foi repetida no mesmo HEAD `0319d49e0e0465e10d274a4beadc746c5a74bb77`
+antes da atualização. O registro histórico de 14 ocorrências não foi
+reproduzido: a base atual do npm retornou 42 ocorrências no audit completo e 21
+com `--omit=dev`. A divergência decorre da atualização temporal da base de
+advisories, da propagação de um advisory por vários nós afetados e da diferença
+de escopo entre audit completo e runtime; não houve evidência de mudança de
+código entre o registro de 14 e a nova consulta.
+
+Remediação mínima aplicada:
+
+- `next` e `eslint-config-next`: 16.2.9 → 16.3.0. A versão 16.2.11 corrige os
+  advisories próprios do Next, mas ainda fixa PostCSS 8.4.31 e restringe Sharp a
+  `^0.34.5`; 16.3.0 é a primeira versão estável que resolve PostCSS 8.5.23 e
+  Sharp `^0.35.3` pela cadeia pai;
+- `vitest`: 4.0.18 → 4.1.0, eliminando GHSA-5xrq-8626-4rwp /
+  CVE-2026-47429 sem mudança major;
+- `vite` 7.3.6 fixado diretamente para impedir que o range amplo do Vitest
+  selecione Vite 8 e produza uma árvore inválida no npm 11;
+- `js-yaml` 4.3.2 e `brace-expansion` 1.1.18/5.0.9 resolvidos dentro dos ranges
+  já aceitos pelos pacotes pais;
+- os quatro pacotes Payload permanecem alinhados em 3.88.0, versão estável mais
+  recente, cujo peer range aceita Next `>=16.2.6 <17`; React permanece 19.2.7;
+- nenhum override, mudança major, migration ou alteração de schema foi usado.
+
+Resultado do audit:
+
+| Escopo | Antes | Depois |
+| --- | --- | --- |
+| Completo | 42: 2 baixas, 8 moderadas, 31 altas, 1 crítica | 11: 5 baixas, 6 moderadas, 0 altas, 0 críticas |
+| `--omit=dev` | 21: 2 baixas, 5 moderadas, 14 altas, 0 críticas | 11: 5 baixas, 6 moderadas, 0 altas, 0 críticas |
+
+Os 11 nós restantes propagam apenas dois riscos-raiz sem correção compatível
+publicada pelos pacotes pais:
+
+1. DOMPurify 3.4.8, dependência exata do Monaco Editor 0.56.0, usado pela UI do
+   Payload. Não há release estável posterior do Monaco e não foi aplicado
+   override. A exploração depende de configurações/hook de sanitização não
+   usados diretamente pela aplicação.
+2. esbuild 0.18.20, trazido por
+   `@payloadcms/db-postgres → drizzle-kit → @esbuild-kit/esm-loader`. O advisory
+   depende de servidor de desenvolvimento do esbuild exposto à rede; esse
+   servidor não é iniciado nos scripts, build, migrations ou runtime. Payload
+   3.88.0 continua sendo a versão estável mais recente.
+
+Validações locais aprovadas: instalação limpa; árvore npm sem pacotes inválidos
+ou extraneous; lint sem erros; typecheck; 69 testes da aplicação, 32 do runner e
+34 do conector; tipos e import map do Payload; duas migrations existentes
+aplicadas e confirmadas em PostgreSQL 16 descartável; build Next.js/Webpack;
+imagem Docker multi-stage; arquivos Compose; standalone contendo Next 16.3.0 e
+Sharp 0.35.3 sem Vitest; home, conteúdos, admin desautenticado, APIs, health,
+robots, sitemap e 404; carregamento e transformação de imagem pelo Sharp.
+
+O PR #8 permanece aberto e draft. A homologação visual humana nos cinco
+viewports continua pendente. Nenhum staging, produção, container ativo, banco
+persistente, DNS, Traefik, n8n ou Hermes foi alterado.
