@@ -1,6 +1,6 @@
 # Fase 4 — Arquitetura pública e páginas comerciais
 
-Data de início: 28 de agosto de 2026. Status: em execução.
+Data de início: 28 de agosto de 2026. Status: implementação concluída, aguardando aceite humano.
 
 ## Catálogo aprovado
 
@@ -29,6 +29,14 @@ validar SHA-256. Em rollback, restaurar a imagem anterior e recriar somente o
 app; a migration deve ser revertida apenas por procedimento aprovado.
 
 ## Gates
+
+Migration aplicada no staging após backup pré-deploy; seed executado com sucesso
+e confirmou `services=6`, slugs canônicos sem duplicação, `cases=0`, `articles=0`
+e administrador preservado. O app e o PostgreSQL estão saudáveis; as rotas
+comerciais, legais, editoriais e healthchecks retornam os códigos esperados, 404
+é preservado para rota inexistente e o acesso externo sem BasicAuth retorna 401.
+O PR draft #10 possui os quatro checks obrigatórios verdes. Backup pré-deploy
+em `/opt/backups/crescimento-vertical/phase4-predeploy-9596d15-20260828T155842Z/`.
 
 Produção permanece inalterada. A homologação responsiva completa nos cinco
 viewports, teclado, foco, overflow e todas as rotas segue obrigatória no
