@@ -107,6 +107,15 @@ As páginas comerciais da Fase 4 devem manter metadata/canonical exclusivos,
 JSON-LD Service somente quando semântico, CTA proporcional, 404 seguro e
 nenhuma exposição de campos internos do CMS.
 
+### Aceite humano da Fase 4 com ressalva — 28 de agosto de 2026
+
+Arquitetura, rotas, navegação e catálogo foram aprovados. O conteúdo comercial
+foi aceito provisoriamente: parte dos textos ainda é abstrata e exige rodada
+posterior obrigatória de concretização, cobrindo clareza, especificidade,
+problemas atendidos, entregáveis, diferenciais, processo, limites e CTAs. A
+melhoria não bloqueia a Fase 5, mas bloqueia produção; é proibido inventar
+resultados, clientes, métricas ou garantias.
+
 - Status HTTP correto.
 - Um H1.
 - Title e description.

@@ -2,6 +2,19 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Encerramento formal da Fase 4 com ressalva — 28 de agosto de 2026
+
+O responsável pelo produto aprovou arquitetura, rotas, navegação e catálogo da
+Fase 4. O aceite do conteúdo comercial é provisório: parte dos textos foi
+avaliada como abstrata e requer rodada obrigatória de concretização antes da
+produção, sem inventar resultados, clientes, métricas ou garantias. A melhoria
+não bloqueia a Fase 5. A homologação responsiva integral do ADR-023 permanece
+igualmente obrigatória e ambos os itens são gates pré-produção.
+
+A Fase 4 está concluída com ressalva; nenhuma fase está em execução e as Fases
+5 a 12 permanecem pendentes. Produção, staging, n8n e Hermes não foram alterados
+nesta sessão.
+
 ## Início formal da Fase 4 — 28 de agosto de 2026
 
 Após o merge da Fase 3 (`2be72e3`), a branch `feat/phase-4-commercial-pages`

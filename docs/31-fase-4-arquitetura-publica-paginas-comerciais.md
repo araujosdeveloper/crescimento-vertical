@@ -1,6 +1,6 @@
 # Fase 4 — Arquitetura pública e páginas comerciais
 
-Data de início: 28 de agosto de 2026. Status: implementação concluída, aguardando aceite humano.
+Data de início: 28 de agosto de 2026. Status: concluída com ressalva após aceite humano em 28 de agosto de 2026.
 
 ## Catálogo aprovado
 
@@ -40,4 +40,9 @@ em `/opt/backups/crescimento-vertical/phase4-predeploy-9596d15-20260828T155842Z/
 
 Produção permanece inalterada. A homologação responsiva completa nos cinco
 viewports, teclado, foco, overflow e todas as rotas segue obrigatória no
-hardening visual final e bloqueia produção.
+hardening visual final e bloqueia produção. O aceite humano também exige uma
+rodada obrigatória de concretização do copy comercial, hoje provisoriamente
+aceito por conter trechos abstratos. Essa rodada deve cobrir clareza,
+especificidade, problemas reais, entregáveis, diferenciais, processo, limites e
+CTAs, sem inventar clientes, resultados, métricas ou garantias; não bloqueia a
+Fase 5, mas bloqueia produção.

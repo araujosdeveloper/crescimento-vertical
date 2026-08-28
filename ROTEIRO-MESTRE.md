@@ -22,7 +22,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
 | 2 | Fundação do portal e design system | Fase 1 | Concluída |
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
-| 4 | Arquitetura pública e páginas comerciais | Fase 3 | Em execução |
+| 4 | Arquitetura pública e páginas comerciais | Fase 3 | Concluída com ressalva |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
@@ -53,10 +53,24 @@ substituem automaticamente os gates sequenciais das Fases 1, 2 e seguintes.
 A reconciliação do roteiro está registrada no ADR-021.
 
 A Fase 4 foi iniciada em 28 de agosto de 2026 a partir do merge commit
-`2be72e3815a908feabee9e5e9e34e534b77b61f7`. O catálogo comercial consolidado
-em seis pilares e as páginas institucionais estão no escopo ativo; as Fases 5 a
-12 permanecem pendentes. A homologação responsiva integral continua gate
-obrigatório pré-produção.
+`2be72e3815a908feabee9e5e9e34e534b77b61f7` e encerrada com aceite humano com
+ressalva em 28 de agosto de 2026. Arquitetura, rotas, navegação e catálogo foram
+aprovados; o conteúdo comercial foi aceito provisoriamente, pois parte dos
+textos ainda está abstrata. A rodada obrigatória de concretização deve tornar a
+comunicação mais clara, específica e persuasiva, ligada a problemas reais,
+entregáveis, diferenciais, processo, limites e CTAs, sem inventar resultados,
+clientes, métricas ou garantias. Essa melhoria não bloqueia a Fase 5, mas bloqueia
+produção. As Fases 5 a 12 permanecem pendentes.
+
+## Gates obrigatórios pré-produção
+
+1. Homologação responsiva integral nos cinco viewports, incluindo teclado, foco,
+   overflow e todas as rotas públicas.
+2. Concretização dos textos comerciais da Fase 4, com revisão de clareza,
+   especificidade, problemas atendidos, entregáveis, diferenciais, processo,
+   limites e CTAs.
+
+Nenhum dos dois gates pode ser declarado concluído por este encerramento.
 
 ## Fase 0 — Governança, auditoria e documentação
 

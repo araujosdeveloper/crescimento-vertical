@@ -5,9 +5,9 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: Fase 4 — Arquitetura pública e páginas comerciais, iniciada em 28
-  de agosto de 2026 a partir da `main` `2be72e3815a908feabee9e5e9e34e534b77b61f7`.
-- Última fase concluída: Fase 3 — Payload CMS, PostgreSQL e autenticação.
+- Fase ativa: nenhuma; a Fase 4 — Arquitetura pública e páginas comerciais foi
+  concluída com ressalva em 28 de agosto de 2026.
+- Última fase concluída: Fase 4, com Fases 0–3 preservadas como concluídas.
 - Próxima fase: Fase 5, pendente e não iniciada.
 - Produção alterada por este planejamento: não.
 - Deploy realizado: staging atualizado previamente; nenhum novo deploy nesta
@@ -17,7 +17,9 @@ A homologação responsiva completa foi postergada por decisão expressa do
 responsável pelo produto (ADR-023) para o hardening visual final. A pendência
 não bloqueia as próximas implementações, porém continua bloqueando produção e
 não dispensa navegação por teclado, foco visível, ausência de overflow nem os
-cinco viewports obrigatórios.
+cinco viewports obrigatórios. O aceite humano da Fase 4 também registrou
+ressalva: parte do copy comercial é abstrata e exige concretização obrigatória
+antes da produção, sem inventar resultados, clientes, métricas ou garantias.
 
 O escopo ativo comprova as antecipações da Fase 2A e corrige somente lacunas
 reais de autenticação, autorização, preview, migrations, mídia e recuperação.
@@ -26,7 +28,11 @@ capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
 
 O catálogo comercial da Fase 4 segue o ADR-024: seis pilares, modelos
 `services`/`cases`, seed idempotente somente de serviços e páginas públicas e
-legais. Produção, n8n e Hermes permanecem inalterados.
+legais. Produção, n8n e Hermes permanecem inalterados. Nenhuma fase está em
+execução; a Fase 5 continua pendente.
+
+Gates pré-produção preservados: (1) homologação responsiva integral; (2)
+concretização dos textos comerciais da Fase 4.
 
 ## Registro da sessão 2026-08-28 — aceite humano e encerramento da Fase 3
 
