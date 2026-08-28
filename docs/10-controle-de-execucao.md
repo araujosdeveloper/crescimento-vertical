@@ -5,10 +5,11 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: nenhuma; a Fase 2 foi tecnicamente concluída em 28 de agosto de
-  2026 e nenhuma fase seguinte foi iniciada nesta execução.
+- Fase ativa: Fase 3 — Payload CMS, PostgreSQL e autenticação, iniciada em 28 de
+  agosto de 2026 a partir da `main`
+  `d0f7b33f19dc00a8053aa8c0f42359a417182ee0`.
 - Última fase concluída: Fase 2 — Fundação do portal e design system.
-- Próxima fase: Fase 3, ainda não iniciada.
+- Próxima fase: Fase 4, pendente e não iniciada.
 - Produção alterada por este planejamento: não.
 - Deploy realizado: não.
 
@@ -17,6 +18,11 @@ responsável pelo produto (ADR-023) para o hardening visual final. A pendência
 não bloqueia as próximas implementações, porém continua bloqueando produção e
 não dispensa navegação por teclado, foco visível, ausência de overflow nem os
 cinco viewports obrigatórios.
+
+O escopo ativo comprova as antecipações da Fase 2A e corrige somente lacunas
+reais de autenticação, autorização, preview, migrations, mídia e recuperação.
+As antecipações 2A, 2B, 3A, 3B e 3C permanecem preservadas; coleções e
+capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
 
 ## Gate para iniciar a Fase 1
 

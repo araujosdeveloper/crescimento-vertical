@@ -21,7 +21,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 0 | Governança, auditoria e documentação | Nenhuma | Concluída |
 | 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
 | 2 | Fundação do portal e design system | Fase 1 | Concluída |
-| 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Pendente |
+| 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Em execução |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Pendente |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
@@ -35,12 +35,16 @@ um portal editorial e comercial orientado à geração de receita.
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
 
-Após o fechamento da Fase 2, nenhuma nova fase foi iniciada nesta execução. A
-homologação responsiva completa foi transferida, por decisão expressa do
+A Fase 3 foi iniciada formalmente em 28 de agosto de 2026, a partir da `main`
+`d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, para reconciliar e comprovar as
+capacidades antecipadas na Fase 2A e completar somente lacunas reais de CMS,
+PostgreSQL e autenticação. Nenhuma fase posterior está em execução.
+
+A homologação responsiva completa foi transferida, por decisão expressa do
 responsável pelo produto (ADR-023), para o hardening visual final. A pendência
-não bloqueia as próximas implementações, mas permanece gate obrigatório
-pré-produção e não pode ser declarada concluída sem os cinco viewports e os
-critérios de acessibilidade.
+não bloqueia a Fase 3 nem as próximas implementações, mas permanece gate
+obrigatório pré-produção e não pode ser declarada concluída sem os cinco
+viewports e os critérios de acessibilidade.
 
 As antecipações aprovadas 2A, 2B, 3A, 3B e 3C permanecem entregues e
 preservadas. Elas adicionaram capacidades de fases posteriores, mas não

@@ -2,6 +2,25 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Início formal da Fase 3 — 28 de agosto de 2026
+
+O preflight confirmou `main` local e remota limpas no SHA
+`d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, tag
+`phase2-portal-foundation-2026-08-28` no mesmo commit, proteção da `main` ativa
+com os quatro checks obrigatórios e ausência de PR aberto para
+`feat/phase-3-cms-authentication`. A branch da fase possui merge-base exato com
+essa `main`.
+
+Os oito containers preservados foram inventariados sem leitura de valores de
+ambiente. O candidato `phase2-foundation-staging-575e232` e o PostgreSQL 16
+dedicado estão `running` e `healthy`; o banco continua apenas em porta interna.
+Produção, staging, n8n e Hermes não foram alterados no início da fase.
+
+A Fase 3 passa a ser a única fase em execução. Seu primeiro gate é uma matriz
+de lacunas que distinguirá capacidades já entregues pela Fase 2A de requisitos
+formais ainda não comprovados. A pendência responsiva do ADR-023 permanece gate
+obrigatório pré-produção e não é reduzida por este início.
+
 ## Fechamento técnico da Fase 2 — 28 de agosto de 2026
 
 O candidato de staging está healthy e identifica o HEAD
