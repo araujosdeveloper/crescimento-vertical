@@ -12,6 +12,8 @@ import { Media } from "./src/collections/Media";
 import { ResearchDossiers } from "./src/collections/ResearchDossiers";
 import { Sources } from "./src/collections/Sources";
 import { Users } from "./src/collections/Users";
+import { Services } from "./src/collections/Services";
+import { Cases } from "./src/collections/Cases";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -32,6 +34,8 @@ export default buildConfig({
     Sources,
     ResearchDossiers,
     Articles,
+    Services,
+    Cases,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",
