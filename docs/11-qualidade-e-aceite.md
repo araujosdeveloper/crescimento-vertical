@@ -10,7 +10,7 @@
 - Deduplicação e idempotência.
 - Mapeamento de CTA.
 
-Ferramenta planejada: Vitest.
+Ferramenta adotada: Vitest 4.1.0 sobre Vite 7.3.6.
 
 Testes editoriais já implementados na Fase 2A (Vitest, `tests/`): matriz de
 permissões, transições editoriais, bloqueio de publicação por automation/editor,
@@ -31,6 +31,18 @@ Testes da Fase 3C (Vitest, `packages/n8n-nodes-crescimento-vertical/test/`):
 vetor HMAC, assinatura de corpo, nonce/timestamp, validação de URL interna,
 validação da requisição, cliente HTTP (timeout, resposta grande, status
 401/409/503, sem segredo em erro), node e credencial. Total: 34 testes.
+
+Testes formais da Fase 3:
+
+- `tests/preview.test.ts`: slug estrito, mesmo origin, open redirect, drafts,
+  lockout e usuário inativo;
+- `tests/permissions.test.ts`: matriz dos cinco papéis, usuário inativo e
+  limites de edição de `editor`/`automation`;
+- `tests/cms.integration.test.ts`: ciclo real e sequencial em PostgreSQL 16 e
+  mídia temporária, opt-in por `RUN_CMS_INTEGRATION=1`;
+- `tests/cms-recovery.integration.test.ts`: autenticação, contagens, relações,
+  versões, conteúdo público/privado e mídia após restore isolado;
+- o CI executa o ciclo CMS somente depois das migrations no PostgreSQL efêmero.
 
 ### Componentes
 

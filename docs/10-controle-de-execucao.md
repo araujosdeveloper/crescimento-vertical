@@ -24,6 +24,20 @@ reais de autenticação, autorização, preview, migrations, mídia e recuperaç
 As antecipações 2A, 2B, 3A, 3B e 3C permanecem preservadas; coleções e
 capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
 
+## Registro da sessão 2026-08-28 — gate formal da Fase 3
+
+| Campo | Evidência |
+| --- | --- |
+| Base | `main` e `origin/main` em `d0f7b33f19dc00a8053aa8c0f42359a417182ee0`; tag da Fase 2 no mesmo commit |
+| Branch | `feat/phase-3-cms-authentication`; merge-base exato com a base |
+| Lacunas reais | preview seguro; inativo bloqueado; restrição de edição publicada para editor/automation; ciclo e recuperação automatizados |
+| Preservado | sete coleções, cinco papéis, migrations, PostgreSQL e mídia da Fase 2A; antecipações 2B/3A/3B/3C |
+| Descartável | dois PostgreSQL 16 em tmpfs; mídia em `/tmp`; containers removidos após a evidência |
+| Ciclo | cinco papéis, mídia, fonte, dossiê, draft, revisão, aprovação, publicação, arquivamento, versões, preview e autoelevação |
+| Restauração | `pg_restore --list`, restore isolado, migrations idempotentes, autenticação, relações, versões, mídia e visibilidade validadas |
+| Produção | não alterada |
+| Próxima ação | qualidade completa, PR draft, CI, backup/deploy de staging e aceite humano |
+
 ## Gate para iniciar a Fase 1
 
 - [x] Repositório correto confirmado.

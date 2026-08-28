@@ -21,6 +21,28 @@ de lacunas que distinguirá capacidades já entregues pela Fase 2A de requisitos
 formais ainda não comprovados. A pendência responsiva do ADR-023 permanece gate
 obrigatório pré-produção e não é reduzida por este início.
 
+### Auditoria de lacunas e validação descartável
+
+A Fase 2A já continha Payload 3.88.0, PostgreSQL 16, sete coleções, autenticação,
+lockout, cinco papéis, drafts, versões, workflow, mídia persistente, duas
+migrations, DTOs públicos e backups de staging. Não existiam preview funcional,
+negação explícita de login para usuário inativo nem restrição por estado que
+impedisse `editor` e `automation` de alterar artigo já publicado.
+
+Essas lacunas foram corrigidas sem migration nova e sem mudança de dependência.
+O preview usa sessão Payload validada no servidor, `draftMode`, rota dedicada,
+mesmo origin, slug estrito, `noindex`, cache desabilitado e DTO seguro. A leitura
+anônima exige também `_status=published`; consultas internas de fonte no gate
+de publicação deixaram de usar `overrideAccess:true`.
+
+O ciclo integrado em PostgreSQL 16 descartável validou seis usuários (cinco
+ativos e um inativo), autor, categoria, mídia, fonte verificada, dossiê, dois
+artigos, transições, bloqueios, versões, preview e leitura pública. O dump
+custom e a mídia foram restaurados em um segundo PostgreSQL 16: contagens
+`6/1/1/1/1/1/2`, logins, relações, versões, publicado, draft e checksum da mídia
+foram confirmados. Os dois containers foram removidos sem tocar volumes
+persistentes.
+
 ## Fechamento técnico da Fase 2 — 28 de agosto de 2026
 
 O candidato de staging está healthy e identifica o HEAD
@@ -100,14 +122,16 @@ tratar a árvore antiga do Hermes como planejamento substituído pela antecipaç
 aprovada da Fase 3B. O ADR-022 registra o protocolo transversal sem iniciar nova
 fase nem alterar runtime.
 
-O `npm audit` do estado atual registra 14 vulnerabilidades pendentes: 1 baixa,
-6 moderadas, 6 altas e 1 crítica. Nenhuma dependência foi alterada e
-`npm audit fix` não foi executado nesta sessão documental. A vulnerabilidade
-crítica deve ser triada antes do merge do PR #8.
+Registro histórico daquela auditoria: o `npm audit` então apontava 14 avisos,
+incluindo uma crítica. Esse retrato foi supersedido pelas atualizações de
+dependências já registradas abaixo; a auditoria da Fase 3 encontrou 11 avisos
+transitivos (5 baixos, 6 moderados, 0 altos, 0 críticos), todos sem correção
+segura disponível no grafo atual.
 
-A Fase 2 continua em execução e a homologação visual humana permanece como
-próxima ação. Produção, staging, banco, containers, integrações e execução do
-Hermes não foram alterados.
+Naquele ponto a Fase 2 continuava em execução e a homologação visual humana era
+a próxima ação. O estado corrente está registrado no início formal da Fase 3;
+produção, staging, banco, containers, integrações e execução do Hermes não foram
+alterados nesta auditoria documental.
 
 ## VPS oficial confirmada em 24 de agosto de 2026
 

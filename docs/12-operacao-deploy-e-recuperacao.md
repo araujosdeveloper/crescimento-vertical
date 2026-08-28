@@ -173,6 +173,20 @@ Na Fase 2B foi criado um backup root-only antes do deploy (docs/20):
 - Usar versões do Payload para reverter documento.
 - Preservar nota de correção quando conteúdo já foi público.
 
+### Prova formal de recuperação da Fase 3
+
+O procedimento foi comprovado em dois PostgreSQL 16 descartáveis, sem usar o
+banco de staging:
+
+1. executar o ciclo editorial e persistir mídia em diretório temporário;
+2. gerar `pg_dump --format=custom --no-owner --no-acl` e arquivar a mídia;
+3. validar `pg_restore --list` e SHA-256 dos dois artefatos;
+4. restaurar em segundo PostgreSQL 16 vazio com `--exit-on-error`;
+5. confirmar `migrate:status` e executar `migrate` sem pendências;
+6. autenticar usuários, conferir contagens, versões e relações;
+7. confirmar publicado público, draft privado e checksum idêntico da mídia;
+8. remover somente os containers e temporários criados para o teste.
+
 ### Staging blue-green (Fase 2A)
 
 O staging da Fase 2A usa roteamento controlado por `PHASE2_TRAEFIK_ENABLE`.

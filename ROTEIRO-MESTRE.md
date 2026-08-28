@@ -122,7 +122,7 @@ a validação integral dos cinco viewports e das rotas públicas aplicáveis.
 1. Integrar Payload ao Next.js existente.
 2. Adicionar PostgreSQL com migrações versionadas.
 3. Criar coleções e globals definidos em docs/07-cms-dados-e-apis.md.
-4. Implantar roles admin, editor, revisor, comercial e hermes-service.
+4. Implantar roles admin, editor, reviewer, researcher e automation.
 5. Ativar versões, drafts e preview.
 6. Configurar armazenamento persistente de mídia.
 7. Implementar seed apenas estrutural: categorias, serviços, CTAs e configurações.
@@ -133,6 +133,16 @@ a validação integral dos cinco viewports e das rotas públicas aplicáveis.
 
 - Administrador consegue criar, revisar, visualizar e publicar um artigo em
   staging; visitante nunca acessa rascunhos; restauração do banco é comprovada.
+
+### Execução formal — 28 de agosto de 2026
+
+A auditoria formal preservou as sete coleções e os cinco papéis entregues pela
+Fase 2A. As lacunas reais completadas foram preview editorial autenticado,
+bloqueio de login e acesso para usuário inativo, restrição de edição de artigos
+publicados por `editor`/`automation` e prova automatizada de ciclo editorial,
+mídia, backup e restauração em PostgreSQL 16 descartável. Nenhuma coleção de
+fase futura foi antecipada. O fechamento permanece condicionado ao CI, staging
+e aceite humano no `/admin`; a Fase 4 não foi iniciada.
 
 ## Fase 2A — Fundação editorial (implementada em código)
 

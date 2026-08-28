@@ -15,6 +15,24 @@ papéis implementados são `admin`, `editor`, `reviewer`, `researcher` e
 As demais coleções (services, cases, ctas, leads, newsletter, editorialRuns,
 redirects, pages) permanecem previstas para as fases seguintes.
 
+O estado corrente usa Payload 3.88.0 no Next.js 16.3.0, PostgreSQL 16,
+`push:false` e duas migrations versionadas.
+
+## Preview editorial seguro (Fase 3 formal)
+
+- O botão de preview de `articles` aponta para `/api/preview` no mesmo origin.
+- A rota valida slug estrito e sessão Payload no servidor antes de habilitar
+  `draftMode`.
+- A renderização ocorre em `/preview/conteudos/[slug]`, revalida usuário
+  editorial ativo, usa `overrideAccess:false`, desabilita cache e define
+  `noindex`, `nofollow` e `nocache`.
+- `/api/preview/exit` desabilita `draftMode`; redirecionamentos são limitados ao
+  mesmo origin.
+- O DTO do preview não inclui e-mail, papéis, fontes internas, dossiês ou
+  auditoria.
+- Rotas públicas comuns continuam exigindo `_status=published`,
+  `workflowStatus=published` e `publishedAt` não futuro.
+
 ## Estado implementado (Fase 2B)
 
 A Fase 2B adicionou a camada pública de leitura (docs/19):
@@ -34,7 +52,7 @@ A Fase 2B adicionou a camada pública de leitura (docs/19):
 - name
 - email
 - password
-- roles: admin, editor, reviewer, commercial, hermes-service
+- roles: admin, editor, reviewer, researcher, automation
 - active
 - lastLoginAt
 - mfaStatus quando suportado pela solução escolhida

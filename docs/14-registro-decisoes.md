@@ -173,6 +173,14 @@ banco é novo e não contém dados a preservar.
 `npm ci`, lint, typecheck, 38 testes, `migrate`/`migrate:status`, `generate:types`
 e `next build` aprovados em banco PostgreSQL descartável.
 
+### Revalidação formal na Fase 3 — 2026-08-28
+
+O ADR permanece válido com Next.js 16.3.0, React 19.2.7, Payload 3.88.0,
+Vitest 4.1.0, Vite 7.3.6 e Sharp 0.35.3 no standalone. A formalização adicionou
+preview autenticado e hardening de usuário inativo/limites de edição, sem nova
+decisão arquitetural, dependência, migration ou coleção. Por isso não foi
+criado novo ADR.
+
 ## ADR-015 — DTO público, cache e revalidação do portal editorial
 
 - Data: 2026-08-25
