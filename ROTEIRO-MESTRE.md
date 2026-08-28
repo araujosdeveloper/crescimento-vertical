@@ -20,7 +20,7 @@ um portal editorial e comercial orientado à geração de receita.
 | --- | --- | --- | --- |
 | 0 | Governança, auditoria e documentação | Nenhuma | Concluída |
 | 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
-| 2 | Fundação do portal e design system | Fase 1 | Em execução |
+| 2 | Fundação do portal e design system | Fase 1 | Concluída |
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Pendente |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Pendente |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
@@ -34,6 +34,13 @@ um portal editorial e comercial orientado à geração de receita.
 
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
+
+Após o fechamento da Fase 2, nenhuma nova fase foi iniciada nesta execução. A
+homologação responsiva completa foi transferida, por decisão expressa do
+responsável pelo produto (ADR-023), para o hardening visual final. A pendência
+não bloqueia as próximas implementações, mas permanece gate obrigatório
+pré-produção e não pode ser declarada concluída sem os cinco viewports e os
+critérios de acessibilidade.
 
 As antecipações aprovadas 2A, 2B, 3A, 3B e 3C permanecem entregues e
 preservadas. Elas adicionaram capacidades de fases posteriores, mas não
@@ -93,6 +100,16 @@ A reconciliação do roteiro está registrada no ADR-021.
 
 - Estrutura pública navegável com design consistente, sem regressão da landing
   page e aprovada nos viewports obrigatórios.
+
+### Fechamento técnico — 28 de agosto de 2026
+
+A Fase 2 foi aceita tecnicamente no candidato de staging do HEAD `575e232`,
+saudável, com PR #8 e seus quatro checks aprovados. A evidência humana parcial
+aprovou Header e Hero em 390 × 844 sem sobreposição, corte, indício de overflow
+ou posicionamento incorreto de CTA/menu. Conforme ADR-023, a homologação
+responsiva completa foi postergada para o hardening visual final anterior à
+produção. Essa postergação não dispensa acessibilidade e bloqueia produção até
+a validação integral dos cinco viewports e das rotas públicas aplicáveis.
 
 ## Fase 3 — Payload CMS, PostgreSQL e autenticação
 
@@ -482,3 +499,17 @@ O registro deve ser feito em docs/14-registro-decisoes.md antes da implementaç�
   registrada no ADR-019; responsável Crescimento Vertical.
 - Data: 2026-08-25.
 - Fases afetadas: 9 (ponte n8n → Hermes), antecipada sem execução.
+
+### Alteração 2026-08-28 — postergação da homologação responsiva completa
+
+- Problema: preservar a continuidade das implementações sem declarar como
+  concluída uma homologação visual ainda parcial.
+- Impacto: a Fase 2 fica tecnicamente concluída; a homologação completa passa
+  ao gate de hardening visual final e continua bloqueando produção.
+- Alternativa rejeitada: manter todas as próximas implementações bloqueadas até
+  a inspeção visual completa nesta execução.
+- Decisão e responsável: postergação expressamente aprovada pelo responsável
+  pelo produto e registrada no ADR-023.
+- Data: 2026-08-28.
+- Fases afetadas: encerramento da Fase 2 e gate obrigatório pré-produção; nenhuma
+  fase seguinte foi iniciada nesta execução.

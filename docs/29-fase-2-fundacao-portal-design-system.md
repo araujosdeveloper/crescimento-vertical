@@ -4,8 +4,11 @@
 
 Esta fase consolida a estrutura pública do App Router, a navegação, os tokens
 semânticos, os componentes estruturais e a acessibilidade sem mudar URLs,
-marca, conteúdo ou runtime de produção. A fase permanece **em execução** até
-a homologação visual humana do candidato de staging.
+marca, conteúdo ou runtime de produção. A fase está **tecnicamente concluída**
+desde 28 de agosto de 2026. Por decisão expressa do responsável pelo produto
+(ADR-023), a homologação responsiva completa foi transferida para o hardening
+visual final: não bloqueia as próximas implementações, mas permanece bloqueio
+obrigatório antes de produção.
 
 ## Estrutura de rotas
 
@@ -95,10 +98,27 @@ volumes permanecem preservados.
   `X-Robots-Tag` permaneceu `noindex, nofollow, noarchive`.
 - Banco preservado: um usuário e zero registros nas coleções editoriais.
 
-A inspeção automatizada não dispõe de navegador no host/container. A validação
-visual nos cinco viewports permanece como gate humano deste PR draft; o aceite
-anterior da Fase 2B é o baseline comparativo, não aprovação automática desta
-mudança.
+A inspeção automatizada não dispõe de navegador no host/container. O aceite
+anterior da Fase 2B permanece baseline comparativo, não aprovação automática
+desta mudança. A validação humana completa dos cinco viewports continua
+pendente, agora como gate obrigatório do hardening visual final pré-produção.
+
+### Aceite técnico e exceção aprovada em 28 de agosto de 2026
+
+- Candidato atualizado no staging: HEAD `575e232`, healthy, sem novo deploy
+  nesta execução.
+- PR #8 mergeável e CI aprovado com os quatro jobs obrigatórios.
+- Dependências sem vulnerabilidades altas ou críticas; achados residuais
+  baixos/moderados permanecem documentados.
+- Evidência humana: Header e Hero aprovados em 390 × 844, sem sobreposição,
+  texto cortado, indício visual de overflow ou posicionamento incorreto de
+  CTAs/menu.
+- Homologação completa postergada para o hardening visual final, sem dispensa de
+  acessibilidade e sem declarar a responsividade concluída.
+- Antes de produção permanecem obrigatórios os cinco viewports, menu mobile,
+  todas as seções da home, `/conteudos`, Footer/CTA, 404, demais rotas públicas,
+  navegação por teclado, foco e overflow.
+- Produção não foi alterada e nenhuma fase seguinte foi iniciada nesta execução.
 
 ## Fora do escopo
 
@@ -106,4 +126,5 @@ mudança.
 - `/solucoes`, `/diagnostico`, `/sobre`, `/contato`, `/cases` e páginas legais;
 - conteúdo fictício, leads, usuários ou tenants;
 - execução do Hermes e alterações em n8n/Evolution API;
-- início da Fase 3 ou merge antes da homologação.
+- início da Fase 3 nesta execução;
+- produção antes da homologação responsiva completa.

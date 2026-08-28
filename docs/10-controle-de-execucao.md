@@ -5,11 +5,18 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: Fase 2 — Fundação do portal e design system.
-- Última fase concluída: Fase 1 — Baseline técnico e segurança de implantação.
-- Próxima fase: Fase 3, somente depois do gate integral e da homologação da Fase 2.
+- Fase ativa: nenhuma; a Fase 2 foi tecnicamente concluída em 28 de agosto de
+  2026 e nenhuma fase seguinte foi iniciada nesta execução.
+- Última fase concluída: Fase 2 — Fundação do portal e design system.
+- Próxima fase: Fase 3, ainda não iniciada.
 - Produção alterada por este planejamento: não.
 - Deploy realizado: não.
+
+A homologação responsiva completa foi postergada por decisão expressa do
+responsável pelo produto (ADR-023) para o hardening visual final. A pendência
+não bloqueia as próximas implementações, porém continua bloqueando produção e
+não dispensa navegação por teclado, foco visível, ausência de overflow nem os
+cinco viewports obrigatórios.
 
 ## Gate para iniciar a Fase 1
 
@@ -343,6 +350,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Próxima ação | Habilitar execução e fechar o ciclo editorial (Fase 9) quando autorizado |
 
 ## Registro por sessão
+
+## Registro da sessão 2026-08-28 — fechamento técnico da Fase 2
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation @ 575e232 (candidato de staging antes do commit documental) |
+| Fase | 2 — Fundação do portal e design system, tecnicamente concluída |
+| Objetivo | Registrar a aceitação técnica e transferir a homologação responsiva completa para o hardening visual final |
+| Alterações | Somente documentação; ADR-023; nenhum código, dependência, migration, schema, Docker, workflow ou runtime |
+| Validações | Staging healthy no HEAD 575e232; PR #8 mergeável; quatro checks verdes; Header/Hero em 390 × 844 aprovados pelo responsável |
+| Riscos | Homologação completa dos cinco viewports, rotas públicas, teclado, foco e overflow permanece gate obrigatório antes de produção |
+| Próxima ação | Encerrar e integrar o PR #8 sem iniciar a Fase 3 nesta execução |
 
 ## Registro da sessão 2026-08-27 — fundação do portal em staging
 

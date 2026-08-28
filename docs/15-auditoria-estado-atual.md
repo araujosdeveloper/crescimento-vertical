@@ -2,6 +2,26 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Fechamento técnico da Fase 2 — 28 de agosto de 2026
+
+O candidato de staging está healthy e identifica o HEAD
+`575e23260149f18961f1f44431b1d44189fa0091`. O PR #8 estava aberto, draft,
+mergeável, sem reviews ou conversas bloqueadoras, e o run `33113727705` possuía
+os quatro jobs obrigatórios verdes. A proteção da `main` exigia os mesmos quatro
+checks, base atualizada, resolução de conversas e aplicação a administradores.
+
+As dependências permanecem sem vulnerabilidades altas ou críticas conhecidas;
+os achados residuais são baixos/moderados e estão documentados na remediação de
+27 de agosto. O responsável pelo produto aprovou Header e Hero em 390 × 844 e,
+pelo ADR-023, autorizou transferir a homologação responsiva completa para o
+hardening visual final.
+
+A Fase 2 fica tecnicamente concluída. A pendência visual não bloqueia as
+próximas implementações, mas continua bloqueando produção e não dispensa os
+cinco viewports nem os critérios de acessibilidade. Nesta execução não houve
+novo deploy nem alteração de staging, produção ou integrações, e nenhuma fase
+seguinte foi iniciada.
+
 ## Reauditoria e conclusão formal da Fase 1 — 26 de agosto de 2026
 
 - `main`, `origin/main` e a tag `repository-hardening-2026-08-26` resolvem para

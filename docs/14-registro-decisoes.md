@@ -635,6 +635,36 @@ Execuções passam a ter um protocolo comum e verificável, sem publicar detalhe
 operacionais. Qualquer mudança material desta decisão exige novo registro; uma
 reversão documental não autoriza alterar runtime, dados ou fases.
 
+## ADR-023 — Postergação da homologação responsiva completa
+
+- Data: 2026-08-28
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fases afetadas: fechamento da Fase 2 e gate obrigatório pré-produção
+
+### Contexto e decisão
+
+O responsável pelo produto decidiu expressamente manter a continuidade das
+implementações e transferir a homologação responsiva completa para o hardening
+visual final anterior à produção. A evidência humana disponível aprovou Header
+e Hero em 390 × 844, sem sobreposição, texto cortado, indício visual de overflow
+ou posicionamento incorreto de CTAs e menu.
+
+A Fase 2 pode ser tecnicamente encerrada e as próximas implementações não ficam
+bloqueadas por essa postergação. A homologação completa, contudo, permanece
+pendência obrigatória e bloqueio de produção. É proibido declarar o produto
+pronto para produção sem validar 360 × 800, 390 × 844, 768 × 1024, 1024 × 768 e
+1440 × 900, incluindo menu mobile, seções da home, `/conteudos`, Footer/CTA,
+404, demais rotas públicas, navegação por teclado, foco e overflow.
+
+### Consequências e limites
+
+A decisão não dispensa qualquer critério de acessibilidade e não declara a
+homologação responsiva concluída. Também não altera código, dependências,
+migrations, schemas, configuração ou runtime; staging e produção permanecem
+inalterados. Se o gate não for integralmente aprovado no hardening visual final,
+a produção continua bloqueada até correção e nova validação.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

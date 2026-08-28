@@ -133,6 +133,21 @@ lançamento.
 | 1024 | Tablet paisagem/notebook pequeno |
 | 1440 | Desktop |
 
+### Exceção de aceite da Fase 2
+
+Por decisão expressa do responsável pelo produto em 28 de agosto de 2026
+(ADR-023), a homologação responsiva completa da Fase 2 foi transferida para o
+hardening visual final anterior à produção. Header e Hero foram aprovados em
+390 × 844, sem sobreposição, texto cortado, indício visual de overflow ou erro
+de posicionamento de CTAs/menu.
+
+Essa postergação permite o encerramento técnico da Fase 2 e as próximas
+implementações, mas não constitui dispensa. Antes de produção continuam
+obrigatórias a inspeção integral em 360 × 800, 390 × 844, 768 × 1024,
+1024 × 768 e 1440 × 900, incluindo menu mobile, todas as seções da home,
+`/conteudos`, Footer/CTA, 404, demais rotas públicas, navegação por teclado,
+foco visível e ausência de overflow.
+
 ## Testes editoriais do Hermes
 
 Conjunto obrigatório:
