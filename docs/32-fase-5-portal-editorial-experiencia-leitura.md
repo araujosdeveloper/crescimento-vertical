@@ -34,3 +34,13 @@ alteração de produção nesta etapa de implementação.
 Os gates pré-produção permanecem: homologação responsiva integral e
 concretização da copy comercial da Fase 4. A Fase 6 (hardening avançado de SEO,
 dados estruturados e performance) não foi antecipada.
+
+## Staging
+
+Após backup pré-deploy, a migration foi aplicada sem seed editorial e somente o
+app `cv-phase2-staging-app` foi recriado. App e PostgreSQL estão saudáveis;
+`tags=0`, `articles=0`, `authors=0`, `categories=0`, `sources=0`,
+`research_dossiers=0`, `services=6`, `cases=0` e `users=1`. Hubs por tipo,
+busca, políticas, páginas comerciais, RSS, sitemap, robots, `/admin`,
+healthchecks e 404 foram verificados; acesso externo sem BasicAuth retorna 401.
+O staging preserva o estado anterior e a produção permanece inalterada.
