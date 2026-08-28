@@ -33,7 +33,12 @@ describe("navegação pública", () => {
     expect(PUBLIC_NAVIGATION.map(({ label, href }) => [label, href])).toEqual([
       ["Início", "/"],
       ["Conteúdos", "/conteudos"],
+      ["Notícias", "/noticias"],
+      ["Análises", "/analises"],
+      ["Guias", "/guias"],
+      ["Ferramentas", "/ferramentas"],
       ["Soluções", "/solucoes"],
+      ["Diagnóstico", "/diagnostico"],
       ["Sobre", "/sobre"],
       ["Contato", "/contato"],
     ]);

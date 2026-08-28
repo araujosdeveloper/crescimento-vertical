@@ -15,6 +15,12 @@ import {
 } from "@/lib/editorial/seo";
 import type { BreadcrumbItem } from "@/types/public";
 import Link from "next/link";
+import { ContentTypeBadge } from "@/components/editorial/content-type-badge";
+import { ReviewerByline } from "@/components/editorial/reviewer-byline";
+import { SourceList } from "@/components/editorial/source-list";
+import { BusinessImpact } from "@/components/editorial/business-impact";
+import { CorrectionNotice } from "@/components/editorial/correction-notice";
+import { RelatedContent } from "@/components/editorial/related-content";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +57,7 @@ export default async function ArticlePage({ params }: PageProps) {
           <Breadcrumbs items={crumbs} />
 
           <header className="editorial-article-head">
+            <ContentTypeBadge type={article.contentType} label={article.contentTypeLabel} />
             {article.category ? (
               <Link
                 className="editorial-article-category"
@@ -69,11 +76,13 @@ export default async function ArticlePage({ params }: PageProps) {
                   {article.author.name}
                 </Link>
               ) : null}
+              <ReviewerByline reviewer={article.publicReviewer} />
               {article.publishedAt ? (
                 <time dateTime={article.publishedAt}>
                   {formatDate(article.publishedAt)}
                 </time>
               ) : null}
+              {article.readingTime ? <span>{article.readingTime} min de leitura</span> : null}
             </div>
           </header>
 
@@ -90,6 +99,11 @@ export default async function ArticlePage({ params }: PageProps) {
           <div className="editorial-article-body">
             <EditorialContent content={article.content} />
           </div>
+
+          <BusinessImpact text={article.businessImpact} />
+          <SourceList citations={article.publicCitations} />
+          <CorrectionNotice corrections={article.correctionHistory} />
+          <RelatedContent items={article.relatedArticles} />
 
           <EditorialCTA />
 

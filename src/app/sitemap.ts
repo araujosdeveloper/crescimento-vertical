@@ -4,6 +4,7 @@ import {
   getAllPublishedArticles,
   getPublishedAuthors,
   getPublishedCategories,
+  getPublicTags,
 } from "@/lib/editorial/data";
 import { absoluteUrl, isNoindexEnabled } from "@/lib/editorial/seo";
 
@@ -14,10 +15,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return [];
   }
 
-  const [articles, categories, authors] = await Promise.all([
+  const [articles, categories, authors, tags] = await Promise.all([
     getAllPublishedArticles(),
     getPublishedCategories(),
     getPublishedAuthors(),
+    getPublicTags(),
   ]);
 
   const entries: MetadataRoute.Sitemap = [
@@ -27,6 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 1,
     },
+    ...["noticias", "analises", "guias", "ferramentas", "comparativos"].map((slug) => ({ url: absoluteUrl(`/${slug}`), changeFrequency: "daily" as const, priority: 0.6 })),
     {
       url: absoluteUrl("/conteudos"),
       lastModified: new Date(),
@@ -53,6 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
       priority: 0.5,
     })),
+    ...tags.filter((tag) => tag.indexable).map((tag) => ({ url: absoluteUrl(`/tags/${tag.slug}`), changeFrequency: "weekly" as const, priority: 0.4 })),
   ];
 
   return entries;

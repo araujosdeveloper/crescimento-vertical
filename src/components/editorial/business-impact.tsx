@@ -1,0 +1,1 @@
+export function BusinessImpact({ text }: { text: string | null }) { return text ? <section><h2 className="text-2xl font-semibold">Impacto para o seu negócio</h2><p className="mt-3 text-slate-300">{text}</p></section> : null; }

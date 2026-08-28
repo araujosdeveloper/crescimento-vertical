@@ -3,7 +3,12 @@ import type { NavigationItem } from "@/types/public";
 export const PUBLIC_NAVIGATION = [
   { label: "Início", href: "/", kind: "route" },
   { label: "Conteúdos", href: "/conteudos", kind: "route" },
+  { label: "Notícias", href: "/noticias", kind: "route" },
+  { label: "Análises", href: "/analises", kind: "route" },
+  { label: "Guias", href: "/guias", kind: "route" },
+  { label: "Ferramentas", href: "/ferramentas", kind: "route" },
   { label: "Soluções", href: "/solucoes", kind: "route" },
+  { label: "Diagnóstico", href: "/diagnostico", kind: "route" },
   { label: "Sobre", href: "/sobre", kind: "route" },
   { label: "Contato", href: "/contato", kind: "route" },
 ] as const satisfies readonly NavigationItem[];
