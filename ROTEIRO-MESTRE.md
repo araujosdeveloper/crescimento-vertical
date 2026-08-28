@@ -21,7 +21,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 0 | Governança, auditoria e documentação | Nenhuma | Concluída |
 | 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
 | 2 | Fundação do portal e design system | Fase 1 | Concluída |
-| 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Pendente |
+| 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Pendente |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
@@ -35,12 +35,17 @@ um portal editorial e comercial orientado à geração de receita.
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
 
-Após o fechamento da Fase 2, nenhuma nova fase foi iniciada nesta execução. A
-homologação responsiva completa foi transferida, por decisão expressa do
+A Fase 3 foi iniciada formalmente em 28 de agosto de 2026, a partir da `main`
+`d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, e concluída após o aceite humano
+expresso do responsável pelo produto. Foram reconciliadas e comprovadas as
+capacidades antecipadas na Fase 2A e completadas somente lacunas reais de CMS,
+PostgreSQL e autenticação. Nenhuma fase posterior está em execução.
+
+A homologação responsiva completa foi transferida, por decisão expressa do
 responsável pelo produto (ADR-023), para o hardening visual final. A pendência
-não bloqueia as próximas implementações, mas permanece gate obrigatório
-pré-produção e não pode ser declarada concluída sem os cinco viewports e os
-critérios de acessibilidade.
+não bloqueia a Fase 3 nem as próximas implementações, mas permanece gate
+obrigatório pré-produção e não pode ser declarada concluída sem os cinco
+viewports e os critérios de acessibilidade.
 
 As antecipações aprovadas 2A, 2B, 3A, 3B e 3C permanecem entregues e
 preservadas. Elas adicionaram capacidades de fases posteriores, mas não
@@ -118,7 +123,7 @@ a validação integral dos cinco viewports e das rotas públicas aplicáveis.
 1. Integrar Payload ao Next.js existente.
 2. Adicionar PostgreSQL com migrações versionadas.
 3. Criar coleções e globals definidos em docs/07-cms-dados-e-apis.md.
-4. Implantar roles admin, editor, revisor, comercial e hermes-service.
+4. Implantar roles admin, editor, reviewer, researcher e automation.
 5. Ativar versões, drafts e preview.
 6. Configurar armazenamento persistente de mídia.
 7. Implementar seed apenas estrutural: categorias, serviços, CTAs e configurações.
@@ -129,6 +134,29 @@ a validação integral dos cinco viewports e das rotas públicas aplicáveis.
 
 - Administrador consegue criar, revisar, visualizar e publicar um artigo em
   staging; visitante nunca acessa rascunhos; restauração do banco é comprovada.
+
+### Execução formal — 28 de agosto de 2026
+
+A auditoria formal preservou as sete coleções e os cinco papéis entregues pela
+Fase 2A. As lacunas reais completadas foram preview editorial autenticado,
+bloqueio de login e acesso para usuário inativo, restrição de edição de artigos
+publicados por `editor`/`automation` e prova automatizada de ciclo editorial,
+mídia, backup e restauração em PostgreSQL 16 descartável. Nenhuma coleção de
+fase futura foi antecipada. O fechamento permanece condicionado ao CI, staging
+e aceite humano no `/admin`; a Fase 4 não foi iniciada.
+
+### Aceite humano e encerramento — 28 de agosto de 2026
+
+O responsável pelo produto aprovou login administrativo, painel Payload, as
+sete coleções (Articles, Authors, Categories, Media, Sources, Research Dossiers
+e Users), confirmou Articles vazio e administrador ativo, e aprovou logout e
+bloqueio anônimo. Nenhum conteúdo, usuário, fonte ou mídia de teste foi criado
+no staging. O ciclo editorial, o backup/restauração isolada em PostgreSQL 16
+descartável e o preview seguro foram comprovados.
+
+A Fase 3 está concluída. As Fases 4 a 12 permanecem pendentes e nenhuma fase
+está em execução. A homologação responsiva completa do ADR-023 continua
+pendência obrigatória e gate de produção, sem dispensa de acessibilidade.
 
 ## Fase 2A — Fundação editorial (implementada em código)
 

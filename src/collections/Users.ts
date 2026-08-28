@@ -1,4 +1,4 @@
-import type { CollectionConfig } from "payload";
+import { Forbidden, type CollectionConfig } from "payload";
 
 import {
   adminFieldOnly,
@@ -7,7 +7,13 @@ import {
   usersRead,
   usersUpdate,
 } from "../access";
-import { ROLES } from "../lib/roles";
+import { isEditorialUser, ROLES } from "../lib/roles";
+
+export function rejectInactiveLogin({ user }: { user: { active?: boolean | null } }) {
+  if (user.active === false) {
+    throw new Forbidden();
+  }
+}
 
 export const Users: CollectionConfig = {
   slug: "users",
@@ -25,9 +31,10 @@ export const Users: CollectionConfig = {
     read: usersRead,
     update: usersUpdate,
     delete: usersDelete,
-    admin: ({ req: { user } }) => {
-      return Boolean(user?.roles?.includes("admin"));
-    },
+    admin: ({ req: { user } }) => isEditorialUser(user),
+  },
+  hooks: {
+    beforeLogin: [rejectInactiveLogin],
   },
   fields: [
     {
@@ -52,6 +59,7 @@ export const Users: CollectionConfig = {
       name: "active",
       type: "checkbox",
       defaultValue: true,
+      saveToJWT: true,
       access: {
         create: adminFieldOnly,
         update: adminFieldOnly,

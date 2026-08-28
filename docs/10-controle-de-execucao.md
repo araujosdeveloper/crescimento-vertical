@@ -5,18 +5,63 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: nenhuma; a Fase 2 foi tecnicamente concluída em 28 de agosto de
-  2026 e nenhuma fase seguinte foi iniciada nesta execução.
-- Última fase concluída: Fase 2 — Fundação do portal e design system.
-- Próxima fase: Fase 3, ainda não iniciada.
+- Fase ativa: nenhuma.
+- Última fase concluída: Fase 3 — Payload CMS, PostgreSQL e autenticação.
+- Próxima fase: Fase 4, pendente e não iniciada.
 - Produção alterada por este planejamento: não.
-- Deploy realizado: não.
+- Deploy realizado: staging atualizado previamente; nenhum novo deploy nesta
+  sessão.
 
 A homologação responsiva completa foi postergada por decisão expressa do
 responsável pelo produto (ADR-023) para o hardening visual final. A pendência
 não bloqueia as próximas implementações, porém continua bloqueando produção e
 não dispensa navegação por teclado, foco visível, ausência de overflow nem os
 cinco viewports obrigatórios.
+
+O escopo ativo comprova as antecipações da Fase 2A e corrige somente lacunas
+reais de autenticação, autorização, preview, migrations, mídia e recuperação.
+As antecipações 2A, 2B, 3A, 3B e 3C permanecem preservadas; coleções e
+capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
+
+## Registro da sessão 2026-08-28 — aceite humano e encerramento da Fase 3
+
+| Campo | Evidência |
+| --- | --- |
+| Base | `main` e `origin/main` em `d0f7b33f19dc00a8053aa8c0f42359a417182ee0`; tag da Fase 2 no mesmo commit |
+| Branch | `feat/phase-3-cms-authentication`; merge-base exato com a base |
+| Lacunas reais | preview seguro; inativo bloqueado; restrição de edição publicada para editor/automation; ciclo e recuperação automatizados |
+| Preservado | sete coleções, cinco papéis, migrations, PostgreSQL e mídia da Fase 2A; antecipações 2B/3A/3B/3C |
+| Descartável | dois PostgreSQL 16 em tmpfs; mídia em `/tmp`; containers removidos após a evidência |
+| Ciclo | cinco papéis, mídia, fonte, dossiê, draft, revisão, aprovação, publicação, arquivamento, versões, preview e autoelevação |
+| Restauração | `pg_restore --list`, restore isolado, migrations idempotentes, autenticação, relações, versões, mídia e visibilidade validadas |
+| Produção | não alterada |
+| Próxima ação | integrar o PR #9, criar tag e backup final; não iniciar a Fase 4 |
+
+### Resultado do CI e staging — 28 de agosto de 2026
+
+O PR draft #9 está aberto, mergeável e sem reviews ou conversas bloqueadoras,
+com HEAD `89c67c37f1b3de2c2b8f66dd59213e484b0d392d`. O run
+`33165627510` terminou com os quatro jobs obrigatórios verdes: aplicação
+(incluindo ciclo CMS), runner Hermes, conector n8n e secret-scan.
+
+Foi criado o backup pré-deploy
+`/opt/backups/crescimento-vertical/phase3-predeploy-89c67c3-20260828-0408`;
+SHA-256, bundle, dump e catálogo `pg_restore` foram validados. Como houve
+alteração funcional, somente `cv-phase2-staging-app` foi recriado com a imagem
+`cv-phase2-staging-app:phase3-89c67c3`; PostgreSQL, mídia e os outros sete
+containers permaneceram preservados. Após corrigir a invocação do Compose para
+usar o arquivo de ambiente existente (sem expor valores), app e PostgreSQL
+estão healthy, `/`, `/conteudos`, `/admin`, APIs, live/ready e 404 respondem
+corretamente, preview anônimo responde 401 e o acesso externo sem BasicAuth
+responde 401. O banco mantém um admin, zero conteúdo persistente e duas
+migrations aplicadas.
+
+O aceite humano foi recebido em 28 de agosto de 2026: login administrativo,
+painel Payload, sete coleções, Articles vazio, administrador ativo, logout e
+bloqueio anônimo aprovados. Nenhum dado de teste foi criado no staging. O ciclo
+editorial descartável, preview seguro e backup/restauração isolada já estavam
+comprovados. A Fase 3 está concluída; nenhuma fase está em execução e a Fase 4
+permanece pendente. O PR #9 segue draft até a integração autorizada.
 
 ## Gate para iniciar a Fase 1
 

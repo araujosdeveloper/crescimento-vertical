@@ -70,6 +70,11 @@ jobs:
           npm run migrate
           npm run migrate:status
 
+      - name: Ciclo editorial, autenticação e mídia (banco efêmero)
+        env:
+          PAYLOAD_MEDIA_DIR: /tmp/cv-phase3-ci-media
+        run: npm run test:cms
+
       - name: Build
         run: npm run build
 

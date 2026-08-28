@@ -10,7 +10,7 @@
 - Deduplicação e idempotência.
 - Mapeamento de CTA.
 
-Ferramenta planejada: Vitest.
+Ferramenta adotada: Vitest 4.1.0 sobre Vite 7.3.6.
 
 Testes editoriais já implementados na Fase 2A (Vitest, `tests/`): matriz de
 permissões, transições editoriais, bloqueio de publicação por automation/editor,
@@ -31,6 +31,18 @@ Testes da Fase 3C (Vitest, `packages/n8n-nodes-crescimento-vertical/test/`):
 vetor HMAC, assinatura de corpo, nonce/timestamp, validação de URL interna,
 validação da requisição, cliente HTTP (timeout, resposta grande, status
 401/409/503, sem segredo em erro), node e credencial. Total: 34 testes.
+
+Testes formais da Fase 3:
+
+- `tests/preview.test.ts`: slug estrito, mesmo origin, open redirect, drafts,
+  lockout e usuário inativo;
+- `tests/permissions.test.ts`: matriz dos cinco papéis, usuário inativo e
+  limites de edição de `editor`/`automation`;
+- `tests/cms.integration.test.ts`: ciclo real e sequencial em PostgreSQL 16 e
+  mídia temporária, opt-in por `RUN_CMS_INTEGRATION=1`;
+- `tests/cms-recovery.integration.test.ts`: autenticação, contagens, relações,
+  versões, conteúdo público/privado e mídia após restore isolado;
+- o CI executa o ciclo CMS somente depois das migrations no PostgreSQL efêmero.
 
 ### Componentes
 
@@ -147,6 +159,19 @@ obrigatórias a inspeção integral em 360 × 800, 390 × 844, 768 × 1024,
 1024 × 768 e 1440 × 900, incluindo menu mobile, todas as seções da home,
 `/conteudos`, Footer/CTA, 404, demais rotas públicas, navegação por teclado,
 foco visível e ausência de overflow.
+
+### Aceite humano da Fase 3 — 28 de agosto de 2026
+
+O responsável pelo produto aprovou login administrativo, painel Payload, as
+sete coleções (Articles, Authors, Categories, Media, Sources, Research Dossiers
+e Users), confirmou Articles vazio e administrador ativo, e aprovou logout e
+bloqueio anônimo. Nenhum conteúdo, usuário, fonte ou mídia de teste foi criado
+no staging. O ciclo editorial completo em PostgreSQL 16 descartável, o
+backup/restauração isolada e o preview seguro foram comprovados. A Fase 3 está
+concluída e nenhuma fase seguinte foi iniciada.
+
+A homologação responsiva completa permanece pendência obrigatória antes da
+produção, conforme ADR-023, e não dispensa qualquer critério de acessibilidade.
 
 ## Testes editoriais do Hermes
 

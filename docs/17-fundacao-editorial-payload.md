@@ -13,7 +13,7 @@ foi criado no staging durante a validação da Fase 2A.
 
 Incluído:
 
-- Integração do Payload 3 ao Next.js 16.2.9 (rotas `/admin` e `/api`).
+- Integração do Payload 3 ao Next.js 16.3.0 (rotas `/admin` e `/api`).
 - PostgreSQL 16 dedicado com migrações versionadas (sem `push` automático).
 - Coleções: users, authors, categories, media, sources, research-dossiers e
   articles.
@@ -53,14 +53,16 @@ PostgreSQL 16 (rede interna exclusiva, sem porta publicada)
 
 | Pacote | Versão |
 | --- | --- |
-| next | 16.2.9 |
+| next | 16.3.0 |
 | react / react-dom | 19.2.7 |
 | payload | 3.88.0 |
 | @payloadcms/next | 3.88.0 |
 | @payloadcms/db-postgres | 3.88.0 |
 | @payloadcms/richtext-lexical | 3.88.0 |
 | sharp | 0.35.3 |
-| vitest | 4.0.18 |
+| sharp no standalone | 0.35.3 |
+| vitest | 4.1.0 |
+| vite | 7.3.6 |
 
 GraphQL não foi instalado nem habilitado: não existem rotas GraphQL e o endpoint
 não é criado. O pacote `graphql` eventualmente presente em `node_modules` é
@@ -218,8 +220,15 @@ Vitest (`tests/`):
 - `editorial.test.ts` — transições, bloqueio de publicação por automation/editor,
   exigência de fonte validada e acesso público somente a publicados.
 - `env.test.ts` — validação das variáveis obrigatórias.
+- `preview.test.ts` — preview seguro, mesmo origin, saída e usuário inativo.
+- `cms.integration.test.ts` — ciclo editorial e mídia em PostgreSQL descartável.
+- `cms-recovery.integration.test.ts` — restore, autenticação, relações e mídia.
 
 Execução: `npm test` (ou `npm run test:watch`).
+
+Na formalização da Fase 3 não houve nova coleção, migration ou dependência.
+`services`/`cases`, taxonomia ampliada, captação, `editorialRuns` e
+redirects/globals futuros permanecem nas respectivas fases do roteiro.
 
 ## CI
 

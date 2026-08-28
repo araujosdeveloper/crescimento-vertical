@@ -2,6 +2,76 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Aceite humano e encerramento da Fase 3 — 28 de agosto de 2026
+
+O responsável pelo produto registrou aceite expresso: login administrativo,
+painel Payload, sete coleções (Articles, Authors, Categories, Media, Sources,
+Research Dossiers e Users), Articles vazio, administrador ativo, logout e
+bloqueio anônimo aprovados. Nenhum conteúdo, usuário, fonte ou mídia de teste
+foi criado no staging. O ciclo editorial completo em PostgreSQL descartável,
+backup/restauração isolada e preview seguro foram comprovados.
+
+A Fase 3 está concluída, nenhuma fase está em execução e a Fase 4 permanece
+pendente. A homologação responsiva completa do ADR-023 continua gate obrigatório
+e bloqueio para produção, sem dispensa de acessibilidade.
+
+## Início formal da Fase 3 — 28 de agosto de 2026
+
+O preflight confirmou `main` local e remota limpas no SHA
+`d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, tag
+`phase2-portal-foundation-2026-08-28` no mesmo commit, proteção da `main` ativa
+com os quatro checks obrigatórios e ausência de PR aberto para
+`feat/phase-3-cms-authentication`. A branch da fase possui merge-base exato com
+essa `main`.
+
+Os oito containers preservados foram inventariados sem leitura de valores de
+ambiente. O candidato `phase2-foundation-staging-575e232` e o PostgreSQL 16
+dedicado estão `running` e `healthy`; o banco continua apenas em porta interna.
+Produção, staging, n8n e Hermes não foram alterados no início da fase.
+
+A Fase 3 passa a ser a única fase em execução. Seu primeiro gate é uma matriz
+de lacunas que distinguirá capacidades já entregues pela Fase 2A de requisitos
+formais ainda não comprovados. A pendência responsiva do ADR-023 permanece gate
+obrigatório pré-produção e não é reduzida por este início.
+
+### Auditoria de lacunas e validação descartável
+
+A Fase 2A já continha Payload 3.88.0, PostgreSQL 16, sete coleções, autenticação,
+lockout, cinco papéis, drafts, versões, workflow, mídia persistente, duas
+migrations, DTOs públicos e backups de staging. Não existiam preview funcional,
+negação explícita de login para usuário inativo nem restrição por estado que
+impedisse `editor` e `automation` de alterar artigo já publicado.
+
+Essas lacunas foram corrigidas sem migration nova e sem mudança de dependência.
+O preview usa sessão Payload validada no servidor, `draftMode`, rota dedicada,
+mesmo origin, slug estrito, `noindex`, cache desabilitado e DTO seguro. A leitura
+anônima exige também `_status=published`; consultas internas de fonte no gate
+de publicação deixaram de usar `overrideAccess:true`.
+
+O ciclo integrado em PostgreSQL 16 descartável validou seis usuários (cinco
+ativos e um inativo), autor, categoria, mídia, fonte verificada, dossiê, dois
+artigos, transições, bloqueios, versões, preview e leitura pública. O dump
+custom e a mídia foram restaurados em um segundo PostgreSQL 16: contagens
+`6/1/1/1/1/1/2`, logins, relações, versões, publicado, draft e checksum da mídia
+foram confirmados. Os dois containers foram removidos sem tocar volumes
+persistentes.
+
+### Deploy controlado de staging — 28 de agosto de 2026
+
+Com o CI do PR #9 verde, o backup pré-deploy foi validado e somente o container
+`cv-phase2-staging-app` foi recriado na imagem `phase3-89c67c3`. Uma primeira
+invocação sem o arquivo de ambiente efetivo foi detectada imediatamente por
+`/admin`/APIs 500 e corrigida antes do aceite, sem alteração de banco ou dados;
+o app foi recriado com `.env.phase2.staging` e passou a responder normalmente.
+O PostgreSQL manteve ID `886c99…`, o admin foi preservado, as coleções seguem
+vazias, duas migrations estão aplicadas, e produção, staging antigo, n8n,
+Traefik, Hermes e runner mantiveram seus IDs. O smoke final confirmou `/` e
+`/conteudos`/`/admin`/APIs/live/ready em 200, preview anônimo em 401, 404 em
+404 e acesso externo sem BasicAuth em 401. Nenhuma porta nova foi publicada.
+
+O PR permanece draft aguardando aceite humano no `/admin`; não houve merge,
+produção continua inalterada e a Fase 4 não foi iniciada.
+
 ## Fechamento técnico da Fase 2 — 28 de agosto de 2026
 
 O candidato de staging está healthy e identifica o HEAD
@@ -81,14 +151,16 @@ tratar a árvore antiga do Hermes como planejamento substituído pela antecipaç
 aprovada da Fase 3B. O ADR-022 registra o protocolo transversal sem iniciar nova
 fase nem alterar runtime.
 
-O `npm audit` do estado atual registra 14 vulnerabilidades pendentes: 1 baixa,
-6 moderadas, 6 altas e 1 crítica. Nenhuma dependência foi alterada e
-`npm audit fix` não foi executado nesta sessão documental. A vulnerabilidade
-crítica deve ser triada antes do merge do PR #8.
+Registro histórico daquela auditoria: o `npm audit` então apontava 14 avisos,
+incluindo uma crítica. Esse retrato foi supersedido pelas atualizações de
+dependências já registradas abaixo; a auditoria da Fase 3 encontrou 11 avisos
+transitivos (5 baixos, 6 moderados, 0 altos, 0 críticos), todos sem correção
+segura disponível no grafo atual.
 
-A Fase 2 continua em execução e a homologação visual humana permanece como
-próxima ação. Produção, staging, banco, containers, integrações e execução do
-Hermes não foram alterados.
+Naquele ponto a Fase 2 continuava em execução e a homologação visual humana era
+a próxima ação. O estado corrente está registrado no início formal da Fase 3;
+produção, staging, banco, containers, integrações e execução do Hermes não foram
+alterados nesta auditoria documental.
 
 ## VPS oficial confirmada em 24 de agosto de 2026
 

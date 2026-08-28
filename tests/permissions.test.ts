@@ -5,6 +5,7 @@ import type { Access } from "payload";
 import {
   articlesCreate,
   articlesDelete,
+  articlesRead,
   articlesUpdate,
   dossiersCreate,
   dossiersDelete,
@@ -29,11 +30,11 @@ import type { Role } from "../src/lib/roles";
 
 const ROLES: Role[] = ["admin", "editor", "reviewer", "researcher", "automation"];
 
-function user(roles: Role[]): { roles: Role[] } {
-  return { roles };
+function user(roles: Role[], active = true): { active: boolean; roles: Role[] } {
+  return { active, roles };
 }
 
-function req(userArg: { roles: Role[] } | null) {
+function req(userArg: { active?: boolean; roles: Role[] } | null) {
   return { req: { user: userArg } } as unknown as Parameters<Access>[0];
 }
 
@@ -73,9 +74,13 @@ describe("matriz de permissões — Articles", () => {
 
   it("researcher não edita artigos", () => {
     expect(articlesUpdate(req(user(["researcher"])))).toBe(false);
-    expect(articlesUpdate(req(user(["editor"])))).toBe(true);
+    expect(articlesUpdate(req(user(["editor"])))).toEqual({
+      workflowStatus: { in: ["draft", "in_review"] },
+    });
     expect(articlesUpdate(req(user(["reviewer"])))).toBe(true);
-    expect(articlesUpdate(req(user(["automation"])))).toBe(true);
+    expect(articlesUpdate(req(user(["automation"])))).toEqual({
+      workflowStatus: { equals: "draft" },
+    });
   });
 
   it("somente admin exclui artigos", () => {
@@ -157,5 +162,13 @@ describe("helpers de papel", () => {
     expect(isAdmin(user(["editor"]))).toBe(false);
     expect(isAutomation(user(["automation"]))).toBe(true);
     expect(hasRole(user(["reviewer"]), "reviewer")).toBe(true);
+  });
+
+  it("usuário inativo não recebe permissões nem leitura editorial", () => {
+    const inactiveAdmin = user(["admin"], false);
+    expect(isAdmin(inactiveAdmin)).toBe(false);
+    expect(usersCreate(req(inactiveAdmin))).toBe(false);
+    expect(articlesCreate(req(inactiveAdmin))).toBe(false);
+    expect(articlesRead(req(inactiveAdmin))).not.toBe(true);
   });
 });
