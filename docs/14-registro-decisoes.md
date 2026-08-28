@@ -704,6 +704,32 @@ Não serão inventados preços, cases, métricas, depoimentos ou resultados. O
 impacto é a navegação única, os modelos `services`/`cases`, DTOs públicos,
 metadados e CTAs contextuais da Fase 4. Produção não é alterada.
 
+## ADR-025 — Separação entre identidade operacional e atribuição editorial pública
+
+- Data: 2026-08-28
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: Fase 5 — Portal editorial e experiência de leitura
+
+### Decisão
+
+A identidade do usuário Payload continua responsável por aprovação, publicação
+e auditoria operacional, mas a atribuição exibida ao público usa exclusivamente
+um perfil seguro da coleção `authors`. Artigos publicados exigem revisor público;
+rascunhos podem não ter revisor. Usuários, e-mails, roles, sessões, IDs
+administrativos, dossiês, notas e dados de coleta nunca entram nos DTOs públicos.
+
+Fontes permanecem privadas. No momento da publicação, o artigo recebe snapshot
+imutável de citações somente de fontes verificadas com URL HTTPS, título,
+publisher, autor opcional, data, acesso e tipo. Alterações posteriores em Sources
+não reescrevem artigo publicado; correções exigem nova versão e histórico.
+
+### Consequências e reversão
+
+O modelo editorial ganha atribuição pública segura e rastreabilidade histórica
+sem misturar autenticação com identidade editorial. A reversão restaura a versão
+anterior via backup/migration aprovada; não autoriza expor fontes ou usuários.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

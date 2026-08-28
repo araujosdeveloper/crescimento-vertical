@@ -224,3 +224,9 @@ Resultado esperado: o sistema bloqueia os casos inseguros e registra o motivo.
 | P1 | Site indisponível, lead perdido, login quebrado | Bloqueia release |
 | P2 | SEO importante, layout quebrado, erro funcional parcial | Corrigir antes |
 | P3 | Refinamento sem impacto material | Pode ser planejado |
+### Fase 5 — critérios adicionais
+
+Os cinco tipos, hubs, busca, filtros, tags, atribuição pública, citações,
+correções, relacionados, RSS, sitemap e estados vazios devem preservar DTOs
+whitelist, drafts/futuros privados, canonical correto e noindex de busca/filtros
+e tags não indexáveis.

@@ -279,3 +279,9 @@ A fundação editorial foi ativada e validada no staging em blue-green
 - Integração Hermes/n8n.
 - Páginas públicas do blog e conteúdo editorial real.
 - Migração de DNS (@ e www).
+# Atualização Fase 5
+
+O modelo editorial foi estendido sem alterar a fronteira de autenticação:
+`contentType`, `tags`, revisor público, citações snapshot, correções, reading
+time e relações. A migration `20260828_182146_add_phase5_editorial` é versionada
+e foi testada em PostgreSQL vazio.

@@ -1,0 +1,36 @@
+# Fase 5 — Portal editorial e experiência de leitura
+
+## Estado e lacunas
+
+A antecipação 2B já entregava o hub `/conteudos`, artigo canônico, categorias,
+autores, RSS, sitemap, DTOs, publicação segura, cache, SEO, paginação, Lexical,
+`featured` e estados vazios. A Fase 5 completou descoberta e leitura sem
+reconstruir essas capacidades.
+
+## Entregas
+
+- `contentType` fechado: news, analysis, guide, tool e comparison.
+- Coleção `tags`, com `indexable=false` por padrão e sem seed.
+- Atribuição pública de revisor via `authors`, separada do usuário Payload.
+- Snapshot de citações HTTPS de fontes verificadas no momento da publicação.
+- Impacto para o negócio, tempo de leitura calculado no servidor, correções,
+  disclosure de IA, serviços e artigos relacionados.
+- Hubs e rotas por tipo, busca, filtros e `/tags/[slug]`.
+- Componentes de leitura, fontes, revisão, correções, relacionados e busca.
+- `/politica-editorial` e `/correcoes`, ambos honestos no estado vazio.
+
+Fontes, dossiês, usuários, e-mails, roles e auditoria permanecem fora dos DTOs.
+Artigos draft, futuros ou sem fonte verificada, revisor público e requisitos de
+publicação não são expostos.
+
+## Migration, testes e rollback
+
+A migration `20260828_182146_add_phase5_editorial` adiciona campos com default
+seguro e a coleção `tags`, preservando dados anteriores. Foi aplicada em
+PostgreSQL 16 descartável com `migrate:status` verde. O rollback restaura o
+backup Git/PostgreSQL/mídia anterior e recria somente o app; não há deploy ou
+alteração de produção nesta etapa de implementação.
+
+Os gates pré-produção permanecem: homologação responsiva integral e
+concretização da copy comercial da Fase 4. A Fase 6 (hardening avançado de SEO,
+dados estruturados e performance) não foi antecipada.

@@ -74,6 +74,11 @@ código, as rotas públicas iniciais (detalhes em docs/19):
 As páginas por tipo de conteúdo (notícias, análises, guias, ferramentas e
 comparativos) e a busca permanecem previstas para fases posteriores.
 
+Na Fase 5, essas rotas foram implementadas com hubs plurais (`/noticias`,
+`/analises`, `/guias`, `/ferramentas`, `/comparativos`) e caminhos individuais;
+`/conteudos/[slug]` continua sendo a URL canônica. A taxonomia pública adota
+`/categorias/[slug]`, `/autores/[slug]` e `/tags/[slug]`.
+
 ### Navegação vigente na Fase 2
 
 A fundação usa somente destinos existentes: Início (`/`), Conteúdos

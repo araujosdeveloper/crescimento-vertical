@@ -144,3 +144,8 @@ Requisitos:
 Mudança visual é aprovada por comparação de screenshots de baseline e nova
 versão. Diferença intencional deve corresponder ao escopo da fase; regressão
 acidental bloqueia entrega.
+# Atualização Fase 5
+
+A experiência editorial reutiliza ArticleCard, Breadcrumbs, Pagination e estados
+existentes, acrescentando badges de tipo, autoria/revisão, fontes, correções,
+impacto, relacionados, busca e filtros, sem duplicar o shell público.

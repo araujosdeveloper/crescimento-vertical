@@ -365,3 +365,9 @@ explícito e idempotente; não cria cases.
 - EditorialRuns: 24 meses para auditoria.
 - Leads: conforme base legal e política aprovada.
 - Inscrições canceladas: manter apenas evidência mínima de opt-out.
+# Atualização Fase 5
+
+Foi adicionada a coleção `tags` (sem seed, `indexable=false` por padrão) e
+campos editoriais em `articles`, com migration determinística. Fontes continuam
+privadas; somente snapshots de citações HTTPS de fontes verificadas entram no
+DTO público. Usuários, roles, dossiês e notas internas nunca são expostos.

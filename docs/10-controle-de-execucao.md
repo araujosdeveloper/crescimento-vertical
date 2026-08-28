@@ -5,6 +5,12 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
+- Fase ativa: Fase 5 — Portal editorial e experiência de leitura, iniciada em
+  28 de agosto de 2026 a partir da `main` `e153f50f9591cf74f804d57a0e213acad463fd17`.
+- Fases 0–4 concluídas; Fases 6–12 pendentes.
+- Gates pré-produção preservados: homologação responsiva integral e
+  concretização da copy comercial da Fase 4.
+
 - Fase ativa: nenhuma; a Fase 4 — Arquitetura pública e páginas comerciais foi
   concluída com ressalva em 28 de agosto de 2026.
 - Última fase concluída: Fase 4, com Fases 0–3 preservadas como concluídas.

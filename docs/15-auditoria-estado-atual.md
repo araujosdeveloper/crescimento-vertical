@@ -1,5 +1,13 @@
 # Auditoria do estado atual
 
+## Início formal da Fase 5 — 28 de agosto de 2026
+
+A branch `feat/phase-5-editorial-experience` foi criada a partir da `main`
+`e153f50f9591cf74f804d57a0e213acad463fd17`, com merge-base exato. A Fase 5 é a
+única fase em execução; as Fases 6–12 permanecem pendentes. Os gates de
+homologação responsiva integral e concretização da copy comercial da Fase 4
+continuam obrigatórios antes da produção.
+
 Data da auditoria: 23 de agosto de 2026.
 
 ## Encerramento formal da Fase 4 com ressalva — 28 de agosto de 2026

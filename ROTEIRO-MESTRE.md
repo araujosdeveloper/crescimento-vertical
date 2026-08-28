@@ -23,7 +23,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 2 | Fundação do portal e design system | Fase 1 | Concluída |
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Concluída com ressalva |
-| 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
+| 5 | Portal editorial e experiência de leitura | Fase 4 | Em execução |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
@@ -71,6 +71,11 @@ produção. As Fases 5 a 12 permanecem pendentes.
    limites e CTAs.
 
 Nenhum dos dois gates pode ser declarado concluído por este encerramento.
+
+A Fase 5 foi iniciada em 28 de agosto de 2026 a partir da `main`
+`e153f50f9591cf74f804d57a0e213acad463fd17`. As antecipações 2A, 2B, 3A, 3B e
+3C e as ressalvas da Fase 4 permanecem preservadas; a Fase 5 é a única fase em
+execução e as Fases 6 a 12 permanecem pendentes.
 
 ## Fase 0 — Governança, auditoria e documentação
 

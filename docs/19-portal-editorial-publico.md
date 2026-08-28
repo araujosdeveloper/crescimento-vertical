@@ -170,3 +170,9 @@ links, metadata/canonical, JSON-LD, feed, estado vazio e regras da Fase 2A.
 - Integração Hermes/n8n.
 - Conteúdo editorial real e produção editorial.
 - Migração de DNS (@ e www).
+# Atualização Fase 5
+
+As capacidades antecipadas da Fase 2B permanecem canônicas. A Fase 5 adiciona
+descoberta por tipo, busca/filtros, tags, atribuição de revisor, citações
+públicas, correções, impacto para o negócio, relacionados e políticas
+editoriais, sem conteúdo fictício ou publicação automatizada.
