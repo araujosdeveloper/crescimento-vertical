@@ -1,5 +1,14 @@
 # Qualidade e aceite
 
+## Aceite técnico da correção de navegação — 28 de agosto de 2026
+
+O Header foi validado contra a regressão de menu cortado: primeiro nível curto,
+grupos lógicos, Contato dentro de Empresa, CTA destacado, `aria-expanded`,
+`aria-controls`, `aria-haspopup`, `aria-current`, Escape, clique externo,
+retorno de foco, teclado e focus trap no menu compacto. O breakpoint de 1180px
+mantém 1024px em menu compacto e evita sobreposição nas larguras intermediárias.
+O gate de homologação responsiva completa em cinco viewports continua aberto.
+
 ## Pirâmide de testes
 
 ### Unitários

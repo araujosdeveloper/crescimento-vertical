@@ -15,7 +15,7 @@ import {
   SuccessState,
 } from "@/components/ui/interface-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { isNavigationItemCurrent, PUBLIC_NAVIGATION } from "@/lib/navigation";
+import { isNavigationItemCurrent, NAVIGATION_CTA, NAVIGATION_GROUPS, PUBLIC_NAVIGATION } from "@/lib/navigation";
 
 let pathname = "/";
 vi.mock("next/navigation", () => ({
@@ -30,18 +30,9 @@ afterEach(() => {
 
 describe("navegação pública", () => {
   it("mantém somente destinos liberados e absolutos", () => {
-    expect(PUBLIC_NAVIGATION.map(({ label, href }) => [label, href])).toEqual([
-      ["Início", "/"],
-      ["Conteúdos", "/conteudos"],
-      ["Notícias", "/noticias"],
-      ["Análises", "/analises"],
-      ["Guias", "/guias"],
-      ["Ferramentas", "/ferramentas"],
-      ["Soluções", "/solucoes"],
-      ["Diagnóstico", "/diagnostico"],
-      ["Sobre", "/sobre"],
-      ["Contato", "/contato"],
-    ]);
+    expect(NAVIGATION_GROUPS.map(({ label }) => label)).toEqual(["Conteúdos", "Soluções", "Empresa"]);
+    expect(NAVIGATION_CTA).toMatchObject({ label: "Solicitar diagnóstico", href: "/diagnostico" });
+    expect(PUBLIC_NAVIGATION.map(({ label, href }) => [label, href])).toContainEqual(["Contato", "/contato"]);
     expect(PUBLIC_NAVIGATION.every(({ href }) => href.startsWith("/"))).toBe(true);
     const unavailableRoutes = [
       "/admin",
@@ -60,9 +51,25 @@ describe("navegação pública", () => {
   it("renderiza o header desktop com aria-current", () => {
     pathname = "/conteudos";
     render(<SiteHeader />);
-    const current = screen.getAllByRole("link", { name: "Conteúdos" })[0];
+    const current = screen.getByRole("button", { name: "Conteúdos" });
     expect(current.getAttribute("aria-current")).toBe("page");
     expect(screen.getByRole("navigation", { name: "Navegação principal" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Conteúdos" }).getAttribute("aria-haspopup")).toBe("true");
+  });
+
+  it("abre somente um grupo e fecha com segundo clique ou navegação", async () => {
+    const user = userEvent.setup();
+    render(<SiteHeader />);
+    const contents = screen.getByRole("button", { name: "Conteúdos" });
+    const solutions = screen.getByRole("button", { name: "Soluções" });
+    await user.click(contents);
+    expect(contents.getAttribute("aria-expanded")).toBe("true");
+    expect(screen.getByRole("menu", { name: "Conteúdos" })).toBeTruthy();
+    await user.click(solutions);
+    expect(contents.getAttribute("aria-expanded")).toBe("false");
+    expect(solutions.getAttribute("aria-expanded")).toBe("true");
+    await user.click(solutions);
+    expect(screen.queryByRole("menu", { name: "Soluções" })).toBeNull();
   });
 });
 
@@ -89,7 +96,7 @@ describe("menu mobile", () => {
     await user.tab({ shift: true });
     expect(document.activeElement).toBe(
       screen.getByRole("link", {
-        name: /Enviar e-mail|Falar com especialista/,
+        name: "Solicitar diagnóstico",
       }),
     );
     await user.tab();

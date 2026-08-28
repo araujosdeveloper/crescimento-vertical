@@ -1,5 +1,17 @@
 # Fase 5 — Portal editorial e experiência de leitura
 
+## Correção de navegação do Header
+
+Após evidência humana de corte de Contato, espaçamento inadequado e overflow em
+tablet, a navegação foi reorganizada em cinco destinos de primeiro nível:
+Início, Conteúdos, Soluções, Empresa e Solicitar diagnóstico. Os três grupos
+usam dropdown acessível no desktop; abaixo de 1180px o menu compacto usa
+accordion, foco preso, Escape, retorno de foco, scroll lock e fechamento ao
+navegar. Header, MobileNavigation e Footer consomem a mesma configuração
+tipada. Não houve migration, seed ou alteração de dados. A verificação técnica
+foi feita em 1024, 1100, 1180, 1280 e 1440px; a homologação responsiva integral
+continua sendo gate do hardening visual final.
+
 ## Estado e lacunas
 
 A antecipação 2B já entregava o hub `/conteudos`, artigo canônico, categorias,

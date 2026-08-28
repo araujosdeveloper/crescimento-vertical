@@ -1,5 +1,15 @@
 # Auditoria do estado atual
 
+## Correção de navegação — 28 de agosto de 2026
+
+Foi registrada regressão visual no Header: menu plano excessivamente longo,
+Contato cortado e overflow em tablet. A Fase 5 corrigiu a hierarquia usando
+fonte única tipada, grupos Conteúdos/Soluções/Empresa, CTA de diagnóstico e
+menu mobile/tablet com accordion acessível. O breakpoint desktop é 1180px.
+Nenhum banco, migration, seed, dado persistente ou integração externa foi
+alterado. A homologação responsiva integral segue pendente para o hardening
+visual final.
+
 ## Início formal da Fase 5 — 28 de agosto de 2026
 
 A branch `feat/phase-5-editorial-experience` foi criada a partir da `main`

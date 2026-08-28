@@ -1,5 +1,15 @@
 # Controle de execução
 
+## Correção de navegação da Fase 5 — 28 de agosto de 2026
+
+Evidência humana identificou menu desktop longo, Contato cortado, competição
+entre logo/links/CTA e overflow em tablet horizontal. A correção reorganizou a
+navegação em Início, Conteúdos, Soluções, Empresa e Solicitar diagnóstico, com
+dropdowns acessíveis no desktop e accordion no mobile/tablet. O breakpoint
+adotado é 1180px; não houve migration, seed, alteração de dados ou dependência.
+Testes de componente, lint, typecheck, build e diff foram executados. A
+responsividade integral permanece gate obrigatório pré-produção.
+
 Este documento é o quadro de controle. O detalhamento das fases permanece em
 ../ROTEIRO-MESTRE.md.
 

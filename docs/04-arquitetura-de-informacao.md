@@ -1,5 +1,14 @@
 # Arquitetura de informação
 
+## Correção de navegação — Fase 5 — 28 de agosto de 2026
+
+A navegação principal deixou de ser uma lista plana. O primeiro nível agora é
+Início, Conteúdos, Soluções, Empresa e o CTA Solicitar diagnóstico. Conteúdos,
+Soluções e Empresa expõem seus destinos em grupos acessíveis; Contato fica
+dentro de Empresa, e Privacidade, Termos e Cookies permanecem no Footer.
+Comparativos e busca são descobertos dentro do grupo Conteúdos. A mesma fonte
+tipada alimenta Header, menu mobile/tablet e Footer.
+
 ## Navegação principal
 
 Na Fase 4, Soluções aponta para `/solucoes`; o catálogo único substitui os oito
