@@ -103,6 +103,10 @@ action externa é pinada por SHA e os checkouts não persistem credenciais.
 
 ## Critérios por página
 
+As páginas comerciais da Fase 4 devem manter metadata/canonical exclusivos,
+JSON-LD Service somente quando semântico, CTA proporcional, 404 seguro e
+nenhuma exposição de campos internos do CMS.
+
 - Status HTTP correto.
 - Um H1.
 - Title e description.

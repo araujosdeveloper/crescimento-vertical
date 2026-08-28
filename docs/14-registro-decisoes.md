@@ -673,6 +673,37 @@ migrations, schemas, configuração ou runtime; staging e produção permanecem
 inalterados. Se o gate não for integralmente aprovado no hardening visual final,
 a produção continua bloqueada até correção e nova validação.
 
+## ADR-024 — Catálogo comercial consolidado em seis pilares
+
+- Data: 2026-08-28
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: Fase 4 — Arquitetura pública e páginas comerciais
+
+### Decisão
+
+Adotar um único catálogo comercial com seis pilares e rotas canônicas:
+
+1. Sites e landing pages — `/solucoes/sites-e-landing-pages`
+2. Tráfego e conversão — `/solucoes/trafego-e-conversao`
+3. Automação de WhatsApp — `/solucoes/automacao-whatsapp`
+4. Agentes de IA — `/solucoes/agentes-de-ia`
+5. Integrações n8n — `/solucoes/integracoes-n8n`
+6. Consultoria e suporte — `/solucoes/consultoria-e-suporte`
+
+A visão consolidada usa `/solucoes`. A decisão substitui os oito cards locais e
+a lista provisória de cinco soluções de docs/04. O mapeamento é: Sites de alta
+conversão + Landing pages → Sites e landing pages; Tráfego pago + Funis de venda
++ Otimização de conversão → Tráfego e conversão; Automação inteligente focada
+em atendimento → Automação de WhatsApp; Criativos com IA + agentes
+especializados → Agentes de IA; Automações e orquestrações técnicas →
+Integrações n8n; Consultoria digital + monitoramento recorrente → Consultoria e
+suporte.
+
+Não serão inventados preços, cases, métricas, depoimentos ou resultados. O
+impacto é a navegação única, os modelos `services`/`cases`, DTOs públicos,
+metadados e CTAs contextuais da Fase 4. Produção não é alterada.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

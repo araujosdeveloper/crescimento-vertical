@@ -2,6 +2,16 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Início formal da Fase 4 — 28 de agosto de 2026
+
+Após o merge da Fase 3 (`2be72e3`), a branch `feat/phase-4-commercial-pages`
+foi criada com merge-base exato na `main`. A Fase 4 é a única fase em execução;
+Fases 5 a 12 permanecem pendentes. O ADR-024 fixa o catálogo comercial em seis
+pilares e suas rotas canônicas.
+
+Produção, DNS, Traefik, PostgreSQL persistente, n8n e Hermes não foram alterados.
+A homologação responsiva integral continua gate obrigatório pré-produção.
+
 ## Aceite humano e encerramento da Fase 3 — 28 de agosto de 2026
 
 O responsável pelo produto registrou aceite expresso: login administrativo,
@@ -11,9 +21,9 @@ bloqueio anônimo aprovados. Nenhum conteúdo, usuário, fonte ou mídia de test
 foi criado no staging. O ciclo editorial completo em PostgreSQL descartável,
 backup/restauração isolada e preview seguro foram comprovados.
 
-A Fase 3 está concluída, nenhuma fase está em execução e a Fase 4 permanece
-pendente. A homologação responsiva completa do ADR-023 continua gate obrigatório
-e bloqueio para produção, sem dispensa de acessibilidade.
+A Fase 3 está concluída; naquele registro, nenhuma fase estava em execução e a
+Fase 4 permanecia pendente. A homologação responsiva completa do ADR-023 continua
+gate obrigatório e bloqueio para produção, sem dispensa de acessibilidade.
 
 ## Início formal da Fase 3 — 28 de agosto de 2026
 

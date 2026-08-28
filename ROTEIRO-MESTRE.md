@@ -22,7 +22,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
 | 2 | Fundação do portal e design system | Fase 1 | Concluída |
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
-| 4 | Arquitetura pública e páginas comerciais | Fase 3 | Pendente |
+| 4 | Arquitetura pública e páginas comerciais | Fase 3 | Em execução |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
@@ -51,6 +51,12 @@ As antecipações aprovadas 2A, 2B, 3A, 3B e 3C permanecem entregues e
 preservadas. Elas adicionaram capacidades de fases posteriores, mas não
 substituem automaticamente os gates sequenciais das Fases 1, 2 e seguintes.
 A reconciliação do roteiro está registrada no ADR-021.
+
+A Fase 4 foi iniciada em 28 de agosto de 2026 a partir do merge commit
+`2be72e3815a908feabee9e5e9e34e534b77b61f7`. O catálogo comercial consolidado
+em seis pilares e as páginas institucionais estão no escopo ativo; as Fases 5 a
+12 permanecem pendentes. A homologação responsiva integral continua gate
+obrigatório pré-produção.
 
 ## Fase 0 — Governança, auditoria e documentação
 

@@ -2,6 +2,10 @@
 
 ## Prioridade de receita
 
+Na Fase 4, CTAs apontam para contato ou diagnóstico sem formulário funcional,
+analytics, preços ou promessas de resultado. Cases permanecem vazios até haver
+autorização e evidência verificável.
+
 1. Projetos de automação e agentes de IA.
 2. Sites e landing pages de alta conversão.
 3. Integrações n8n, CRM e WhatsApp.

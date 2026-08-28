@@ -2,6 +2,12 @@
 
 ## Navegação principal
 
+Na Fase 4, Soluções aponta para `/solucoes`; o catálogo único substitui os oito
+cards anteriores e a lista provisória de cinco soluções. Os seis slugs
+canônicos são `sites-e-landing-pages`, `trafego-e-conversao`,
+`automacao-whatsapp`, `agentes-de-ia`, `integracoes-n8n` e
+`consultoria-e-suporte`.
+
 1. Notícias
 2. Análises
 3. Guias

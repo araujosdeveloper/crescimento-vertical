@@ -5,9 +5,10 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: nenhuma.
+- Fase ativa: Fase 4 — Arquitetura pública e páginas comerciais, iniciada em 28
+  de agosto de 2026 a partir da `main` `2be72e3815a908feabee9e5e9e34e534b77b61f7`.
 - Última fase concluída: Fase 3 — Payload CMS, PostgreSQL e autenticação.
-- Próxima fase: Fase 4, pendente e não iniciada.
+- Próxima fase: Fase 5, pendente e não iniciada.
 - Produção alterada por este planejamento: não.
 - Deploy realizado: staging atualizado previamente; nenhum novo deploy nesta
   sessão.
@@ -22,6 +23,10 @@ O escopo ativo comprova as antecipações da Fase 2A e corrige somente lacunas
 reais de autenticação, autorização, preview, migrations, mídia e recuperação.
 As antecipações 2A, 2B, 3A, 3B e 3C permanecem preservadas; coleções e
 capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
+
+O catálogo comercial da Fase 4 segue o ADR-024: seis pilares, modelos
+`services`/`cases`, seed idempotente somente de serviços e páginas públicas e
+legais. Produção, n8n e Hermes permanecem inalterados.
 
 ## Registro da sessão 2026-08-28 — aceite humano e encerramento da Fase 3
 
