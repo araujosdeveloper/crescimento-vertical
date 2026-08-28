@@ -21,7 +21,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 0 | Governança, auditoria e documentação | Nenhuma | Concluída |
 | 1 | Baseline técnico e segurança de implantação | Fase 0 | Concluída |
 | 2 | Fundação do portal e design system | Fase 1 | Concluída |
-| 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Em execução |
+| 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Pendente |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Pendente |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
@@ -36,8 +36,9 @@ Somente uma fase pode permanecer “em execução”. Exceções precisam de dec
 registrada.
 
 A Fase 3 foi iniciada formalmente em 28 de agosto de 2026, a partir da `main`
-`d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, para reconciliar e comprovar as
-capacidades antecipadas na Fase 2A e completar somente lacunas reais de CMS,
+`d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, e concluída após o aceite humano
+expresso do responsável pelo produto. Foram reconciliadas e comprovadas as
+capacidades antecipadas na Fase 2A e completadas somente lacunas reais de CMS,
 PostgreSQL e autenticação. Nenhuma fase posterior está em execução.
 
 A homologação responsiva completa foi transferida, por decisão expressa do
@@ -143,6 +144,19 @@ publicados por `editor`/`automation` e prova automatizada de ciclo editorial,
 mídia, backup e restauração em PostgreSQL 16 descartável. Nenhuma coleção de
 fase futura foi antecipada. O fechamento permanece condicionado ao CI, staging
 e aceite humano no `/admin`; a Fase 4 não foi iniciada.
+
+### Aceite humano e encerramento — 28 de agosto de 2026
+
+O responsável pelo produto aprovou login administrativo, painel Payload, as
+sete coleções (Articles, Authors, Categories, Media, Sources, Research Dossiers
+e Users), confirmou Articles vazio e administrador ativo, e aprovou logout e
+bloqueio anônimo. Nenhum conteúdo, usuário, fonte ou mídia de teste foi criado
+no staging. O ciclo editorial, o backup/restauração isolada em PostgreSQL 16
+descartável e o preview seguro foram comprovados.
+
+A Fase 3 está concluída. As Fases 4 a 12 permanecem pendentes e nenhuma fase
+está em execução. A homologação responsiva completa do ADR-023 continua
+pendência obrigatória e gate de produção, sem dispensa de acessibilidade.
 
 ## Fase 2A — Fundação editorial (implementada em código)
 

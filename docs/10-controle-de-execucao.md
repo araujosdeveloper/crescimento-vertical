@@ -5,13 +5,12 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: Fase 3 — Payload CMS, PostgreSQL e autenticação, iniciada em 28 de
-  agosto de 2026 a partir da `main`
-  `d0f7b33f19dc00a8053aa8c0f42359a417182ee0`.
-- Última fase concluída: Fase 2 — Fundação do portal e design system.
+- Fase ativa: nenhuma.
+- Última fase concluída: Fase 3 — Payload CMS, PostgreSQL e autenticação.
 - Próxima fase: Fase 4, pendente e não iniciada.
 - Produção alterada por este planejamento: não.
-- Deploy realizado: não.
+- Deploy realizado: staging atualizado previamente; nenhum novo deploy nesta
+  sessão.
 
 A homologação responsiva completa foi postergada por decisão expressa do
 responsável pelo produto (ADR-023) para o hardening visual final. A pendência
@@ -24,7 +23,7 @@ reais de autenticação, autorização, preview, migrations, mídia e recuperaç
 As antecipações 2A, 2B, 3A, 3B e 3C permanecem preservadas; coleções e
 capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
 
-## Registro da sessão 2026-08-28 — gate formal da Fase 3
+## Registro da sessão 2026-08-28 — aceite humano e encerramento da Fase 3
 
 | Campo | Evidência |
 | --- | --- |
@@ -36,7 +35,7 @@ capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
 | Ciclo | cinco papéis, mídia, fonte, dossiê, draft, revisão, aprovação, publicação, arquivamento, versões, preview e autoelevação |
 | Restauração | `pg_restore --list`, restore isolado, migrations idempotentes, autenticação, relações, versões, mídia e visibilidade validadas |
 | Produção | não alterada |
-| Próxima ação | qualidade completa, PR draft, CI, backup/deploy de staging e aceite humano |
+| Próxima ação | integrar o PR #9, criar tag e backup final; não iniciar a Fase 4 |
 
 ### Resultado do CI e staging — 28 de agosto de 2026
 
@@ -57,8 +56,12 @@ corretamente, preview anônimo responde 401 e o acesso externo sem BasicAuth
 responde 401. O banco mantém um admin, zero conteúdo persistente e duas
 migrations aplicadas.
 
-O PR segue draft e não foi marcado ready nem mergeado. A próxima ação é aceite
-humano no `/admin`; a Fase 4 não foi iniciada.
+O aceite humano foi recebido em 28 de agosto de 2026: login administrativo,
+painel Payload, sete coleções, Articles vazio, administrador ativo, logout e
+bloqueio anônimo aprovados. Nenhum dado de teste foi criado no staging. O ciclo
+editorial descartável, preview seguro e backup/restauração isolada já estavam
+comprovados. A Fase 3 está concluída; nenhuma fase está em execução e a Fase 4
+permanece pendente. O PR #9 segue draft até a integração autorizada.
 
 ## Gate para iniciar a Fase 1
 

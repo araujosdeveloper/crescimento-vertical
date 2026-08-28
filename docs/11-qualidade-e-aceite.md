@@ -160,6 +160,19 @@ obrigatórias a inspeção integral em 360 × 800, 390 × 844, 768 × 1024,
 `/conteudos`, Footer/CTA, 404, demais rotas públicas, navegação por teclado,
 foco visível e ausência de overflow.
 
+### Aceite humano da Fase 3 — 28 de agosto de 2026
+
+O responsável pelo produto aprovou login administrativo, painel Payload, as
+sete coleções (Articles, Authors, Categories, Media, Sources, Research Dossiers
+e Users), confirmou Articles vazio e administrador ativo, e aprovou logout e
+bloqueio anônimo. Nenhum conteúdo, usuário, fonte ou mídia de teste foi criado
+no staging. O ciclo editorial completo em PostgreSQL 16 descartável, o
+backup/restauração isolada e o preview seguro foram comprovados. A Fase 3 está
+concluída e nenhuma fase seguinte foi iniciada.
+
+A homologação responsiva completa permanece pendência obrigatória antes da
+produção, conforme ADR-023, e não dispensa qualquer critério de acessibilidade.
+
 ## Testes editoriais do Hermes
 
 Conjunto obrigatório:

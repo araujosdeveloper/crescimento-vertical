@@ -2,8 +2,8 @@
 
 Data: 28 de agosto de 2026.
 
-Status: tecnicamente validada, CI verde e staging saudável; aguardando aceite
-humano no painel administrativo. O PR permanece draft e a Fase 4 não foi
+Status: concluída em 28 de agosto de 2026 após aceite humano; CI verde e staging
+saudável. O PR permanece draft até a integração autorizada e a Fase 4 não foi
 iniciada.
 
 ## Escopo reconciliado
@@ -60,15 +60,26 @@ Não houve migration nova, alteração de schema, dependência ou lockfile.
 Produção, n8n e Hermes permaneceram inalterados. A homologação responsiva do
 ADR-023 continua bloqueando produção, independentemente do aceite desta fase.
 
-## Staging e próxima ação
+## Aceite humano e encerramento — 28 de agosto de 2026
+
+O responsável pelo produto aprovou login administrativo, painel Payload, as
+sete coleções (Articles, Authors, Categories, Media, Sources, Research Dossiers
+e Users), confirmou Articles vazio e administrador ativo, e aprovou logout e
+bloqueio anônimo. Nenhum conteúdo, usuário, fonte ou mídia de teste foi criado
+no staging. O ciclo editorial completo em PostgreSQL 16 descartável,
+backup/restauração isolada e preview seguro já estavam comprovados.
+
+A Fase 3 está concluída; nenhuma próxima fase foi iniciada. A homologação
+responsiva completa permanece obrigatória e bloqueia produção, conforme
+ADR-023, sem dispensa dos critérios de acessibilidade.
+
+## Staging e encerramento
 
 O backup pré-deploy foi validado antes de recriar somente o app candidato na
 imagem `phase3-89c67c3`. PostgreSQL, mídia, staging antigo e integrações foram
 preservados. O candidato está healthy, com admin preservado, duas migrations
 aplicadas, zero conteúdo persistente anterior alterado e smoke de rotas/API
-aprovado. URL para aceite humano: `https://staging.crescimentovertical.com/admin`.
+aprovado. URL utilizada no aceite humano: `https://staging.crescimentovertical.com/admin`.
 
-Não compartilhar credenciais. O checklist humano é login, coleções conforme o
-papel, criação de draft, preview, histórico de versões, envio para revisão,
-aprovação, publicação e logout. Após o aceite, este PR deverá ser marcado ready
-e mergeado em execução posterior autorizada; nesta execução não se faz merge.
+Não compartilhar credenciais. O aceite humano foi registrado acima; o PR deverá
+ser marcado ready e mergeado após os checks finais, sem iniciar a Fase 4.
