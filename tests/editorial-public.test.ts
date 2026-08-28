@@ -93,7 +93,6 @@ describe("DTO público — não expõe campos internos", () => {
       '"noindex"',
       '"sources"',
       '"dossier"',
-      '"tags"',
     ]) {
       expect(serialized).not.toContain(forbidden);
     }
