@@ -6,12 +6,13 @@ import {
   articlesRead,
   articlesUpdate,
   workflowStatusFieldAccess,
+  publishStatusFieldAccess,
 } from "../access";
 import { auditWorkflowChange } from "../hooks/audit";
 import { enforceWorkflowRules } from "../hooks/enforceWorkflow";
 import { ensureSlug } from "../hooks/ensureSlug";
 import { revalidateEditorialContent } from "../hooks/revalidate";
-import { WORKFLOW_STATUSES } from "../lib/editorial";
+import { CONTENT_TYPES, WORKFLOW_STATUSES } from "../lib/editorial";
 import { previewURLForArticle } from "../lib/preview";
 
 export const Articles: CollectionConfig = {
@@ -83,6 +84,19 @@ export const Articles: CollectionConfig = {
         },
       ],
     },
+    { name: "tagRelations", type: "relationship", relationTo: "tags", hasMany: true },
+    { name: "contentType", type: "select", required: true, defaultValue: "news", options: CONTENT_TYPES.map((value) => ({ label: value, value })) },
+    { name: "publicReviewer", type: "relationship", relationTo: "authors", access: { create: publishStatusFieldAccess, update: publishStatusFieldAccess } },
+    { name: "businessImpact", type: "textarea" },
+    { name: "readingTime", type: "number", admin: { readOnly: true } },
+    { name: "reviewedAt", type: "date" },
+    { name: "aiDisclosure", type: "textarea" },
+    { name: "relatedServices", type: "relationship", relationTo: "services", hasMany: true },
+    { name: "relatedArticles", type: "relationship", relationTo: "articles", hasMany: true },
+    { name: "publicCitations", type: "array", admin: { readOnly: true }, fields: [
+      { name: "title", type: "text", required: true }, { name: "publisher", type: "text", required: true }, { name: "url", type: "text", required: true }, { name: "author", type: "text" }, { name: "publishedAt", type: "date" }, { name: "accessedAt", type: "date", required: true }, { name: "sourceType", type: "text", required: true }, { name: "isPrimary", type: "checkbox" },
+    ] },
+    { name: "correctionHistory", type: "array", access: { create: publishStatusFieldAccess, update: publishStatusFieldAccess }, fields: [{ name: "date", type: "date", required: true }, { name: "summary", type: "textarea", required: true }, { name: "responsible", type: "relationship", relationTo: "authors" }] },
     {
       name: "sources",
       type: "relationship",

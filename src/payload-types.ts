@@ -76,6 +76,7 @@ export interface Config {
     articles: Article;
     services: Service;
     cases: Case;
+    tags: Tag;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     cases: CasesSelect<false> | CasesSelect<true>;
+    tags: TagsSelect<false> | TagsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -326,6 +328,36 @@ export interface Article {
         id?: string | null;
       }[]
     | null;
+  tagRelations?: (number | Tag)[] | null;
+  contentType: 'news' | 'analysis' | 'guide' | 'tool' | 'comparison';
+  publicReviewer?: (number | null) | Author;
+  businessImpact?: string | null;
+  readingTime?: number | null;
+  reviewedAt?: string | null;
+  aiDisclosure?: string | null;
+  relatedServices?: (number | Service)[] | null;
+  relatedArticles?: (number | Article)[] | null;
+  publicCitations?:
+    | {
+        title: string;
+        publisher: string;
+        url: string;
+        author?: string | null;
+        publishedAt?: string | null;
+        accessedAt: string;
+        sourceType: string;
+        isPrimary?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  correctionHistory?:
+    | {
+        date: string;
+        summary: string;
+        responsible?: (number | null) | Author;
+        id?: string | null;
+      }[]
+    | null;
   sources?: (number | Source)[] | null;
   dossier?: (number | null) | ResearchDossier;
   /**
@@ -343,6 +375,26 @@ export interface Article {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags".
+ */
+export interface Tag {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  active?: boolean | null;
+  indexable?: boolean | null;
+  order?: number | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -491,6 +543,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'cases';
         value: number | Case;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: number | Tag;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -703,6 +759,36 @@ export interface ArticlesSelect<T extends boolean = true> {
         tag?: T;
         id?: T;
       };
+  tagRelations?: T;
+  contentType?: T;
+  publicReviewer?: T;
+  businessImpact?: T;
+  readingTime?: T;
+  reviewedAt?: T;
+  aiDisclosure?: T;
+  relatedServices?: T;
+  relatedArticles?: T;
+  publicCitations?:
+    | T
+    | {
+        title?: T;
+        publisher?: T;
+        url?: T;
+        author?: T;
+        publishedAt?: T;
+        accessedAt?: T;
+        sourceType?: T;
+        isPrimary?: T;
+        id?: T;
+      };
+  correctionHistory?:
+    | T
+    | {
+        date?: T;
+        summary?: T;
+        responsible?: T;
+        id?: T;
+      };
   sources?: T;
   dossier?: T;
   featured?: T;
@@ -809,6 +895,27 @@ export interface CasesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_select".
+ */
+export interface TagsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  active?: T;
+  indexable?: T;
+  order?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

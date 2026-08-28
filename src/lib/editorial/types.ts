@@ -32,6 +32,7 @@ export interface PublicAuthor extends PublicAuthorCard {
 export interface PublicCategory extends PublicCategoryCard {
   description: string | null;
 }
+export interface PublicTag { name: string; slug: string; description: string | null; indexable: boolean; }
 
 export interface ArticleListItem {
   title: string;
@@ -41,6 +42,11 @@ export interface ArticleListItem {
   featuredImage: SafeImage | null;
   author: PublicAuthorCard | null;
   category: PublicCategoryCard | null;
+  contentType: "news" | "analysis" | "guide" | "tool" | "comparison";
+  contentTypeLabel: string;
+  publicReviewer: PublicAuthorCard | null;
+  readingTime: number | null;
+  tags: PublicTag[];
 }
 
 export interface PublicSeo {
@@ -53,7 +59,15 @@ export interface ArticleDetail extends ArticleListItem {
   content: unknown;
   updatedAt: string | null;
   seo: PublicSeo;
+  businessImpact: string | null;
+  publicCitations: PublicCitation[];
+  correctionHistory: PublicCorrection[];
+  relatedServices: { title: string; slug: string }[];
+  relatedArticles: ArticleListItem[];
+  aiDisclosure: string | null;
 }
+export interface PublicCitation { title: string; publisher: string; url: string; author: string | null; publishedAt: string | null; accessedAt: string; sourceType: string; isPrimary: boolean; }
+export interface PublicCorrection { date: string; summary: string; responsible: PublicAuthorCard | null; }
 
 /** Entrada leve usada pelo sitemap e pelo feed RSS. */
 export interface ArticleFeedEntry {
@@ -72,3 +86,4 @@ export interface PaginatedArticles {
   hasNextPage: boolean;
   hasPrevPage: boolean;
 }
+export interface EditorialSearchParams { q?: string; type?: string; category?: string; tag?: string; page?: number; }

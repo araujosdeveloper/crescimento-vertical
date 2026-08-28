@@ -14,6 +14,7 @@ import { Sources } from "./src/collections/Sources";
 import { Users } from "./src/collections/Users";
 import { Services } from "./src/collections/Services";
 import { Cases } from "./src/collections/Cases";
+import { Tags } from "./src/collections/Tags";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -36,6 +37,7 @@ export default buildConfig({
     Articles,
     Services,
     Cases,
+    Tags,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",

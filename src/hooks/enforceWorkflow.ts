@@ -60,6 +60,10 @@ export const enforceWorkflowRules: CollectionBeforeChangeHook = async ({
   data,
   originalDoc,
 }) => {
+  const textFrom = (value: unknown): string => { if (typeof value === "string") return value; if (Array.isArray(value)) return value.map(textFrom).join(" "); if (value && typeof value === "object") return Object.values(value as Record<string, unknown>).map(textFrom).join(" "); return ""; };
+  const words = textFrom(data?.content).trim().split(/\s+/).filter(Boolean).length;
+  if (words > 0) data.readingTime = Math.max(1, Math.ceil(words / 200));
+  if (Array.isArray(data?.relatedArticles)) { const own = originalDoc?.id; data.relatedArticles = data.relatedArticles.filter((entry: unknown) => { const id = entry && typeof entry === "object" && "id" in entry ? (entry as { id: unknown }).id : entry; return id !== own; }); }
   const roles = rolesOf(req.user);
   const previous: WorkflowStatus =
     (originalDoc?.workflowStatus as WorkflowStatus | undefined) ?? "draft";
@@ -120,7 +124,9 @@ export const enforceWorkflowRules: CollectionBeforeChangeHook = async ({
       );
     }
 
-    const sourceIds = extractIds(data?.sources);
+    const reviewerId = data?.publicReviewer ?? originalDoc?.publicReviewer;
+    if (reviewerId == null) throw new Error("Publicação exige revisor público atribuído.");
+    const sourceIds = extractIds(data?.sources ?? originalDoc?.sources);
     let hasValidated = false;
     if (sourceIds.length > 0 && req.payload) {
       const result = await req.payload.find({
@@ -132,6 +138,12 @@ export const enforceWorkflowRules: CollectionBeforeChangeHook = async ({
         user: req.user,
       });
       hasValidated = hasValidatedSource(result.docs as SourceLike[]);
+      const citations = result.docs.filter((source) => {
+        const s = source as unknown as Record<string, unknown>;
+        return s.reliability === "verified" && typeof s.url === "string" && /^https:\/\//i.test(s.url);
+      }).map((source) => { const s = source as unknown as Record<string, unknown>; return { title: String(s.title ?? ""), publisher: String(s.publisher ?? ""), url: String(s.url), author: typeof s.author === "string" ? s.author : undefined, publishedAt: typeof s.publishedAt === "string" ? s.publishedAt : undefined, accessedAt: new Date().toISOString(), sourceType: String(s.sourceType ?? "other"), isPrimary: s.sourceLevel === "A" }; });
+      if (citations.length > 0) data.publicCitations = citations;
+      else throw new Error("Publicação exige ao menos uma citação pública HTTPS de fonte verificada.");
     }
 
     if (!hasValidated) {

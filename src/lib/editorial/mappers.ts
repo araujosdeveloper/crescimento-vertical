@@ -7,7 +7,9 @@ import type {
   PublicCategory,
   PublicCategoryCard,
   SafeImage,
+  PublicTag,
 } from "./types";
+import { CONTENT_TYPE_LABELS, CONTENT_TYPES, type ContentType } from "../editorial";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -108,9 +110,11 @@ export function toPublicCategory(value: unknown): PublicCategory | null {
     description: asString(category.description),
   };
 }
+export function toPublicTag(value: unknown): PublicTag | null { const tag=asRecord(value); if(!tag) return null; const name=asString(tag.name), slug=asString(tag.slug); if(!name||!slug) return null; return {name,slug,description:asString(tag.description),indexable:tag.indexable===true}; }
 
 export function toArticleListItem(value: unknown): ArticleListItem {
   const doc = asRecord(value) ?? {};
+  const type = CONTENT_TYPES.includes(doc.contentType as ContentType) ? doc.contentType as ContentType : "news";
   return {
     title: asString(doc.title) ?? "",
     slug: asString(doc.slug) ?? "",
@@ -119,6 +123,11 @@ export function toArticleListItem(value: unknown): ArticleListItem {
     featuredImage: toSafeImage(doc.heroImage),
     author: toPublicAuthorCard(doc.author),
     category: toPublicCategoryCard(doc.category),
+    contentType: type,
+    contentTypeLabel: CONTENT_TYPE_LABELS[type],
+    publicReviewer: toPublicAuthorCard(doc.publicReviewer),
+    readingTime: asNumber(doc.readingTime) ?? null,
+    tags: (Array.isArray(doc.tagRelations) ? doc.tagRelations.map(toPublicTag) : []).filter((tag): tag is PublicTag => tag !== null),
   };
 }
 
@@ -135,6 +144,12 @@ export function toArticleDetail(value: unknown): ArticleDetail {
       metaDescription: asString(seo?.seoDescription),
       canonicalUrl: asString(seo?.canonicalUrl),
     },
+    businessImpact: asString(doc.businessImpact),
+    publicCitations: Array.isArray(doc.publicCitations) ? doc.publicCitations.map((item) => { const x=asRecord(item) ?? {}; return { title: String(x.title ?? ""), publisher: String(x.publisher ?? ""), url: String(x.url ?? ""), author: asString(x.author), publishedAt: asString(x.publishedAt), accessedAt: String(x.accessedAt ?? ""), sourceType: String(x.sourceType ?? ""), isPrimary: x.isPrimary === true }; }).filter((x) => /^https:\/\//i.test(x.url)) : [],
+    correctionHistory: Array.isArray(doc.correctionHistory) ? doc.correctionHistory.map((item) => { const x=asRecord(item) ?? {}; return { date: String(x.date ?? ""), summary: String(x.summary ?? ""), responsible: toPublicAuthorCard(x.responsible) }; }).filter((x) => x.summary) : [],
+    relatedServices: Array.isArray(doc.relatedServices) ? doc.relatedServices.map((item) => { const x=asRecord(item) ?? {}; return { title: String(x.title ?? ""), slug: String(x.slug ?? "") }; }).filter((x) => x.slug) : [],
+    relatedArticles: Array.isArray(doc.relatedArticles) ? doc.relatedArticles.map(toArticleListItem).filter((x) => x.slug !== item.slug) : [],
+    aiDisclosure: asString(doc.aiDisclosure),
   };
 }
 
