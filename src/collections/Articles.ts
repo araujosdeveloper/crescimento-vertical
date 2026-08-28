@@ -12,12 +12,14 @@ import { enforceWorkflowRules } from "../hooks/enforceWorkflow";
 import { ensureSlug } from "../hooks/ensureSlug";
 import { revalidateEditorialContent } from "../hooks/revalidate";
 import { WORKFLOW_STATUSES } from "../lib/editorial";
+import { previewURLForArticle } from "../lib/preview";
 
 export const Articles: CollectionConfig = {
   slug: "articles",
   admin: {
     useAsTitle: "title",
     defaultColumns: ["title", "workflowStatus", "publishedAt", "updatedAt"],
+    preview: (doc) => previewURLForArticle(doc.slug),
   },
   access: {
     read: articlesRead,

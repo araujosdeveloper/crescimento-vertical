@@ -128,7 +128,8 @@ export const enforceWorkflowRules: CollectionBeforeChangeHook = async ({
         where: { id: { in: sourceIds } },
         depth: 0,
         limit: 500,
-        overrideAccess: true,
+        overrideAccess: false,
+        user: req.user,
       });
       hasValidated = hasValidatedSource(result.docs as SourceLike[]);
     }

@@ -9,21 +9,30 @@ export const ROLES = [
 export type Role = (typeof ROLES)[number];
 
 export interface RoleUser {
+  active?: boolean | null;
   roles?: (string | Role)[] | null;
+}
+
+export function isActiveUser<T extends RoleUser>(
+  user: T | null | undefined,
+): user is T {
+  return Boolean(user && user.active !== false);
 }
 
 export function hasRole(
   user: RoleUser | null | undefined,
   role: Role,
 ): boolean {
-  return Boolean(user?.roles?.includes(role));
+  return Boolean(isActiveUser(user) && user?.roles?.includes(role));
 }
 
 export function hasAnyRole(
   user: RoleUser | null | undefined,
   roles: Role[],
 ): boolean {
-  return Boolean(user && roles.some((role) => user.roles?.includes(role)));
+  return Boolean(
+    isActiveUser(user) && roles.some((role) => user?.roles?.includes(role)),
+  );
 }
 
 export function isAdmin(user: RoleUser | null | undefined): boolean {
@@ -46,6 +55,8 @@ export function isAutomation(user: RoleUser | null | undefined): boolean {
   return hasRole(user, "automation");
 }
 
-export function isEditorialUser(user: RoleUser | null | undefined): boolean {
-  return Boolean(user && user.roles && user.roles.length > 0);
+export function isEditorialUser<T extends RoleUser>(
+  user: T | null | undefined,
+): user is T {
+  return Boolean(isActiveUser(user) && user?.roles && user.roles.length > 0);
 }

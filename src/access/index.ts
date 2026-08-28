@@ -3,6 +3,7 @@ import type { Access, FieldAccess, Where } from "payload";
 import {
   hasAnyRole,
   hasRole,
+  isActiveUser,
   isAdmin,
   isEditorialUser,
 } from "../lib/roles";
@@ -11,7 +12,7 @@ import {
 // Generic helpers
 // ---------------------------------------------------------------------------
 
-export const authenticated: Access = ({ req: { user } }) => Boolean(user);
+export const authenticated: Access = ({ req: { user } }) => isActiveUser(user);
 
 export const adminOnly: Access = ({ req: { user } }) => isAdmin(user);
 
@@ -31,14 +32,14 @@ export const usersRead: Access = ({ req: { user } }) => {
   if (isAdmin(user)) {
     return true;
   }
-  return user ? { id: { equals: user.id } } : false;
+  return isActiveUser(user) ? { id: { equals: user.id } } : false;
 };
 
 export const usersUpdate: Access = ({ req: { user } }) => {
   if (isAdmin(user)) {
     return true;
   }
-  return user ? { id: { equals: user.id } } : false;
+  return isActiveUser(user) ? { id: { equals: user.id } } : false;
 };
 
 export const usersDelete: Access = ({ req: { user } }) => isAdmin(user);
@@ -48,7 +49,7 @@ export const usersDelete: Access = ({ req: { user } }) => isAdmin(user);
 // ---------------------------------------------------------------------------
 
 export const articlesRead: Access = ({ req: { user } }) => {
-  if (user) {
+  if (isActiveUser(user)) {
     return true;
   }
 
@@ -56,6 +57,7 @@ export const articlesRead: Access = ({ req: { user } }) => {
     and: [
       { workflowStatus: { equals: "published" } },
       { publishedAt: { less_than_equal: new Date().toISOString() } },
+      { _status: { equals: "published" } },
     ],
   };
 
@@ -70,10 +72,18 @@ export const articlesCreate: Access = ({ req: { user } }) => {
 };
 
 export const articlesUpdate: Access = ({ req: { user } }) => {
-  if (!user) {
-    return false;
+  if (isAdmin(user) || hasRole(user, "reviewer")) {
+    return true;
   }
-  return hasAnyRole(user, ["admin", "editor", "reviewer", "automation"]);
+  if (hasRole(user, "editor")) {
+    return {
+      workflowStatus: { in: ["draft", "in_review"] },
+    };
+  }
+  if (hasRole(user, "automation")) {
+    return { workflowStatus: { equals: "draft" } };
+  }
+  return false;
 };
 
 export const articlesDelete: Access = ({ req: { user } }) => isAdmin(user);

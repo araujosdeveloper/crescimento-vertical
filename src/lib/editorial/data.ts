@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
 import type { Payload } from "payload";
+import type { User } from "@/payload-types";
 
 import config from "@payload-config";
 
@@ -158,6 +159,28 @@ const getArticleBySlugCached = unstable_cache(
 
 export function getArticleBySlug(slug: string): Promise<ArticleDetail | null> {
   return getArticleBySlugCached(slug);
+}
+
+/** Consulta exclusiva de preview: sem cache, com usuário já autenticado. */
+export async function getPreviewArticleBySlug(
+  slug: string,
+  user: User,
+): Promise<ArticleDetail | null> {
+  const payload = await getPayloadInstance();
+  if (!payload) {
+    return null;
+  }
+  const result = await payload.find({
+    collection: "articles",
+    where: { slug: { equals: slug } },
+    draft: true,
+    overrideAccess: false,
+    user,
+    depth: 2,
+    limit: 1,
+  });
+  const doc = result.docs[0];
+  return doc ? toArticleDetail(doc) : null;
 }
 
 const getAllPublishedArticlesCached = unstable_cache(
