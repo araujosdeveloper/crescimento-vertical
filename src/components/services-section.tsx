@@ -35,7 +35,7 @@ export function ServicesSection() {
             const ServiceIcon = Icon as typeof Bot;
             return (
               <article className="service-card" key={title as string}>
-                <div className="service-card-head"><span className="service-icon"><ServiceIcon size={24} /></span><span className="card-number">0{index + 1}</span></div>
+                <div className="service-card-head"><span className="service-icon"><ServiceIcon aria-hidden="true" size={24} /></span><span className="card-number">0{index + 1}</span></div>
                 <h3>{title as string}</h3>
                 <p>{text as string}</p>
                 <span className="service-link">Estrutura especializada <ArrowGlyph /></span>

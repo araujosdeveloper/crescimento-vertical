@@ -2,6 +2,7 @@
 
 ## Documentos de direção
 
+- [Constituição do Projeto](../CONSTITUICAO-DO-PROJETO.md)
 - [Roteiro Mestre](../ROTEIRO-MESTRE.md)
 - [Visão e objetivos](01-visao-e-objetivos.md)
 - [Escopo e requisitos](02-escopo-e-requisitos.md)
@@ -37,6 +38,7 @@
 - [Conector n8n ↔ Hermes](26-conector-n8n-hermes.md)
 - [Deploy do conector n8n ↔ Hermes](27-deploy-conector-n8n-hermes.md)
 - [Hardening do repositório público](28-hardening-repositorio-publico.md)
+- [Fase 2 — Fundação do portal e design system](29-fase-2-fundacao-portal-design-system.md)
 
 ### Contratos de integração (schemas JSON)
 

@@ -1,17 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { ArticleCard } from "@/components/editorial/article-card";
-import { Breadcrumbs } from "@/components/editorial/breadcrumbs";
-import { EmptyState } from "@/components/editorial/empty-state";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { EmptyState } from "@/components/ui/interface-state";
 import { JsonLd } from "@/components/editorial/json-ld";
 import { Pagination } from "@/components/editorial/pagination";
 import { getCategoryArticles } from "@/lib/editorial/data";
 import { normalizePage } from "@/lib/editorial/pagination";
 import { breadcrumbJsonLd, categoryMetadata } from "@/lib/editorial/seo";
-import type { Crumb } from "@/lib/editorial/types";
+import type { BreadcrumbItem } from "@/types/public";
 
 export const dynamic = "force-dynamic";
 
@@ -39,15 +37,14 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
   }
 
   const { category, paginated } = data;
-  const crumbs: Crumb[] = [
+  const crumbs: BreadcrumbItem[] = [
     { name: "Início", href: "/" },
     { name: "Conteúdos", href: "/conteudos" },
     { name: category.name, href: `/categorias/${category.slug}` },
   ];
 
   return (
-    <main className="overflow-hidden">
-      <Header />
+    <>
       <section className="section-pad editorial-page">
         <div className="container-shell">
           <Breadcrumbs items={crumbs} />
@@ -82,8 +79,7 @@ export default async function CategoryPage({ params, searchParams }: PageProps) 
           )}
         </div>
       </section>
-      <Footer />
       <JsonLd data={breadcrumbJsonLd(crumbs)} />
-    </main>
+    </>
   );
 }

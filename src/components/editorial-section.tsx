@@ -33,7 +33,7 @@ export function EditorialSection({ articles }: { articles: ArticleListItem[] }) 
         </div>
         <div className="editorial-more">
           <Link className="button-secondary" href="/conteudos">
-            Ver todos os conteúdos <ArrowRight size={16} />
+            Ver todos os conteúdos <ArrowRight aria-hidden="true" size={16} />
           </Link>
         </div>
       </div>

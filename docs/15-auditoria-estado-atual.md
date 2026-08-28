@@ -2,6 +2,94 @@
 
 Data da auditoria: 23 de agosto de 2026.
 
+## Fechamento técnico da Fase 2 — 28 de agosto de 2026
+
+O candidato de staging está healthy e identifica o HEAD
+`575e23260149f18961f1f44431b1d44189fa0091`. O PR #8 estava aberto, draft,
+mergeável, sem reviews ou conversas bloqueadoras, e o run `33113727705` possuía
+os quatro jobs obrigatórios verdes. A proteção da `main` exigia os mesmos quatro
+checks, base atualizada, resolução de conversas e aplicação a administradores.
+
+As dependências permanecem sem vulnerabilidades altas ou críticas conhecidas;
+os achados residuais são baixos/moderados e estão documentados na remediação de
+27 de agosto. O responsável pelo produto aprovou Header e Hero em 390 × 844 e,
+pelo ADR-023, autorizou transferir a homologação responsiva completa para o
+hardening visual final.
+
+A Fase 2 fica tecnicamente concluída. A pendência visual não bloqueia as
+próximas implementações, mas continua bloqueando produção e não dispensa os
+cinco viewports nem os critérios de acessibilidade. Nesta execução não houve
+novo deploy nem alteração de staging, produção ou integrações, e nenhuma fase
+seguinte foi iniciada.
+
+## Reauditoria e conclusão formal da Fase 1 — 26 de agosto de 2026
+
+- `main`, `origin/main` e a tag `repository-hardening-2026-08-26` resolvem para
+  `b716e4b4fa7b993eebee711739cdbd83de45aa04`; árvore limpa no preflight.
+- Oito containers-alvo foram inspecionados por ID, estado e health sem reinício:
+  todos estão `running`; app de produção, dois stagings, PostgreSQL e runner
+  estão `healthy`; n8n, Traefik e Hermes não declaram healthcheck.
+- Seis redes e quinze volumes Docker foram inventariados. O PostgreSQL permanece
+  somente na rede interna; app candidato, staging antigo, produção, runner e
+  Hermes não ganharam porta publicada. As publicações preexistentes de n8n e
+  Traefik não foram alteradas.
+- As chaves de ambiente obrigatórias foram verificadas somente por nome. O
+  staging possui e-mail operacional com formato válido; WhatsApp não está
+  configurado e é opcional. Nenhum valor foi registrado.
+- `staging.crescimentovertical.com` resolve, redireciona HTTP para HTTPS, possui
+  TLS válido, retorna 401 sem BasicAuth e envia `X-Robots-Tag`. Internamente,
+  `/`, `/conteudos`, `/admin`, live, ready, robots e sitemap retornam 200.
+- Apex e www permanecem na infraestrutura anterior e atualmente retornam 502,
+  com incompatibilidade de hostname observada pelo cliente HTTPS. Essa pendência
+  conhecida não altera o staging e será tratada apenas na migração autorizada.
+- A homologação visual de 25/08 em 360, 390, 768, 1024 e 1440 px constitui o
+  baseline vigente da home e do estado vazio de `/conteudos`; identidade,
+  logotipo e imagens atuais são a referência da Fase 2.
+- Os backups `phase1-8f9d82d` e `phase1-final-ea801b1-20260824-182845` tiveram
+  `SHA256SUMS` e bundles Git verificados novamente. O rollback documentado
+  permanece disponível.
+- Banco do staging preservado: um usuário administrador e zero registros nas
+  coleções editoriais. A execução do Hermes continua desabilitada.
+
+Com essas evidências, o critério de saída da Fase 1 está atendido. As entregas
+antecipadas 2A, 2B, 3A, 3B e 3C permanecem registradas, mas não substituem os
+gates formais seguintes.
+
+## Candidato da fundação do portal em staging — 27 de agosto de 2026
+
+Após os quatro checks verdes do PR draft `#8`, a imagem da fundação do portal
+foi construída e implantada somente em `cv-phase2-staging-app`. O backup
+pré-deploy `phase2-foundation-predeploy-ac7eb19-20260827-011500` contém Git,
+PostgreSQL, mídia, configuração e imagem anterior, com permissões 700/600,
+SHA-256 e validações de bundle, dump e arquivos tar. Não existia migration nova.
+
+O candidato passou de `8ba86f676f44` para `af7129c2402c` e ficou healthy. Os
+IDs de produção, staging antigo, PostgreSQL, n8n, Traefik, Hermes e runner não
+mudaram. Home, hub editorial, Admin, live/ready, robots e sitemap responderam
+200 internamente; 404 respondeu corretamente; sitemap permaneceu vazio. O
+acesso externo sem autenticação respondeu 401, TLS validou e o header noindex
+foi preservado. O banco continua com um usuário e coleções editoriais vazias.
+Produção e integrações não foram alteradas; homologação visual humana permanece
+pendente antes de qualquer merge.
+
+## Constituição e reconciliação documental — 27 de agosto de 2026
+
+A Constituição sanitizada foi integrada à raiz como norma permanente, com
+`AGENTS.md` preservado como porta automática de entrada. O README foi
+reconciliado com a stack e as capacidades já existentes, e docs/06 passou a
+tratar a árvore antiga do Hermes como planejamento substituído pela antecipação
+aprovada da Fase 3B. O ADR-022 registra o protocolo transversal sem iniciar nova
+fase nem alterar runtime.
+
+O `npm audit` do estado atual registra 14 vulnerabilidades pendentes: 1 baixa,
+6 moderadas, 6 altas e 1 crítica. Nenhuma dependência foi alterada e
+`npm audit fix` não foi executado nesta sessão documental. A vulnerabilidade
+crítica deve ser triada antes do merge do PR #8.
+
+A Fase 2 continua em execução e a homologação visual humana permanece como
+próxima ação. Produção, staging, banco, containers, integrações e execução do
+Hermes não foram alterados.
+
 ## VPS oficial confirmada em 24 de agosto de 2026
 
 - O identificador e o endereço da VPS ficam no registro privado ignorado pelo
@@ -448,3 +536,61 @@ para administradores, bloqueando force-push e exclusão. Produção, staging e o
 oito containers permanecem inalterados; a execução do Hermes continua
 desabilitada. Duas ocorrências históricas do Gitleaks foram confirmadas como
 fixtures de teste e recebem exceção exclusivamente por fingerprint exato.
+
+## Remediação de advisories do PR #8 — 27 de agosto de 2026
+
+A triagem foi repetida no mesmo HEAD `0319d49e0e0465e10d274a4beadc746c5a74bb77`
+antes da atualização. O registro histórico de 14 ocorrências não foi
+reproduzido: a base atual do npm retornou 42 ocorrências no audit completo e 21
+com `--omit=dev`. A divergência decorre da atualização temporal da base de
+advisories, da propagação de um advisory por vários nós afetados e da diferença
+de escopo entre audit completo e runtime; não houve evidência de mudança de
+código entre o registro de 14 e a nova consulta.
+
+Remediação mínima aplicada:
+
+- `next` e `eslint-config-next`: 16.2.9 → 16.3.0. A versão 16.2.11 corrige os
+  advisories próprios do Next, mas ainda fixa PostCSS 8.4.31 e restringe Sharp a
+  `^0.34.5`; 16.3.0 é a primeira versão estável que resolve PostCSS 8.5.23 e
+  Sharp `^0.35.3` pela cadeia pai;
+- `vitest`: 4.0.18 → 4.1.0, eliminando GHSA-5xrq-8626-4rwp /
+  CVE-2026-47429 sem mudança major;
+- `vite` 7.3.6 fixado diretamente para impedir que o range amplo do Vitest
+  selecione Vite 8 e produza uma árvore inválida no npm 11;
+- `js-yaml` 4.3.2 e `brace-expansion` 1.1.18/5.0.9 resolvidos dentro dos ranges
+  já aceitos pelos pacotes pais;
+- os quatro pacotes Payload permanecem alinhados em 3.88.0, versão estável mais
+  recente, cujo peer range aceita Next `>=16.2.6 <17`; React permanece 19.2.7;
+- nenhum override, mudança major, migration ou alteração de schema foi usado.
+
+Resultado do audit:
+
+| Escopo | Antes | Depois |
+| --- | --- | --- |
+| Completo | 42: 2 baixas, 8 moderadas, 31 altas, 1 crítica | 11: 5 baixas, 6 moderadas, 0 altas, 0 críticas |
+| `--omit=dev` | 21: 2 baixas, 5 moderadas, 14 altas, 0 críticas | 11: 5 baixas, 6 moderadas, 0 altas, 0 críticas |
+
+Os 11 nós restantes propagam apenas dois riscos-raiz sem correção compatível
+publicada pelos pacotes pais:
+
+1. DOMPurify 3.4.8, dependência exata do Monaco Editor 0.56.0, usado pela UI do
+   Payload. Não há release estável posterior do Monaco e não foi aplicado
+   override. A exploração depende de configurações/hook de sanitização não
+   usados diretamente pela aplicação.
+2. esbuild 0.18.20, trazido por
+   `@payloadcms/db-postgres → drizzle-kit → @esbuild-kit/esm-loader`. O advisory
+   depende de servidor de desenvolvimento do esbuild exposto à rede; esse
+   servidor não é iniciado nos scripts, build, migrations ou runtime. Payload
+   3.88.0 continua sendo a versão estável mais recente.
+
+Validações locais aprovadas: instalação limpa; árvore npm sem pacotes inválidos
+ou extraneous; lint sem erros; typecheck; 69 testes da aplicação, 32 do runner e
+34 do conector; tipos e import map do Payload; duas migrations existentes
+aplicadas e confirmadas em PostgreSQL 16 descartável; build Next.js/Webpack;
+imagem Docker multi-stage; arquivos Compose; standalone contendo Next 16.3.0 e
+Sharp 0.35.3 sem Vitest; home, conteúdos, admin desautenticado, APIs, health,
+robots, sitemap e 404; carregamento e transformação de imagem pelo Sharp.
+
+O PR #8 permanece aberto e draft. A homologação visual humana nos cinco
+viewports continua pendente. Nenhum staging, produção, container ativo, banco
+persistente, DNS, Traefik, n8n ou Hermes foi alterado.

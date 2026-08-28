@@ -22,7 +22,7 @@ export function ProcessSection() {
             return (
               <article className="process-card" key={title as string}>
                 <span className="timeline-node"><i /></span>
-                <div className="process-card-top"><span className="process-number">0{index + 1}</span><span className="service-icon"><StepIcon size={22} /></span></div>
+                <div className="process-card-top"><span className="process-number">0{index + 1}</span><span className="service-icon"><StepIcon aria-hidden="true" size={22} /></span></div>
                 <h3>{title as string}</h3>
                 <p>{text as string}</p>
               </article>

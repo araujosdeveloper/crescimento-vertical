@@ -5,11 +5,18 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
-- Fase ativa: Fase 1 — Baseline técnico e segurança de implantação.
-- Última fase concluída: Fase 0 — Governança, auditoria e documentação.
-- Próxima fase: Fase 2, somente depois do gate integral da Fase 1.
+- Fase ativa: nenhuma; a Fase 2 foi tecnicamente concluída em 28 de agosto de
+  2026 e nenhuma fase seguinte foi iniciada nesta execução.
+- Última fase concluída: Fase 2 — Fundação do portal e design system.
+- Próxima fase: Fase 3, ainda não iniciada.
 - Produção alterada por este planejamento: não.
 - Deploy realizado: não.
+
+A homologação responsiva completa foi postergada por decisão expressa do
+responsável pelo produto (ADR-023) para o hardening visual final. A pendência
+não bloqueia as próximas implementações, porém continua bloqueando produção e
+não dispensa navegação por teclado, foco visível, ausência de overflow nem os
+cinco viewports obrigatórios.
 
 ## Gate para iniciar a Fase 1
 
@@ -28,16 +35,16 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 
 - [x] Confirmar ausência de implantação anterior na VPS-alvo; commit implantado:
   nenhum.
-- [ ] Auditar containers, redes, volumes e portas.
-- [ ] Confirmar DNS, TLS e redirects www/apex.
-- [ ] Inventariar variáveis sem expor valores.
+- [x] Auditar containers, redes, volumes e portas.
+- [x] Confirmar DNS, TLS e redirects www/apex.
+- [x] Inventariar variáveis sem expor valores.
 - [x] Criar backup pré-mudança.
 - [x] Verificar restauração do backup.
 - [x] Registrar commit-base local: 5b461252037f6670be7d8cd4095c5d202f97ae5d.
 - [x] Executar npm ci, lint, typecheck e build.
-- [ ] Registrar baseline visual.
+- [x] Registrar baseline visual.
 - [x] Remover telefone fictício e tornar o contato configurável.
-- [ ] Confirmar e configurar WhatsApp e e-mail reais.
+- [x] Confirmar e configurar ao menos um canal real (e-mail; WhatsApp opcional).
 - [x] Criar branch feat/portal-phase-1-baseline.
 - [x] Criar staging protegido/noindex.
 - [x] Criar healthchecks live e ready.
@@ -47,6 +54,25 @@ Itens executados exigem evidência; os demais permanecem bloqueados.
 - [x] Construir e validar imagem Docker em ambiente com Docker.
 - [x] Demonstrar rollback.
 - [x] Atualizar auditoria com evidências.
+
+## Fechamento formal da Fase 1 — 26 de agosto de 2026
+
+| Gate | Evidência atual |
+| --- | --- |
+| Containers | Oito containers-alvo inspecionados; todos `running`; cinco `healthy` e três sem healthcheck declarado |
+| Redes e portas | Seis redes e quinze volumes inventariados; PostgreSQL, app, staging, runner e Hermes sem porta pública nova |
+| DNS/TLS | Staging resolve, redireciona HTTP→HTTPS e possui TLS válido; apex/www continuam na infraestrutura anterior e permanecem fora desta migração |
+| Variáveis | Chaves obrigatórias inventariadas por nome; valores não registrados |
+| Contato | E-mail operacional válido configurado no staging; WhatsApp ausente e opcional |
+| Baseline visual | Home e `/conteudos` homologados em 360/390/768/1024/1440 px em 25/08; imagens e identidade atuais preservadas como referência |
+| Staging | 401 sem autenticação, `X-Robots-Tag` presente; home, admin e healthchecks internos 200 |
+| Backup/rollback | Dois backups da Fase 1 com SHA-256 e bundles verificados novamente |
+| Dados | Um administrador preservado; coleções editoriais vazias |
+
+O 502/certificado incompatível atualmente observado em apex/www pertence à
+infraestrutura anterior, já registrada, e não ao staging da VPS. A migração
+de produção/DNS continua fora do escopo. As antecipações 2A–3C permanecem
+válidas, mas não foram usadas como substitutas automáticas deste gate.
 
 ## Evidências locais da Fase 1
 
@@ -325,6 +351,43 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 
 ## Registro por sessão
 
+## Registro da sessão 2026-08-28 — fechamento técnico da Fase 2
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation @ 575e232 (candidato de staging antes do commit documental) |
+| Fase | 2 — Fundação do portal e design system, tecnicamente concluída |
+| Objetivo | Registrar a aceitação técnica e transferir a homologação responsiva completa para o hardening visual final |
+| Alterações | Somente documentação; ADR-023; nenhum código, dependência, migration, schema, Docker, workflow ou runtime |
+| Validações | Staging healthy no HEAD 575e232; PR #8 mergeável; quatro checks verdes; Header/Hero em 390 × 844 aprovados pelo responsável |
+| Riscos | Homologação completa dos cinco viewports, rotas públicas, teclado, foco e overflow permanece gate obrigatório antes de produção |
+| Próxima ação | Encerrar e integrar o PR #8 sem iniciar a Fase 3 nesta execução |
+
+## Registro da sessão 2026-08-27 — fundação do portal em staging
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation @ ac7eb19 (imagem) |
+| Fase | 2 — Fundação do portal e design system |
+| Objetivo | Consolidar layout, navegação, tokens, acessibilidade, testes e candidato de staging |
+| Alterações | Route groups públicos, SiteShell, componentes estruturais/estados, contratos TypeScript, tokens semânticos e testes DOM |
+| Validações | 69 testes Node/Payload/Fase 2; runner 32; conector 34; lint, typecheck, build, generate, migrations descartáveis, Compose; quatro checks verdes; staging healthy e smoke HTTP |
+| Backup/rollback | phase2-foundation-predeploy-ac7eb19-20260827-011500 validado; restaurar a imagem anterior e recriar somente app |
+| Riscos | 14 avisos do npm audit herdados exigem triagem posterior; homologação visual humana nos cinco viewports pendente |
+| Próxima ação | Homologar visualmente o PR draft; não fazer merge nem alterar produção |
+
+## Registro da sessão 2026-08-27 — Constituição e reconciliação documental
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation |
+| Fase | 2 — Fundação do portal e design system, em execução |
+| Objetivo | Integrar a Constituição sanitizada e reconciliar a documentação do estado atual |
+| Alterações | Constituição na raiz, protocolo em AGENTS.md, índice, README, Hermes, ADR-022 e auditoria reconciliados |
+| Validações | SHA-256 e identidade de bytes, links Markdown, ordem de leitura, escopo do diff, whitespace e auditorias de segredos/inventário operacional |
+| Riscos | Homologação visual humana pendente; vulnerabilidades do npm exigem triagem antes do merge |
+| Próxima ação | Homologação visual humana do candidato de staging |
+
 ## Registro da sessão 2026-08-25 — hardening do repositório público
 
 | Campo | Conteúdo |
@@ -336,6 +399,20 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 | Validações | YAML, `uses:`, diff, segredos, quatro jobs no PR e na main, releitura da proteção e backup documental |
 | Riscos | Secret scanning/push protection dependem da disponibilidade da API/plano; runtime da VPS permanece fora do escopo |
 | Próxima ação | Nenhuma fase funcional iniciada; manter os controles e tratar alertas de segurança |
+
+## Registro da sessão 2026-08-27 — remediação de dependências do PR #8
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | feat/phase-2-portal-foundation |
+| Fase | 2 — Fundação do portal e design system, em execução |
+| Objetivo | Remediar advisories confirmados sem mudança major, override ou alteração funcional |
+| Alterações | Next.js e eslint-config-next 16.2.9 → 16.3.0; Vitest 4.0.18 → 4.1.0; Vite 7.3.6 fixado como dependência direta de desenvolvimento; js-yaml, brace-expansion, PostCSS e Sharp atualizados pela resolução legítima dos pacotes pais; Payload preservado em 3.88.0 e React em 19.2.7 |
+| Audit antes/depois | Completo: 42 (2 baixas, 8 moderadas, 31 altas, 1 crítica) → 11 (5 baixas, 6 moderadas, 0 altas, 0 críticas). `--omit=dev`: 21 (2 baixas, 5 moderadas, 14 altas) → 11 (5 baixas, 6 moderadas, 0 altas, 0 críticas) |
+| Validações | `npm ci`; `npm ls --all` sem invalid/extraneous; lint; typecheck; 69 testes da aplicação; 32 do runner; 34 do conector; generate:types/importmap; migrations e status em PostgreSQL 16 descartável; build Next/Webpack; build Docker runner; Compose; standalone sem Vitest; smokes HTTP e Sharp |
+| Riscos | Restam somente achados baixos/moderados transitivos do Payload 3.88.0: DOMPurify 3.4.8 fixado pelo Monaco 0.56.0 e esbuild 0.18.20 da cadeia drizzle-kit; sem versão pai compatível corrigida e sem servidor vulnerável exposto pelo projeto |
+| Estado do PR | PR #8 deve permanecer aberto e draft; homologação visual humana nos cinco viewports continua pendente |
+| Próxima ação | Aguardar os quatro checks do novo HEAD; não fazer merge nem alterar runtime |
 
 Ao concluir uma sessão de trabalho, registrar:
 

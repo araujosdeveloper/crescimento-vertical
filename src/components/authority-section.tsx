@@ -41,7 +41,7 @@ export function AuthoritySection() {
           {pillars.map(({ icon: Icon, number, title, text }) => (
             <article className="authority-card" key={title}>
               <div className="authority-card-top">
-                <span className="icon-orbit"><Icon size={22} /></span>
+                <span className="icon-orbit"><Icon aria-hidden="true" size={22} /></span>
                 <span className="card-number">{number}</span>
               </div>
               <h3>{title}</h3>

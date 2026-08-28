@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { ArticleImage } from "@/components/editorial/article-image";
-import { Breadcrumbs } from "@/components/editorial/breadcrumbs";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { EditorialCTA } from "@/components/editorial/editorial-cta";
 import { EditorialContent } from "@/components/editorial/editorial-content";
 import { JsonLd } from "@/components/editorial/json-ld";
@@ -15,7 +13,7 @@ import {
   articleMetadata,
   breadcrumbJsonLd,
 } from "@/lib/editorial/seo";
-import type { Crumb } from "@/lib/editorial/types";
+import type { BreadcrumbItem } from "@/types/public";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -40,15 +38,14 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  const crumbs: Crumb[] = [
+  const crumbs: BreadcrumbItem[] = [
     { name: "Início", href: "/" },
     { name: "Conteúdos", href: "/conteudos" },
     { name: article.title, href: `/conteudos/${article.slug}` },
   ];
 
   return (
-    <main className="overflow-hidden">
-      <Header />
+    <>
       <article className="section-pad editorial-article">
         <div className="container-shell editorial-article-shell">
           <Breadcrumbs items={crumbs} />
@@ -106,9 +103,8 @@ export default async function ArticlePage({ params }: PageProps) {
           ) : null}
         </div>
       </article>
-      <Footer />
       <JsonLd data={articleJsonLd(article)} />
       <JsonLd data={breadcrumbJsonLd(crumbs)} />
-    </main>
+    </>
   );
 }

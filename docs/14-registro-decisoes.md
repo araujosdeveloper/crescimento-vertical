@@ -558,6 +558,113 @@ PR e CI do merge aprovados; quatro checks verdes também na `main`; proteção
 relida pela API com PR, strict, enforce_admins, conversas, force-push e exclusão
 nos estados definidos; bundle e evidências verificadas por SHA-256.
 
+## ADR-021 — Reconciliação dos gates formais e início da Fase 2
+
+- Data: 2026-08-26
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: 1 e 2; preserva as antecipações 2A–3C
+
+### Contexto e decisão
+
+A execução antecipou capacidades editoriais e de integração antes de fechar
+documentalmente todos os itens do gate sequencial da Fase 1. A reauditoria
+comprovou base reproduzível, staging protegido, canal operacional, baseline
+visual, backup e rollback. A Fase 1 fica concluída e a Fase 2 passa a ser a
+única fase em execução. As entregas 2A, 2B, 3A, 3B e 3C continuam válidas,
+mas não concluem automaticamente qualquer gate formal posterior.
+
+### Consequências, validação e reversão
+
+A Fase 2 pode organizar o layout público, design system, acessibilidade e testes
+sem criar páginas comerciais ou habilitar integrações. O apex/www continuam
+na infraestrutura anterior; staging é o único destino de implantação desta
+fase. A validação exige CI, viewports, backup e rollback antes da homologação.
+Reverter por novo commit documental que reabra o item de gate cuja evidência
+deixar de ser verdadeira; nenhuma reversão autoriza alterar produção.
+
+### Dependências de teste
+
+Os testes de interação do menu e foco usarão Testing Library com ambiente
+jsdom, em versões exatas no `package-lock.json`. A adição é limitada a
+devDependencies e evita implementar um simulador DOM próprio ou adicionar uma
+segunda ferramenta de testes; Vitest permanece como runner único.
+
+## ADR-022 — Constituição operacional e protocolo obrigatório de execução
+
+- Data: 2026-08-27
+- Status: aprovada
+- Responsável: Crescimento Vertical
+- Fases afetadas: controle transversal; nenhuma fase iniciada
+
+### Contexto
+
+As regras permanentes do produto e da operação estavam distribuídas entre
+prompts, documentos técnicos e histórico de execução. Era necessário criar uma
+fonte normativa estável sem mover para ela o estado efêmero do projeto nem o
+inventário privado da infraestrutura.
+
+### Decisão
+
+1. Manter `CONSTITUICAO-DO-PROJETO.md` na raiz como norma operacional
+   permanente.
+2. Manter `AGENTS.md` como porta automática de entrada para pessoas, agentes de
+   IA e automações.
+3. Exigir leitura integral dos documentos obrigatórios antes das execuções e um
+   preflight curto que confronte escopo, fase, riscos e evidências atuais.
+4. Conceder autonomia dentro do escopo autorizado e fazer perguntas somente
+   diante das condições de parada registradas.
+5. Manter o estado dinâmico no Roteiro Mestre, em docs/10, docs/15, no Git e no
+   CI.
+6. Manter o inventário operacional detalhado fora do Git público.
+
+### Alternativas rejeitadas
+
+1. Repetir todo o memorial em cada prompt — aumenta ruído e risco de versões
+   divergentes.
+2. Depender apenas da memória da conversa — não oferece persistência nem
+   rastreabilidade.
+3. Colocar estado efêmero em `AGENTS.md` — tornaria a porta de entrada obsoleta
+   a cada execução.
+4. Permitir que cada agente redefina o processo — reduziria consistência,
+   segurança e auditabilidade.
+
+### Consequências e reversão
+
+Execuções passam a ter um protocolo comum e verificável, sem publicar detalhes
+operacionais. Qualquer mudança material desta decisão exige novo registro; uma
+reversão documental não autoriza alterar runtime, dados ou fases.
+
+## ADR-023 — Postergação da homologação responsiva completa
+
+- Data: 2026-08-28
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fases afetadas: fechamento da Fase 2 e gate obrigatório pré-produção
+
+### Contexto e decisão
+
+O responsável pelo produto decidiu expressamente manter a continuidade das
+implementações e transferir a homologação responsiva completa para o hardening
+visual final anterior à produção. A evidência humana disponível aprovou Header
+e Hero em 390 × 844, sem sobreposição, texto cortado, indício visual de overflow
+ou posicionamento incorreto de CTAs e menu.
+
+A Fase 2 pode ser tecnicamente encerrada e as próximas implementações não ficam
+bloqueadas por essa postergação. A homologação completa, contudo, permanece
+pendência obrigatória e bloqueio de produção. É proibido declarar o produto
+pronto para produção sem validar 360 × 800, 390 × 844, 768 × 1024, 1024 × 768 e
+1440 × 900, incluindo menu mobile, seções da home, `/conteudos`, Footer/CTA,
+404, demais rotas públicas, navegação por teclado, foco e overflow.
+
+### Consequências e limites
+
+A decisão não dispensa qualquer critério de acessibilidade e não declara a
+homologação responsiva concluída. Também não altera código, dependências,
+migrations, schemas, configuração ou runtime; staging e produção permanecem
+inalterados. Se o gate não for integralmente aprovado no hardening visual final,
+a produção continua bloqueada até correção e nova validação.
+
 ## Decisões operacionais pendentes
 
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:

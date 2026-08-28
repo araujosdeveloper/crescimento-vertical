@@ -68,6 +68,13 @@ código, as rotas públicas iniciais (detalhes em docs/19):
 As páginas por tipo de conteúdo (notícias, análises, guias, ferramentas e
 comparativos) e a busca permanecem previstas para fases posteriores.
 
+### Navegação vigente na Fase 2
+
+A fundação usa somente destinos existentes: Início (`/`), Conteúdos
+(`/conteudos`) e as seções da home Soluções, Processo, Diferenciais e Contato
+por URLs absolutas (`/#...`). As rotas comerciais e legais listadas como alvo
+neste documento não são criadas nem recebem links antes da Fase 4.
+
 ### Confiança e legais
 
 | Rota | Finalidade |

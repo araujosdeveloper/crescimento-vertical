@@ -44,28 +44,24 @@ assinatura HMAC; o workflow de conectividade é INATIVO e validate-only. A
 execução do Hermes continua desabilitada; o n8n é a única ponte para o Payload
 (ADR-017/ADR-019).
 
-## Estrutura planejada no repositório
+## Estrutura originalmente planejada e estado atual
 
-~~~text
-automation/
-  hermes/
-    skills/
-      crescimento-vertical-editorial/
-        SKILL.md
-        references/
-          fontes-autorizadas.md
-          taxonomia.md
-          politica-editorial.md
-          contrato-de-saida.md
-    schemas/
-      editorial-dossier.v1.json
-    fixtures/
-      valid/
-      invalid/
-~~~
+A árvore `automation/hermes/` descrita anteriormente representava o planejamento
+original. Ela foi substituída pela antecipação aprovada da Fase 3B: o perfil e a
+skill versionados, o runner isolado, o conector n8n e os quatro schemas já
+existem no repositório.
 
-Essa estrutura será criada na Fase 8. Não criar agora arquivos operacionais que
-possam ser confundidos com configuração implantada.
+As referências atuais são:
+
+- docs/23: perfil Hermes editorial;
+- docs/24: runner editorial interno;
+- docs/25: implantação controlada do runner;
+- docs/26: conector n8n ↔ Hermes;
+- docs/27: implantação controlada do conector.
+
+Essa antecipação não habilitou a operação editorial. Execução, agenda, gateway,
+webhook de produção e produção editorial continuam desabilitados ou reservados
+às fases futuras correspondentes.
 
 ## Agenda inicial
 

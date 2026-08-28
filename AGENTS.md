@@ -7,11 +7,30 @@ automações neste repositório.
 
 Antes de alterar código, banco, infraestrutura ou conteúdo, ler:
 
-1. ROTEIRO-MESTRE.md;
-2. docs/00-indice.md;
-3. o documento específico da área alterada;
-4. docs/14-registro-decisoes.md;
-5. docs/15-auditoria-estado-atual.md quando a mudança afetar a base existente.
+1. CONSTITUICAO-DO-PROJETO.md;
+2. ROTEIRO-MESTRE.md;
+3. docs/00-indice.md;
+4. o documento específico da área alterada;
+5. docs/14-registro-decisoes.md;
+6. docs/10-controle-de-execucao.md;
+7. docs/15-auditoria-estado-atual.md quando a base existente ou o runtime forem
+   afetados.
+
+Toda IA ou automação deve ler este `AGENTS.md` e a Constituição integralmente
+antes de executar qualquer tarefa.
+
+## 1.1. Protocolo obrigatório de execução
+
+- Realizar preflight curto de repositório, branch, fase, escopo, riscos,
+  critérios de aceite e estado real.
+- Questionar criticamente a estratégia antes de agir.
+- Adotar otimizações seguras, reversíveis e dentro do escopo autorizado.
+- Sugerir, mas não executar, ampliações materiais de escopo ou produto.
+- Perguntar somente diante das condições de parada deste arquivo ou da
+  Constituição.
+- Não pedir confirmações intermediárias para ações já autorizadas.
+- Racionalizar tempo, comandos, logs e tokens sem reduzir segurança, evidência
+  ou qualidade.
 
 ## 2. Missão imutável
 

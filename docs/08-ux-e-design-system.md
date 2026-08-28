@@ -21,6 +21,17 @@ landing page excessivamente promocional.
 Na Fase 2 esses valores serão convertidos em tokens semânticos e avaliados para
 contraste. Componentes não devem usar cores avulsas quando existir token.
 
+### Consolidação da Fase 2
+
+Os tokens em `globals.css` agora cobrem cores, superfícies, texto, bordas, foco,
+estados, espaçamento, containers, tipografia, radius, elevação, transições e
+camadas. Aliases dos tokens iniciais preservam os componentes estáveis enquanto
+cores avulsas são substituídas somente por equivalência comprovada.
+
+`SiteShell`, `SiteHeader`, `MobileNavigation`, `SiteFooter`, `Container`,
+`Section`, `Breadcrumbs` e `SkipLink` formam a camada estrutural única. Estados
+de vazio, erro, sucesso e loading ficam em `components/ui`, sem concorrentes.
+
 ## Tipografia
 
 - Sans-serif para interface, títulos e leitura.

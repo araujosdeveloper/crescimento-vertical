@@ -63,7 +63,7 @@ export function ProblemSection() {
           <div className="ps-card ps-card--good">
             <div className="ps-card-head">
               <div className="ps-icon ps-icon--good">
-                <Check size={18} />
+                <Check aria-hidden="true" size={18} />
               </div>
 
               <div>
@@ -75,7 +75,7 @@ export function ProblemSection() {
             <div className="ps-list">
               {comEstrutura.map((item) => (
                 <div className="ps-item ps-item--good" key={item}>
-                  <Check size={16} />
+                  <Check aria-hidden="true" size={16} />
                   <span>{item}</span>
                 </div>
               ))}
