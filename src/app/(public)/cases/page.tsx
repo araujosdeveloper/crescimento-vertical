@@ -1,0 +1,4 @@
+import { getPublicCases } from "@/lib/commercial/data";
+import { EmptyState } from "@/components/ui/interface-state";
+export const metadata={title:"Cases | Crescimento Vertical",description:"Projetos autorizados e verificáveis da Crescimento Vertical."};
+export default async function CasesPage(){const cases=await getPublicCases();return <div className="section-pad"><div className="container-shell"><p className="section-kicker">Cases</p><h1 className="section-title">Projetos com contexto e evidência</h1>{cases.length===0?<EmptyState title="Nenhum case publicado" description="Somente projetos autorizados e verificáveis são publicados nesta área."/>:<div className="services-grid">{cases.map(c=><article className="service-card" key={c.slug}><h2>{c.title}</h2><p>{c.summary}</p></article>)}</div>}</div></div>}

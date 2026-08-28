@@ -2,6 +2,10 @@
 
 ## Direção visual
 
+As páginas comerciais da Fase 4 reutilizam `SiteShell`, `Container`, `Section`,
+`Breadcrumbs` e estados existentes. O catálogo apresenta seis pilares sem
+duplicar componentes ou alterar os tokens visuais.
+
 Preservar a linguagem atual: tecnológica, escura, precisa e orientada a
 performance. O portal não deve parecer um agregador genérico de notícias nem uma
 landing page excessivamente promocional.

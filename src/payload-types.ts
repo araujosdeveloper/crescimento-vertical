@@ -74,6 +74,8 @@ export interface Config {
     sources: Source;
     'research-dossiers': ResearchDossier;
     articles: Article;
+    services: Service;
+    cases: Case;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -88,6 +90,8 @@ export interface Config {
     sources: SourcesSelect<false> | SourcesSelect<true>;
     'research-dossiers': ResearchDossiersSelect<false> | ResearchDossiersSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    cases: CasesSelect<false> | CasesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -342,6 +346,94 @@ export interface Article {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  slug: string;
+  shortDescription: string;
+  positioning?: string | null;
+  targetAudience?: string | null;
+  problems?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  deliverables?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  processSteps?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  capabilities?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  primaryCTAType?: ('diagnostic' | 'contact') | null;
+  primaryCTALabel?: string | null;
+  featured?: boolean | null;
+  order?: number | null;
+  active?: boolean | null;
+  publishedAt?: string | null;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cases".
+ */
+export interface Case {
+  id: number;
+  title: string;
+  slug: string;
+  summary?: string | null;
+  clientDisplayName?: string | null;
+  authorizationStatus: 'pending' | 'approved' | 'denied';
+  challenge?: string | null;
+  solution?: string | null;
+  results?: string | null;
+  metrics?:
+    | {
+        label?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  period?: string | null;
+  relatedServices?: (number | Service)[] | null;
+  testimonial?: string | null;
+  media?: (number | null) | Media;
+  seo?: {
+    metaTitle?: string | null;
+    metaDescription?: string | null;
+    canonicalUrl?: string | null;
+    noindex?: boolean | null;
+  };
+  active?: boolean | null;
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -391,6 +483,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'articles';
         value: number | Article;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'cases';
+        value: number | Case;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -616,6 +716,96 @@ export interface ArticlesSelect<T extends boolean = true> {
         canonicalUrl?: T;
         noindex?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  shortDescription?: T;
+  positioning?: T;
+  targetAudience?: T;
+  problems?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  deliverables?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  processSteps?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  capabilities?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  primaryCTAType?: T;
+  primaryCTALabel?: T;
+  featured?: T;
+  order?: T;
+  active?: T;
+  publishedAt?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "cases_select".
+ */
+export interface CasesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  clientDisplayName?: T;
+  authorizationStatus?: T;
+  challenge?: T;
+  solution?: T;
+  results?: T;
+  metrics?:
+    | T
+    | {
+        label?: T;
+        value?: T;
+        id?: T;
+      };
+  period?: T;
+  relatedServices?: T;
+  testimonial?: T;
+  media?: T;
+  seo?:
+    | T
+    | {
+        metaTitle?: T;
+        metaDescription?: T;
+        canonicalUrl?: T;
+        noindex?: T;
+      };
+  active?: T;
+  publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

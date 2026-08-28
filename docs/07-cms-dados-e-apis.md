@@ -350,6 +350,16 @@ controle de acesso.
 
 ## Retenção
 
+### services e cases — Fase 4
+
+`services` possui título, slug, descrição, posicionamento, público, problemas,
+entregáveis, etapas, capacidades, CTA, destaque, ordem, ativo, SEO,
+`publishedAt` e drafts/versões. `cases` possui autorização, desafio, solução,
+resultados e métricas opcionais, serviços relacionados, mídia, SEO, ativo,
+`publishedAt` e drafts/versões. Leitura pública exige ativo, publicado e não
+futuro; cases exigem `authorizationStatus=approved`. O seed de seis serviços é
+explícito e idempotente; não cria cases.
+
 - Versões editoriais: política inicial de 100 por documento, revisável.
 - Logs técnicos: 30 dias, salvo incidente.
 - EditorialRuns: 24 meses para auditoria.

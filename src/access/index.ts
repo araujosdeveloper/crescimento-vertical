@@ -185,3 +185,32 @@ export const mediaUpdate: Access = ({ req: { user } }) => {
 };
 
 export const mediaDelete: Access = ({ req: { user } }) => isAdmin(user);
+
+// Commercial collections: editors may prepare records, while only admin and
+// reviewer can publish through the server-side workflow hooks.
+export const commercialRead: Access = ({ req: { user } }): true | Where => {
+  if (isActiveUser(user)) return true;
+  return {
+    and: [
+      { active: { equals: true } },
+      { _status: { equals: "published" } },
+      { publishedAt: { less_than_equal: new Date().toISOString() } },
+    ],
+  };
+};
+
+export const commercialCreate: Access = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "editor"]);
+
+export const commercialUpdate: Access = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "editor", "reviewer"]);
+
+export const commercialDelete: Access = ({ req: { user } }) => isAdmin(user);
+
+export const commercialPublishFieldAccess: FieldAccess = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "reviewer"]);
+
+export const casesRead: Access = commercialRead;
+export const casesCreate: Access = commercialCreate;
+export const casesUpdate: Access = commercialUpdate;
+export const casesDelete: Access = commercialDelete;

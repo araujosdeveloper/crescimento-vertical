@@ -1,0 +1,4 @@
+import { ContactLink } from "@/components/contact-link";
+import { CONTACT_EMAIL, WHATSAPP_URL } from "@/lib/site";
+export const metadata={title:"Contato | Crescimento Vertical",description:"Fale com a Crescimento Vertical."};
+export default function Contato(){return <div className="section-pad"><div className="container-shell"><p className="section-kicker">Contato</p><h1 className="section-title">Vamos conversar sobre o contexto da sua empresa</h1><p className="section-copy">Escolha um canal para iniciar a conversa. Não há formulário público nesta fase.</p><p className="mt-8"><a className="button-primary inline-flex" href={`mailto:${CONTACT_EMAIL}`}>Enviar e-mail ↗</a></p>{WHATSAPP_URL?<p className="mt-4"><ContactLink className="service-link">Falar pelo WhatsApp ↗</ContactLink></p>:null}</div></div>}

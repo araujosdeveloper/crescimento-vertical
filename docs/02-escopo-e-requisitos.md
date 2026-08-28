@@ -2,6 +2,13 @@
 
 ## Escopo funcional
 
+### Catálogo comercial da Fase 4
+
+O catálogo oficial possui seis pilares: Sites e landing pages, Tráfego e
+conversão, Automação de WhatsApp, Agentes de IA, Integrações n8n e Consultoria
+e suporte. As rotas canônicas estão em `/solucoes` e seus subdiretórios. Não há
+preços, métricas, cases ou resultados inventados.
+
 ### Experiência pública
 
 - Home editorial e comercial.

@@ -33,18 +33,14 @@ describe("navegação pública", () => {
     expect(PUBLIC_NAVIGATION.map(({ label, href }) => [label, href])).toEqual([
       ["Início", "/"],
       ["Conteúdos", "/conteudos"],
-      ["Soluções", "/#solucoes"],
-      ["Processo", "/#processo"],
-      ["Diferenciais", "/#diferenciais"],
-      ["Contato", "/#contato"],
+      ["Soluções", "/solucoes"],
+      ["Sobre", "/sobre"],
+      ["Contato", "/contato"],
     ]);
     expect(PUBLIC_NAVIGATION.every(({ href }) => href.startsWith("/"))).toBe(true);
     const unavailableRoutes = [
-      "/solucoes",
-      "/contato",
-      "/sobre",
-      "/diagnostico",
-      "/cases",
+      "/admin",
+      "/api/users",
     ];
     expect(
       PUBLIC_NAVIGATION.some(({ href }) => unavailableRoutes.includes(href)),
