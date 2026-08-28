@@ -38,6 +38,28 @@ capacidades pertencentes às Fases 4, 5, 7 e 9 não serão antecipadas.
 | Produção | não alterada |
 | Próxima ação | qualidade completa, PR draft, CI, backup/deploy de staging e aceite humano |
 
+### Resultado do CI e staging — 28 de agosto de 2026
+
+O PR draft #9 está aberto, mergeável e sem reviews ou conversas bloqueadoras,
+com HEAD `89c67c37f1b3de2c2b8f66dd59213e484b0d392d`. O run
+`33165627510` terminou com os quatro jobs obrigatórios verdes: aplicação
+(incluindo ciclo CMS), runner Hermes, conector n8n e secret-scan.
+
+Foi criado o backup pré-deploy
+`/opt/backups/crescimento-vertical/phase3-predeploy-89c67c3-20260828-0408`;
+SHA-256, bundle, dump e catálogo `pg_restore` foram validados. Como houve
+alteração funcional, somente `cv-phase2-staging-app` foi recriado com a imagem
+`cv-phase2-staging-app:phase3-89c67c3`; PostgreSQL, mídia e os outros sete
+containers permaneceram preservados. Após corrigir a invocação do Compose para
+usar o arquivo de ambiente existente (sem expor valores), app e PostgreSQL
+estão healthy, `/`, `/conteudos`, `/admin`, APIs, live/ready e 404 respondem
+corretamente, preview anônimo responde 401 e o acesso externo sem BasicAuth
+responde 401. O banco mantém um admin, zero conteúdo persistente e duas
+migrations aplicadas.
+
+O PR segue draft e não foi marcado ready nem mergeado. A próxima ação é aceite
+humano no `/admin`; a Fase 4 não foi iniciada.
+
 ## Gate para iniciar a Fase 1
 
 - [x] Repositório correto confirmado.

@@ -2,8 +2,9 @@
 
 Data: 28 de agosto de 2026.
 
-Status: em execução, tecnicamente validada localmente e aguardando CI, staging
-e aceite humano no painel administrativo. A Fase 4 não foi iniciada.
+Status: tecnicamente validada, CI verde e staging saudável; aguardando aceite
+humano no painel administrativo. O PR permanece draft e a Fase 4 não foi
+iniciada.
 
 ## Escopo reconciliado
 
@@ -58,3 +59,16 @@ mídia. Ambos os containers foram destruídos após o registro.
 Não houve migration nova, alteração de schema, dependência ou lockfile.
 Produção, n8n e Hermes permaneceram inalterados. A homologação responsiva do
 ADR-023 continua bloqueando produção, independentemente do aceite desta fase.
+
+## Staging e próxima ação
+
+O backup pré-deploy foi validado antes de recriar somente o app candidato na
+imagem `phase3-89c67c3`. PostgreSQL, mídia, staging antigo e integrações foram
+preservados. O candidato está healthy, com admin preservado, duas migrations
+aplicadas, zero conteúdo persistente anterior alterado e smoke de rotas/API
+aprovado. URL para aceite humano: `https://staging.crescimentovertical.com/admin`.
+
+Não compartilhar credenciais. O checklist humano é login, coleções conforme o
+papel, criação de draft, preview, histórico de versões, envio para revisão,
+aprovação, publicação e logout. Após o aceite, este PR deverá ser marcado ready
+e mergeado em execução posterior autorizada; nesta execução não se faz merge.

@@ -43,6 +43,22 @@ custom e a mídia foram restaurados em um segundo PostgreSQL 16: contagens
 foram confirmados. Os dois containers foram removidos sem tocar volumes
 persistentes.
 
+### Deploy controlado de staging — 28 de agosto de 2026
+
+Com o CI do PR #9 verde, o backup pré-deploy foi validado e somente o container
+`cv-phase2-staging-app` foi recriado na imagem `phase3-89c67c3`. Uma primeira
+invocação sem o arquivo de ambiente efetivo foi detectada imediatamente por
+`/admin`/APIs 500 e corrigida antes do aceite, sem alteração de banco ou dados;
+o app foi recriado com `.env.phase2.staging` e passou a responder normalmente.
+O PostgreSQL manteve ID `886c99…`, o admin foi preservado, as coleções seguem
+vazias, duas migrations estão aplicadas, e produção, staging antigo, n8n,
+Traefik, Hermes e runner mantiveram seus IDs. O smoke final confirmou `/` e
+`/conteudos`/`/admin`/APIs/live/ready em 200, preview anônimo em 401, 404 em
+404 e acesso externo sem BasicAuth em 401. Nenhuma porta nova foi publicada.
+
+O PR permanece draft aguardando aceite humano no `/admin`; não houve merge,
+produção continua inalterada e a Fase 4 não foi iniciada.
+
 ## Fechamento técnico da Fase 2 — 28 de agosto de 2026
 
 O candidato de staging está healthy e identifica o HEAD
