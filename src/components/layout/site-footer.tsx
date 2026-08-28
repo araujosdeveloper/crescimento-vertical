@@ -22,6 +22,10 @@ export function SiteFooter() {
             {PUBLIC_NAVIGATION.map((item) => (
               <Link href={item.href} key={item.href}>{item.label}</Link>
             ))}
+            <Link href="/cases">Cases</Link>
+            <Link href="/privacidade">Privacidade</Link>
+            <Link href="/termos">Termos</Link>
+            <Link href="/cookies">Cookies</Link>
           </nav>
         </div>
         <div>
