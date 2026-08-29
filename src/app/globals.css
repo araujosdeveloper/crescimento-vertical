@@ -139,12 +139,12 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 /* Hero */
 .hero-stage { position: relative; min-height: 100vh; overflow: hidden; border-bottom: 1px solid rgba(48,153,255,.18); background: #020617; padding-top: 80px; isolation: isolate; }
-.hero-background { position: absolute; inset: 0; z-index: -5; }
+.hero-background { position: absolute; inset: 0; z-index: 0; }
 .hero-background img { object-fit: cover; object-position: right bottom; }
-.hero-background-overlay { position: absolute; inset: 0; z-index: -4; background: linear-gradient(90deg,rgba(2,6,23,.98) 0%,rgba(2,6,23,.94) 31%,rgba(2,6,23,.52) 49%,rgba(2,6,23,.16) 72%,rgba(2,6,23,.08) 100%); }
+.hero-background-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg,rgba(2,6,23,.98) 0%,rgba(2,6,23,.94) 31%,rgba(2,6,23,.52) 49%,rgba(2,6,23,.16) 72%,rgba(2,6,23,.08) 100%); }
 .hero-stage::before { content: none; }
-.hero-stage::after { content: ""; position: absolute; inset: 0; z-index: -2; background: radial-gradient(circle at 78% 42%,rgba(0,163,255,.06),transparent 42%); pointer-events: none; }
-.hero-layout { position: relative; z-index: 1; display: flex; min-height: calc(100vh - 80px); align-items: center; padding-block: 60px 80px; }
+.hero-stage::after { content: ""; position: absolute; inset: 0; z-index: 2; background: radial-gradient(circle at 78% 42%,rgba(0,163,255,.06),transparent 42%); pointer-events: none; }
+.hero-layout { position: relative; z-index: 3; display: flex; min-height: calc(100vh - 80px); align-items: center; padding-block: 60px 80px; }
 .hero-shell { width: min(1600px,calc(100% - 160px)); margin-inline: auto; }
 .hero-copy { position: relative; z-index: 5; }
 .eyebrow { display: inline-flex; align-items: center; gap: 9px; color: #1fc5ff; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }

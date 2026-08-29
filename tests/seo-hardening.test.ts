@@ -4,7 +4,7 @@ import { articleJsonLd, hubMetadata, noindexRobotsMetadata, organizationJsonLd, 
 import type { ArticleDetail } from "../src/lib/editorial/types";
 import robots from "../src/app/robots";
 import sitemap from "../src/app/sitemap";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 const article = (contentType: ArticleDetail["contentType"]): ArticleDetail => ({ title: "Seguro </script><script>alert(1)</script>", slug: "seguro", summary: "Resumo", publishedAt: "2026-08-01T00:00:00Z", updatedAt: "2026-08-02T00:00:00Z", featuredImage: null, author: { name: "Autora", slug: "autora" }, category: null, contentType, contentTypeLabel: "Notícia", publicReviewer: null, readingTime: 1, tags: [], content: {}, seo: { metaTitle: null, metaDescription: null, canonicalUrl: null }, businessImpact: null, publicCitations: [], correctionHistory: [], relatedServices: [], relatedArticles: [], aiDisclosure: null });
 
@@ -53,5 +53,17 @@ describe("contratos SEO da Fase 6", () => {
     expect(tree).toContain('sizes="100vw"');
     expect(tree).toMatch(/width=\{image\.width/);
     expect(tree).toMatch(/height=\{image\.height/);
+  });
+  it("mantém o WebP otimizado visível na pilha da Hero", () => {
+    const hero = readFileSync("src/components/hero.tsx", "utf8");
+    const css = readFileSync("src/app/globals.css", "utf8");
+    expect(existsSync("public/hero-final-crescimento-vertical.webp")).toBe(true);
+    expect(hero).toContain('src="/hero-final-crescimento-vertical.webp"');
+    expect(hero).toContain("fill priority sizes=\"100vw\"");
+    expect(css).toMatch(/\.hero-background \{[^}]*z-index: 0;/);
+    expect(css).toMatch(/\.hero-background-overlay \{[^}]*z-index: 1;/);
+    expect(css).toMatch(/\.hero-layout \{[^}]*z-index: 3;/);
+    expect(css).toContain("object-fit: cover");
+    expect(css).toContain("object-position: right bottom");
   });
 });
