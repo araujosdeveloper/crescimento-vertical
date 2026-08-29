@@ -162,5 +162,6 @@ export function toArticleFeedEntry(value: unknown): ArticleFeedEntry {
     summary: item.summary,
     publishedAt: item.publishedAt,
     updatedAt: asString(doc.updatedAt),
+    contentType: item.contentType,
   };
 }

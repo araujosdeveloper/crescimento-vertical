@@ -434,6 +434,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 
 ## Registro por sessão
 
+## Registro da sessão 2026-08-29 — candidato da Fase 6 em staging
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | `feat/phase-6-seo-performance` / candidato `65d1c60` |
+| Fase | 6 — SEO técnico, dados estruturados e performance, em execução |
+| Objetivo | Consolidar indexação, metadata, schemas e entrega pública e parar no aceite humano |
+| Alterações | Canonical/OG/Twitter, JSON-LD seguro, robots/sitemap, imagem LCP, testes, ADR-026 e documentação |
+| Validações | 90 testes da aplicação; CMS/recuperação descartáveis; runner 32; conector 34; builds Next/Docker; quatro checks verdes; staging healthy e smokes sem 5xx |
+| Riscos | Lighthouse/CWV de navegador indisponíveis no host; GSC/GA4 dependem de lançamento, credencial e consentimento |
+| Próxima ação | Aceite humano no staging; não fazer merge, produção ou Fase 7 |
+
 ## Registro da sessão 2026-08-28 — fechamento técnico da Fase 2
 
 | Campo | Conteúdo |
@@ -517,3 +529,18 @@ Ao concluir uma sessão de trabalho, registrar:
 - Se um item for removido, registrar ADR.
 - Falha reabre o item correspondente.
 - Fase só muda de estado após todos os critérios de saída.
+
+## Registro da sessão 2026-08-29 — aceite humano e encerramento da Fase 6
+
+| Campo | Conteúdo |
+| --- | --- |
+| Data | 2026-08-29 |
+| Branch/commit | `feat/phase-6-seo-performance` / `057a11c`; encerramento documental após merge do PR #12 |
+| Fase | 6 — SEO técnico, dados estruturados e performance — concluída |
+| Objetivo | Registrar o aceite humano expresso e encerrar formalmente a fase |
+| Alterações | Hero inicialmente perdeu a imagem; z-index e ajustes de opacity/object-position foram insuficientes; solução definitiva com `background-image` WebP otimizado, preload único e testes de regressão |
+| Validações | SEO, metadata, canonicals, schemas, sitemap, robots, performance, staging saudável e quatro checks verdes no PR |
+| Aceite humano | O proprietário declarou: “Fase 6 aprovada.” A captura confirmou painel tecnológico visível à direita, título legível, contraste adequado, CTAs preservados e identidade visual restaurada |
+| Integrações | Search Console e GA4 continuam desativados; produção, n8n e Hermes preservados |
+| Riscos/gates | Homologação responsiva integral nos cinco viewports e concretização da copy comercial da Fase 4 continuam bloqueando produção |
+| Próxima ação | Nenhuma fase em execução; Fases 7–12 pendentes |

@@ -13,6 +13,9 @@ import type { BreadcrumbItem } from "@/types/public";
 
 const DEFAULT_SITE_URL = "https://crescimentovertical.com";
 const SITE_NAME = "Crescimento Vertical";
+export const ORGANIZATION_ID = `${DEFAULT_SITE_URL}/#organization`;
+export const WEBSITE_ID = `${DEFAULT_SITE_URL}/#website`;
+export const SOCIAL_IMAGE_PATH = "/hero-final-crescimento-vertical.webp";
 const DEFAULT_TITLE =
   "Crescimento Vertical | Estratégia Digital, Automação e Performance";
 const DEFAULT_DESCRIPTION =
@@ -38,8 +41,15 @@ export function resolveCanonical(
   defaultPath: string,
   explicitUrl?: string | null,
 ): string {
-  if (explicitUrl && /^https?:\/\//i.test(explicitUrl)) {
-    return explicitUrl;
+  if (explicitUrl) {
+    try {
+      const candidate = new URL(explicitUrl, DEFAULT_SITE_URL);
+      if (candidate.protocol === "https:" && candidate.hostname === "crescimentovertical.com") {
+        candidate.search = "";
+        candidate.hash = "";
+        return candidate.toString().replace(/\/$/, candidate.pathname === "/" ? "/" : "");
+      }
+    } catch { /* usa o caminho canônico seguro */ }
   }
   return absoluteUrl(defaultPath);
 }
@@ -80,6 +90,16 @@ export function robotsMetadata(): NonNullable<Metadata["robots"]> {
   return { index: true, follow: true };
 }
 
+export function noindexRobotsMetadata(): NonNullable<Metadata["robots"]> {
+  return isNoindexEnabled()
+    ? robotsMetadata()
+    : { index: false, follow: true, noarchive: true };
+}
+
+export function paginatedCanonical(path: string, page = 1): string {
+  return page > 1 ? `${absoluteUrl(path)}?page=${page}` : absoluteUrl(path);
+}
+
 export function articleCanonicalPath(slug: string): string {
   return `/conteudos/${slug}`;
 }
@@ -105,7 +125,7 @@ export function articleMetadata(article: ArticleDetail): Metadata {
   );
   const imageUrl = article.featuredImage?.url
     ? absoluteUrl(article.featuredImage.url)
-    : undefined;
+    : absoluteUrl(SOCIAL_IMAGE_PATH);
 
   return {
     title,
@@ -121,26 +141,24 @@ export function articleMetadata(article: ArticleDetail): Metadata {
       siteName: SITE_NAME,
       publishedTime: article.publishedAt ?? undefined,
       modifiedTime: article.updatedAt ?? undefined,
-      images: imageUrl
-        ? [{ url: imageUrl, alt: article.featuredImage?.alt }]
-        : undefined,
+      images: [{ url: imageUrl, alt: article.featuredImage?.alt || SITE_NAME }],
     },
     twitter: {
-      card: imageUrl ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: imageUrl ? [imageUrl] : undefined,
+      images: [imageUrl],
     },
   };
 }
 
-export function categoryMetadata(category: PublicCategory): Metadata {
+export function categoryMetadata(category: PublicCategory, page = 1): Metadata {
   const title = truncateMetaTitle(`${category.name} | ${SITE_NAME}`);
   const description = truncateMetaDescription(
     category.description ||
       `Conteúdos de ${category.name} sobre IA, automação e tecnologia para negócios.`,
   );
-  const canonical = resolveCanonical(categoryCanonicalPath(category.slug));
+  const canonical = paginatedCanonical(categoryCanonicalPath(category.slug), page);
 
   return {
     title,
@@ -159,13 +177,13 @@ export function categoryMetadata(category: PublicCategory): Metadata {
   };
 }
 
-export function authorMetadata(author: PublicAuthor): Metadata {
+export function authorMetadata(author: PublicAuthor, page = 1): Metadata {
   const title = truncateMetaTitle(`${author.name} | ${SITE_NAME}`);
   const description = truncateMetaDescription(
     author.biography ||
       `Perfil público de ${author.name} na Crescimento Vertical.`,
   );
-  const canonical = resolveCanonical(authorCanonicalPath(author.slug));
+  const canonical = paginatedCanonical(authorCanonicalPath(author.slug), page);
 
   return {
     title,
@@ -184,16 +202,17 @@ export function authorMetadata(author: PublicAuthor): Metadata {
   };
 }
 
-export function hubMetadata(): Metadata {
+export function hubMetadata(page = 1, filtered = false): Metadata {
+  const canonical = paginatedCanonical("/conteudos", page);
   return {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
-    alternates: { canonical: absoluteUrl("/conteudos") },
-    robots: robotsMetadata(),
+    alternates: { canonical },
+    robots: filtered ? noindexRobotsMetadata() : robotsMetadata(),
     openGraph: {
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
-      url: absoluteUrl("/conteudos"),
+      url: canonical,
       type: "website",
       locale: "pt_BR",
       siteName: SITE_NAME,
@@ -205,7 +224,8 @@ export function hubMetadata(): Metadata {
 export function articleJsonLd(article: ArticleDetail): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": article.contentType === "news" ? "NewsArticle" : "Article",
+    "@id": `${absoluteUrl(articleCanonicalPath(article.slug))}#article`,
     headline: article.title,
     description: article.summary ?? undefined,
     image: article.featuredImage?.url
@@ -213,7 +233,7 @@ export function articleJsonLd(article: ArticleDetail): Record<string, unknown> {
       : undefined,
     datePublished: article.publishedAt ?? undefined,
     dateModified: article.updatedAt ?? undefined,
-    mainEntityOfPage: absoluteUrl(articleCanonicalPath(article.slug)),
+    mainEntityOfPage: { "@type": "WebPage", "@id": absoluteUrl(articleCanonicalPath(article.slug)) },
     author: article.author
       ? {
           "@type": "Person",
@@ -222,10 +242,22 @@ export function articleJsonLd(article: ArticleDetail): Record<string, unknown> {
         }
       : undefined,
     publisher: {
-      "@type": "Organization",
-      name: SITE_NAME,
+      "@id": ORGANIZATION_ID,
     },
   };
+}
+
+export function organizationJsonLd(): Record<string, unknown> {
+  return { "@context": "https://schema.org", "@type": "Organization", "@id": ORGANIZATION_ID, name: SITE_NAME, url: DEFAULT_SITE_URL, logo: absoluteUrl("/logo-crescimento-vertical.png") };
+}
+
+export function websiteJsonLd(): Record<string, unknown> {
+  return { "@context": "https://schema.org", "@type": "WebSite", "@id": WEBSITE_ID, name: SITE_NAME, url: DEFAULT_SITE_URL, publisher: { "@id": ORGANIZATION_ID }, inLanguage: "pt-BR" };
+}
+
+export function profilePageJsonLd(author: PublicAuthor): Record<string, unknown> {
+  const url = absoluteUrl(authorCanonicalPath(author.slug));
+  return { "@context": "https://schema.org", "@type": "ProfilePage", "@id": `${url}#profile`, url, mainEntity: { "@type": "Person", "@id": `${url}#person`, name: author.name, description: author.biography || undefined, image: author.photo?.url ? absoluteUrl(author.photo.url) : undefined } };
 }
 
 export function breadcrumbJsonLd(items: BreadcrumbItem[]): Record<string, unknown> {

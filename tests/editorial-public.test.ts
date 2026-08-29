@@ -27,7 +27,8 @@ const rawArticle = {
   slug: "titulo-do-artigo",
   excerpt: "Resumo público",
   publishedAt: "2026-08-01T12:00:00.000Z",
-  updatedAt: "2026-08-02T12:00:00.000Z",
+      updatedAt: "2026-08-02T12:00:00.000Z",
+      contentType: "news",
   content: { root: { children: [] } },
   heroImage: {
     url: "/api/media/file/img.png",
@@ -222,7 +223,8 @@ describe("SEO e metadados", () => {
     process.env.NEXT_PUBLIC_SITE_URL = "https://crescimentovertical.com/";
     expect(absoluteUrl("/conteudos")).toBe("https://crescimentovertical.com/conteudos");
     expect(resolveCanonical("/x")).toBe("https://crescimentovertical.com/x");
-    expect(resolveCanonical("/x", "https://canonico.com/y")).toBe("https://canonico.com/y");
+    expect(resolveCanonical("/x", "https://canonico.com/y")).toBe("https://crescimentovertical.com/x");
+    expect(resolveCanonical("/x", "https://crescimentovertical.com/y?utm_source=x#top")).toBe("https://crescimentovertical.com/y");
     expect(resolveCanonical("/x", "javascript:alert(1)")).toBe("https://crescimentovertical.com/x");
   });
 
@@ -260,7 +262,7 @@ describe("SEO e metadados", () => {
       ...rawArticle,
       seo: { ...rawArticle.seo, canonicalUrl: "https://canonico.com/x" },
     }) as ArticleDetail;
-    expect(articleMetadata(article).alternates?.canonical).toBe("https://canonico.com/x");
+    expect(articleMetadata(article).alternates?.canonical).toBe("https://crescimentovertical.com/conteudos/titulo-do-artigo");
   });
 
   it("isNoindexEnabled reflete SITE_NOINDEX", () => {
@@ -291,14 +293,12 @@ describe("JSON-LD", () => {
     process.env.NEXT_PUBLIC_SITE_URL = "https://crescimentovertical.com";
     const article = toArticleDetail(rawArticle) as ArticleDetail;
     const jsonLd = articleJsonLd(article) as Record<string, unknown>;
-    expect(jsonLd["@type"]).toBe("Article");
+    expect(jsonLd["@type"]).toBe("NewsArticle");
     expect(jsonLd.headline).toBe("Título do artigo");
-    expect(jsonLd.mainEntityOfPage).toBe(
-      "https://crescimentovertical.com/conteudos/titulo-do-artigo",
-    );
+    expect(jsonLd.mainEntityOfPage).toEqual({ "@type": "WebPage", "@id": "https://crescimentovertical.com/conteudos/titulo-do-artigo" });
     expect((jsonLd.author as Record<string, unknown>).name).toBe("Autor Público");
-    expect((jsonLd.publisher as Record<string, unknown>).name).toBe(
-      "Crescimento Vertical",
+    expect((jsonLd.publisher as Record<string, unknown>)["@id"]).toBe(
+      "https://crescimentovertical.com/#organization",
     );
   });
 
@@ -326,6 +326,7 @@ describe("feed RSS", () => {
         summary: "Resumo com <tag>",
         publishedAt: "2026-08-01T12:00:00.000Z",
         updatedAt: "2026-08-02T12:00:00.000Z",
+        contentType: "news",
       },
       {
         title: "Sem data",
@@ -333,6 +334,7 @@ describe("feed RSS", () => {
         summary: null,
         publishedAt: null,
         updatedAt: null,
+        contentType: "analysis",
       },
     ]);
 

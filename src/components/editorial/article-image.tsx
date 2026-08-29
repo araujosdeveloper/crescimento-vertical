@@ -1,9 +1,8 @@
 import type { SafeImage } from "@/lib/editorial/types";
+import Image from "next/image";
 
 /**
- * Imagem pública segura: usa `<img>` com `alt` obrigatório e carregamento
- * preguiçoso. Evita `<Image>` do Next para não depender de configuração de
- * domínio/remote patterns para mídia servida pelo Payload.
+ * Imagem pública segura e otimizada pelo pipeline do Next.
  */
 export function ArticleImage({
   image,
@@ -15,12 +14,11 @@ export function ArticleImage({
   sizes?: string;
 }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
+    <Image
       src={image.url}
       alt={image.alt}
-      width={image.width}
-      height={image.height}
+      width={image.width || 1200}
+      height={image.height || 675}
       loading="lazy"
       decoding="async"
       sizes={sizes}

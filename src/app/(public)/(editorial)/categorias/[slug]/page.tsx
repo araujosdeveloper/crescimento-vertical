@@ -18,13 +18,14 @@ interface PageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const page = normalizePage((await searchParams).page);
   const data = await getCategoryArticles(slug);
   if (!data) {
     return {};
   }
-  return categoryMetadata(data.category);
+  return categoryMetadata(data.category, page);
 }
 
 export default async function CategoryPage({ params, searchParams }: PageProps) {

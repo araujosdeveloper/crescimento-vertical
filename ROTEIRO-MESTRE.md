@@ -24,7 +24,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Concluída com ressalva |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
-| 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
+| 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
 | 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
@@ -71,6 +71,19 @@ produção. As Fases 5 a 12 permanecem pendentes.
    limites e CTAs.
 
 Nenhum dos dois gates pode ser declarado concluído por este encerramento.
+
+A Fase 6 foi iniciada e concluída em 29 de agosto de 2026 após aceite humano
+expresso. O aceite cobriu SEO técnico, metadata, canonicals, Open Graph, Twitter,
+sitemap, robots, indexação, dados estruturados, imagens, cache, performance e a
+Hero com o painel tecnológico restaurado via `background-image` WebP otimizado.
+O WebP tem 114.140 bytes, redução aproximada de 93% sobre o PNG. O PR #12 e o
+CI foram aprovados e o staging permaneceu saudável. Search Console e GA4 seguem
+desativados; produção, n8n e Hermes foram preservados. Nenhuma fase está em
+execução e as Fases 7–12 permanecem pendentes.
+
+Este encerramento preserva os dois gates pré-produção: homologação responsiva
+integral nos cinco viewports e concretização da copy comercial da Fase 4. A
+aprovação da Fase 6 não os conclui nem autoriza produção.
 
 A Fase 5 foi iniciada em 28 de agosto de 2026 a partir da `main`
 `e153f50f9591cf74f804d57a0e213acad463fd17` e concluída após aceite humano em

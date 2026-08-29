@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { JsonLd } from "@/components/editorial/json-ld";
+import { organizationJsonLd, SOCIAL_IMAGE_PATH, websiteJsonLd } from "@/lib/editorial/seo";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://crescimentovertical.com";
 const NOINDEX = process.env.SITE_NOINDEX === "true";
@@ -42,7 +44,12 @@ export const metadata: Metadata = {
       "Estratégia digital, automação e performance para empresas que querem crescer com previsibilidade.",
     type: "website",
     locale: "pt_BR",
+    url: SITE_URL,
+    siteName: "Crescimento Vertical",
+    images: [{ url: SOCIAL_IMAGE_PATH, width: 1600, height: 900, alt: "Crescimento Vertical" }],
   },
+  twitter: { card: "summary_large_image", title: "Crescimento Vertical | Estratégia Digital, Automação e Performance", description: "Estratégia digital, automação e performance para empresas que querem crescer com previsibilidade.", images: [SOCIAL_IMAGE_PATH] },
+  alternates: { canonical: SITE_URL },
 };
 
 export default function RootLayout({
@@ -52,7 +59,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <head>
+        <link rel="preload" as="image" type="image/webp" href="/hero-final-crescimento-vertical.webp" fetchPriority="high" />
+      </head>
+      <body><JsonLd data={organizationJsonLd()} /><JsonLd data={websiteJsonLd()} />{children}</body>
     </html>
   );
 }

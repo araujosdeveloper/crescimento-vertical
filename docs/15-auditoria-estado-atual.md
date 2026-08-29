@@ -1,5 +1,16 @@
 # Auditoria do estado atual
 
+## Candidato da Fase 6 em staging — 29 de agosto de 2026
+
+A branch `feat/phase-6-seo-performance` partiu da main `e6c7ce5`; o PR draft
+#12 passou pelos quatro checks obrigatórios. O backup pré-deploy foi validado e
+somente `cv-phase2-staging-app` foi recriado com o candidato `65d1c60`.
+PostgreSQL e todos os demais containers foram preservados. Staging está
+saudável, protegido por BasicAuth, integralmente noindex, sem sitemap público,
+analytics ou 5xx. A Fase 6 permanece em execução até aceite humano; produção,
+n8n e Hermes não foram alterados. Os gates de responsividade integral e copy
+comercial da Fase 4 continuam bloqueando produção.
+
 ## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
 
 O responsável pelo produto aprovou hubs editoriais vazios, busca, filtros,
@@ -717,3 +728,21 @@ robots, sitemap e 404; carregamento e transformação de imagem pelo Sharp.
 O PR #8 permanece aberto e draft. A homologação visual humana nos cinco
 viewports continua pendente. Nenhum staging, produção, container ativo, banco
 persistente, DNS, Traefik, n8n ou Hermes foi alterado.
+
+## Encerramento da Fase 6 com aceite humano — 29 de agosto de 2026
+
+O proprietário declarou “Fase 6 aprovada” após captura humana final no staging,
+confirmando o painel tecnológico visível no lado direito da Hero, título
+legível, contraste adequado, CTAs preservados e identidade visual restaurada.
+Durante a fase, a Hero inicialmente perdeu a imagem; z-index e ajustes de
+opacity/object-position foram insuficientes. A solução definitiva restaurou o
+fundo por CSS `background-image` com o WebP otimizado de 114.140 bytes, redução
+aproximada de 93% sobre o PNG.
+
+O PR #12 e seus quatro checks foram aprovados, o staging permaneceu saudável e
+Search Console/GA4 continuam desativados. Produção, PostgreSQL persistente,
+n8n, Hermes, DNS e Traefik não foram alterados. A Fase 6 está concluída e
+nenhuma fase está em execução; Fases 7–12 permanecem pendentes. Os gates
+pré-produção — homologação responsiva integral nos cinco viewports e
+concretização da copy comercial da Fase 4 — continuam preservados e bloqueiam
+produção.

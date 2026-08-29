@@ -12,9 +12,12 @@ import { SearchForm } from "@/components/editorial/search-form";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = hubMetadata();
-
 interface PageProps { searchParams: Promise<{ page?: string; q?: string; type?: string; category?: string; tag?: string }>; }
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+  const params = await searchParams;
+  return hubMetadata(normalizePage(params.page), Boolean(params.q || params.type || params.category || params.tag));
+}
 
 export default async function ConteudosPage({ searchParams }: PageProps) {
   const params = await searchParams;

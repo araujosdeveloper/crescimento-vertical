@@ -1,5 +1,26 @@
 # Qualidade e aceite
 
+## Aceite humano da Fase 6 — 29 de agosto de 2026
+
+O proprietário declarou expressamente: “Fase 6 aprovada.” O aceite cobriu SEO
+técnico, metadata e canonicals, Open Graph e Twitter, sitemap e robots,
+políticas de indexação, dados estruturados, otimização de imagens, Hero com o
+painel tecnológico restaurado, WebP otimizado visível, desempenho, contratos de
+cache e staging saudável. A captura final confirmou o painel tecnológico
+claramente visível no lado direito da Hero, título legível, contraste adequado,
+CTAs preservados e ausência de sobreposição problemática.
+
+Durante a execução, a Hero inicialmente perdeu a imagem. A primeira correção de
+z-index foi insuficiente e os ajustes de opacity/object-position não resolveram
+de forma confiável. A solução aceita restaurou `background-image` CSS usando o
+WebP otimizado de 114.140 bytes, redução aproximada de 93% sobre o PNG, com
+preload único.
+
+Search Console e GA4 permanecem desativados, sem credenciais ou coleta. A Fase 6
+está concluída formalmente. Permanecem pendentes e bloqueando produção:
+homologação responsiva integral nos cinco viewports e concretização da copy
+comercial da Fase 4.
+
 ## Aceite humano da Fase 5 — 29 de agosto de 2026
 
 Foram aprovados hubs vazios, busca/filtros, políticas editorial e de correções,
