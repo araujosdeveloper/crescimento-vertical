@@ -1,5 +1,16 @@
 # Controle de execução
 
+## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
+
+O responsável pelo produto aprovou os hubs editoriais vazios, busca e filtros,
+política editorial, política de correções, novos campos no Admin, ausência de
+conteúdo fictício, preservação das páginas comerciais e a navegação hierárquica
+reorganizada. A regressão do Header foi encerrada: primeiro nível curto,
+Contato dentro de Empresa, menu compacto de tablet, espaçamento corrigido e
+nenhum título cortado. A Fase 5 está concluída; nenhuma fase posterior foi
+iniciada. Permanecem os gates pré-produção de homologação responsiva integral e
+concretização da copy comercial da Fase 4.
+
 ## Correção de navegação da Fase 5 — 28 de agosto de 2026
 
 Evidência humana identificou menu desktop longo, Contato cortado, competição

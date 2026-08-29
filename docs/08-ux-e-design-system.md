@@ -1,5 +1,14 @@
 # UX e design system
 
+## Aceite humano da navegação da Fase 5 — 29 de agosto de 2026
+
+O responsável pelo produto aprovou os hubs vazios, busca, filtros, políticas,
+novos campos editoriais e a navegação hierárquica corrigida. O primeiro nível
+(Início, Conteúdos, Soluções, Empresa e Solicitar diagnóstico), o menu compacto
+para tablet, a organização e o espaçamento do Header e a ausência de títulos
+cortados foram confirmados. A homologação responsiva integral continua pendente
+como gate geral pré-produção.
+
 ## Correção de navegação — Fase 5 — 28 de agosto de 2026
 
 Foi corrigido o Header que apresentava menu excessivamente longo, corte de

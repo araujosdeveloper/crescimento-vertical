@@ -1,5 +1,14 @@
 # Qualidade e aceite
 
+## Aceite humano da Fase 5 — 29 de agosto de 2026
+
+Foram aprovados hubs vazios, busca/filtros, políticas editorial e de correções,
+campos administrativos, ausência de conteúdo fictício, páginas comerciais e a
+correção de navegação. A validação humana confirmou o primeiro nível Início,
+Conteúdos, Soluções, Empresa e Solicitar diagnóstico, menu compacto em tablet,
+Header organizado e ausência de cortes. A Fase 5 está concluída. A
+homologação responsiva integral permanece gate obrigatório pré-produção.
+
 ## Aceite técnico da correção de navegação — 28 de agosto de 2026
 
 O Header foi validado contra a regressão de menu cortado: primeiro nível curto,

@@ -1,5 +1,16 @@
 # Fase 5 — Portal editorial e experiência de leitura
 
+## Aceite humano e encerramento — 29 de agosto de 2026
+
+O responsável pelo produto aprovou hubs editoriais vazios, busca e filtros,
+políticas editorial e de correções, novos campos no Admin, ausência de conteúdo
+fictício, preservação das páginas comerciais e a navegação reorganizada. Foram
+confirmados o primeiro nível Início, Conteúdos, Soluções, Empresa e Solicitar
+diagnóstico, o menu compacto para tablet, o espaçamento do Header e a ausência
+de títulos cortados. A Fase 5 está formalmente concluída; nenhuma próxima fase
+foi iniciada. A homologação responsiva integral e a concretização da copy
+comercial da Fase 4 permanecem gates obrigatórios pré-produção.
+
 ## Correção de navegação do Header
 
 Após evidência humana de corte de Contato, espaçamento inadequado e overflow em
