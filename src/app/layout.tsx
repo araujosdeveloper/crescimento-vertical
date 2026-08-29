@@ -59,6 +59,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="preload" as="image" type="image/webp" href="/hero-final-crescimento-vertical.webp" fetchPriority="high" />
+      </head>
       <body><JsonLd data={organizationJsonLd()} /><JsonLd data={websiteJsonLd()} />{children}</body>
     </html>
   );

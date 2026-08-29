@@ -2,12 +2,11 @@ import { ArrowDownRight, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { ContactLink } from "@/components/contact-link";
 import { PRIMARY_CONTACT_LABEL } from "@/lib/site";
-import Image from "next/image";
 
 export function Hero() {
   return (
     <section className="hero-stage" id="inicio">
-      <div className="hero-background" aria-hidden="true"><Image src="/hero-final-crescimento-vertical.webp" alt="" fill priority sizes="100vw" quality={82} /></div>
+      <div className="hero-background" aria-hidden="true" />
       <div className="hero-background-overlay" aria-hidden="true" />
 
       <div className="hero-shell hero-layout">
