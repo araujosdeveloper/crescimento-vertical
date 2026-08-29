@@ -2,3 +2,4 @@
 # Exceções por fingerprint histórico exato; ocorrências futuras continuam bloqueadas.
 7c83d881d84cb7a399a67c5bcf7bade44858d10a:tests/env.test.ts:generic-api-key:10
 7c83d881d84cb7a399a67c5bcf7bade44858d10a:tests/env.test.ts:generic-api-key:25
+9313e874b886f7f3f01e1310db3240ca5c2ed23f:tests/lead-intake.test.ts:generic-api-key:5
