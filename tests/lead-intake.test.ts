@@ -2,10 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CONSENT_TEXT, CONSENT_VERSION, consentTextHash, issueFormToken, normalizeUtm, validateLeadInput, verifyFormToken } from "../src/lib/lead-intake";
 import { leadsRead, leadsCreate } from "../src/access";
 
-const valid = () => ({ name: "Pessoa Sintética", email: "sintetico@example.test", serviceInterest: "automation", challenge: "Desafio sintético", contactPreference: "email", consent: true, consentVersion: CONSENT_VERSION, consentTextHash: consentTextHash(), idempotencyKey: "synthetic-idempotency-001", startedAt: Date.now() - 5000, formToken: issueFormToken(), website: "" });
+const valid = () => ({ name: "Pessoa Sintética", email: "sintetico@example.test", serviceInterest: "automation", challenge: "Desafio sintético", contactPreference: "email", consent: true, consentVersion: CONSENT_VERSION, consentTextHash: consentTextHash(), idempotencyKey: "test-key", startedAt: Date.now() - 5000, formToken: issueFormToken(), website: "" });
 
 describe("contratos da captação first-party", () => {
-  beforeEach(() => vi.stubEnv("LEADS_FORM_SECRET", "synthetic-only-secret"));
+  beforeEach(() => vi.stubEnv("LEADS_FORM_SECRET", "phase7-test-value"));
   afterEach(() => vi.unstubAllEnvs());
   it("exige consentimento versionado e rejeita propriedades extras", () => {
     expect(validateLeadInput(valid()).value).toBeTruthy();

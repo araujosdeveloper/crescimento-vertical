@@ -32,6 +32,8 @@ export async function up({ db }: MigrateUpArgs): Promise<void> {
     ALTER TABLE "lead_outbox" ADD CONSTRAINT "lead_outbox_lead_id_fk" FOREIGN KEY ("lead_id") REFERENCES "public"."leads"("id") ON DELETE cascade ON UPDATE no action;
     CREATE INDEX "lead_outbox_lead_idx" ON "lead_outbox" USING btree ("lead_id");
     CREATE INDEX "lead_outbox_state_idx" ON "lead_outbox" USING btree ("state");
+    ALTER TABLE "payload_locked_documents_rels" ADD COLUMN "leads_id" integer;
+    ALTER TABLE "payload_locked_documents_rels" ADD COLUMN "lead_outbox_id" integer;
   `);
 }
 
