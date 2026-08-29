@@ -434,6 +434,18 @@ Os identificadores, endereços, métricas e caminhos internos completos ficam em
 
 ## Registro por sessão
 
+## Registro da sessão 2026-08-29 — candidato da Fase 6 em staging
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | `feat/phase-6-seo-performance` / candidato `65d1c60` |
+| Fase | 6 — SEO técnico, dados estruturados e performance, em execução |
+| Objetivo | Consolidar indexação, metadata, schemas e entrega pública e parar no aceite humano |
+| Alterações | Canonical/OG/Twitter, JSON-LD seguro, robots/sitemap, imagem LCP, testes, ADR-026 e documentação |
+| Validações | 90 testes da aplicação; CMS/recuperação descartáveis; runner 32; conector 34; builds Next/Docker; quatro checks verdes; staging healthy e smokes sem 5xx |
+| Riscos | Lighthouse/CWV de navegador indisponíveis no host; GSC/GA4 dependem de lançamento, credencial e consentimento |
+| Próxima ação | Aceite humano no staging; não fazer merge, produção ou Fase 7 |
+
 ## Registro da sessão 2026-08-28 — fechamento técnico da Fase 2
 
 | Campo | Conteúdo |

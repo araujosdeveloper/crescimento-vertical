@@ -71,3 +71,26 @@ n8n, Hermes e runner editorial ficam fora do escopo.
 
 Permanecem gates pré-produção: homologação responsiva integral nos cinco
 viewports e concretização da copy comercial da Fase 4. A Fase 6 não os conclui.
+
+## Candidato de staging
+
+O PR draft #12 recebeu os quatro checks obrigatórios verdes. Antes do deploy,
+foi criado e validado o backup
+`phase6-predeploy-65d1c60-20260829T035055Z` (Git, PostgreSQL, mídia,
+configuração sanitizada, imagem e rollback; 700/600 e SHA-256). A imagem
+`cv-phase2-staging-app:phase6-staging-65d1c60`, ID `sha256:20f7a6f...`, tem
+89.590.873 bytes. Somente o app foi recriado; PostgreSQL e os demais containers
+mantiveram seus IDs.
+
+O app e PostgreSQL ficaram saudáveis. Rotas públicas, comerciais, editoriais,
+legais, Admin, APIs, live/ready, feed, sitemap, robots e 404 foram exercitados
+sem 5xx. O banco permaneceu com seis serviços, zero cases/artigos e um usuário.
+TLS é válido; acesso externo sem BasicAuth retorna 401 e `X-Robots-Tag` mantém
+`noindex, nofollow, noarchive`. Internamente, metadata e 404 são noindex,
+robots bloqueia tudo, sitemap está vazio e nenhum analytics é emitido.
+
+Medição interna após aquecimento (cinco amostras): home mediana 69,4 ms e
+máxima 149,0 ms; `/conteudos` 17,6/37,4 ms; `/solucoes` 17,7/33,2 ms. Não há
+Chromium no host, portanto Lighthouse, LCP/CLS/TBT de navegador e INP de campo
+não foram declarados; o aceite deve usar inspeção humana no staging e métricas
+de campo somente após lançamento/consentimento.

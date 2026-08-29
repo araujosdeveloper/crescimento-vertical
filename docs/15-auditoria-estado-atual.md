@@ -1,5 +1,16 @@
 # Auditoria do estado atual
 
+## Candidato da Fase 6 em staging — 29 de agosto de 2026
+
+A branch `feat/phase-6-seo-performance` partiu da main `e6c7ce5`; o PR draft
+#12 passou pelos quatro checks obrigatórios. O backup pré-deploy foi validado e
+somente `cv-phase2-staging-app` foi recriado com o candidato `65d1c60`.
+PostgreSQL e todos os demais containers foram preservados. Staging está
+saudável, protegido por BasicAuth, integralmente noindex, sem sitemap público,
+analytics ou 5xx. A Fase 6 permanece em execução até aceite humano; produção,
+n8n e Hermes não foram alterados. Os gates de responsividade integral e copy
+comercial da Fase 4 continuam bloqueando produção.
+
 ## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
 
 O responsável pelo produto aprovou hubs editoriais vazios, busca, filtros,
