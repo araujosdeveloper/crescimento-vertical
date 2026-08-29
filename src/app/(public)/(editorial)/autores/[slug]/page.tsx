@@ -9,7 +9,7 @@ import { JsonLd } from "@/components/editorial/json-ld";
 import { Pagination } from "@/components/editorial/pagination";
 import { getAuthorArticles } from "@/lib/editorial/data";
 import { normalizePage } from "@/lib/editorial/pagination";
-import { authorMetadata, breadcrumbJsonLd } from "@/lib/editorial/seo";
+import { authorMetadata, breadcrumbJsonLd, profilePageJsonLd } from "@/lib/editorial/seo";
 import type { BreadcrumbItem } from "@/types/public";
 
 export const dynamic = "force-dynamic";
@@ -88,6 +88,7 @@ export default async function AuthorPage({ params, searchParams }: PageProps) {
         </div>
       </section>
       <JsonLd data={breadcrumbJsonLd(crumbs)} />
+      <JsonLd data={profilePageJsonLd(author)} />
     </>
   );
 }

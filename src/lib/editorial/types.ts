@@ -76,6 +76,7 @@ export interface ArticleFeedEntry {
   summary: string | null;
   publishedAt: string | null;
   updatedAt: string | null;
+  contentType: ArticleListItem["contentType"];
 }
 
 export interface PaginatedArticles {

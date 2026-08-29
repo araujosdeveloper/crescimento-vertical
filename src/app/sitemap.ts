@@ -6,33 +6,34 @@ import {
   getPublishedCategories,
   getPublicTags,
 } from "@/lib/editorial/data";
+import { getPublicCases, getPublicServices } from "@/lib/commercial/data";
 import { absoluteUrl, isNoindexEnabled } from "@/lib/editorial/seo";
 
-export const revalidate = 0;
+export const revalidate = 300;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (isNoindexEnabled()) {
     return [];
   }
 
-  const [articles, categories, authors, tags] = await Promise.all([
+  const [articles, categories, authors, tags, services, cases] = await Promise.all([
     getAllPublishedArticles(),
     getPublishedCategories(),
     getPublishedAuthors(),
     getPublicTags(),
+    getPublicServices(),
+    getPublicCases(),
   ]);
 
   const entries: MetadataRoute.Sitemap = [
     {
       url: absoluteUrl("/"),
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1,
     },
-    ...["noticias", "analises", "guias", "ferramentas", "comparativos"].map((slug) => ({ url: absoluteUrl(`/${slug}`), changeFrequency: "daily" as const, priority: 0.6 })),
+    ...(["news:noticias", "analysis:analises", "guide:guias", "tool:ferramentas", "comparison:comparativos"] as const).filter((entry) => articles.some((article) => article.contentType === entry.split(":")[0])).map((entry) => ({ url: absoluteUrl(`/${entry.split(":")[1]}`), changeFrequency: "daily" as const, priority: 0.6 })),
     {
       url: absoluteUrl("/conteudos"),
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
     },
@@ -57,6 +58,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     })),
     ...tags.filter((tag) => tag.indexable).map((tag) => ({ url: absoluteUrl(`/tags/${tag.slug}`), changeFrequency: "weekly" as const, priority: 0.4 })),
+    ...services.filter((service) => !service.seo.noindex).map((service) => ({ url: absoluteUrl(`/solucoes/${service.slug}`), changeFrequency: "monthly" as const, priority: 0.7 })),
+    ...cases.filter((item) => !item.seo.noindex).map((item) => ({ url: absoluteUrl(`/cases/${item.slug}`), changeFrequency: "monthly" as const, priority: 0.5 })),
+    ...(cases.length ? [{ url: absoluteUrl("/cases"), changeFrequency: "monthly" as const, priority: 0.5 }] : []),
+    ...["solucoes", "diagnostico", "sobre", "contato", "politica-editorial", "correcoes", "privacidade", "termos", "cookies"].map((slug) => ({ url: absoluteUrl(`/${slug}`), changeFrequency: "monthly" as const, priority: 0.5 })),
   ];
 
   return entries;
