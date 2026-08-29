@@ -24,7 +24,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 3 | Payload CMS, PostgreSQL e autenticação | Fase 2 | Concluída |
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Concluída com ressalva |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
-| 6 | SEO técnico, dados estruturados e performance | Fase 5 | Pendente |
+| 6 | SEO técnico, dados estruturados e performance | Fase 5 | Em execução |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
 | 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
