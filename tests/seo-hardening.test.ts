@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { serializeJsonLd } from "../src/components/editorial/json-ld";
-import { articleJsonLd, organizationJsonLd, profilePageJsonLd, robotsMetadata, websiteJsonLd } from "../src/lib/editorial/seo";
+import { articleJsonLd, hubMetadata, noindexRobotsMetadata, organizationJsonLd, paginatedCanonical, profilePageJsonLd, robotsMetadata, websiteJsonLd } from "../src/lib/editorial/seo";
 import type { ArticleDetail } from "../src/lib/editorial/types";
 import robots from "../src/app/robots";
 import sitemap from "../src/app/sitemap";
@@ -27,6 +27,13 @@ describe("contratos SEO da Fase 6", () => {
   it("staging prevalece sobre indexação específica", () => {
     vi.stubEnv("SITE_NOINDEX", "true");
     expect(robotsMetadata()).toMatchObject({ index: false, follow: false });
+    expect(noindexRobotsMetadata()).toMatchObject({ index: false, follow: false });
+    vi.unstubAllEnvs();
+  });
+  it("canonical preserva paginação e filtros ficam noindex", () => {
+    vi.stubEnv("SITE_NOINDEX", "false");
+    expect(paginatedCanonical("/conteudos", 2)).toBe("https://crescimentovertical.com/conteudos?page=2");
+    expect(hubMetadata(1, true).robots).toMatchObject({ index: false, follow: true });
     vi.unstubAllEnvs();
   });
   it("staging bloqueia robots e produz sitemap vazio", async () => {

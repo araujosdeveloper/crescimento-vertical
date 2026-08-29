@@ -90,6 +90,16 @@ export function robotsMetadata(): NonNullable<Metadata["robots"]> {
   return { index: true, follow: true };
 }
 
+export function noindexRobotsMetadata(): NonNullable<Metadata["robots"]> {
+  return isNoindexEnabled()
+    ? robotsMetadata()
+    : { index: false, follow: true, noarchive: true };
+}
+
+export function paginatedCanonical(path: string, page = 1): string {
+  return page > 1 ? `${absoluteUrl(path)}?page=${page}` : absoluteUrl(path);
+}
+
 export function articleCanonicalPath(slug: string): string {
   return `/conteudos/${slug}`;
 }
@@ -142,13 +152,13 @@ export function articleMetadata(article: ArticleDetail): Metadata {
   };
 }
 
-export function categoryMetadata(category: PublicCategory): Metadata {
+export function categoryMetadata(category: PublicCategory, page = 1): Metadata {
   const title = truncateMetaTitle(`${category.name} | ${SITE_NAME}`);
   const description = truncateMetaDescription(
     category.description ||
       `Conteúdos de ${category.name} sobre IA, automação e tecnologia para negócios.`,
   );
-  const canonical = resolveCanonical(categoryCanonicalPath(category.slug));
+  const canonical = paginatedCanonical(categoryCanonicalPath(category.slug), page);
 
   return {
     title,
@@ -167,13 +177,13 @@ export function categoryMetadata(category: PublicCategory): Metadata {
   };
 }
 
-export function authorMetadata(author: PublicAuthor): Metadata {
+export function authorMetadata(author: PublicAuthor, page = 1): Metadata {
   const title = truncateMetaTitle(`${author.name} | ${SITE_NAME}`);
   const description = truncateMetaDescription(
     author.biography ||
       `Perfil público de ${author.name} na Crescimento Vertical.`,
   );
-  const canonical = resolveCanonical(authorCanonicalPath(author.slug));
+  const canonical = paginatedCanonical(authorCanonicalPath(author.slug), page);
 
   return {
     title,
@@ -192,16 +202,17 @@ export function authorMetadata(author: PublicAuthor): Metadata {
   };
 }
 
-export function hubMetadata(): Metadata {
+export function hubMetadata(page = 1, filtered = false): Metadata {
+  const canonical = paginatedCanonical("/conteudos", page);
   return {
     title: DEFAULT_TITLE,
     description: DEFAULT_DESCRIPTION,
-    alternates: { canonical: absoluteUrl("/conteudos") },
-    robots: robotsMetadata(),
+    alternates: { canonical },
+    robots: filtered ? noindexRobotsMetadata() : robotsMetadata(),
     openGraph: {
       title: DEFAULT_TITLE,
       description: DEFAULT_DESCRIPTION,
-      url: absoluteUrl("/conteudos"),
+      url: canonical,
       type: "website",
       locale: "pt_BR",
       siteName: SITE_NAME,

@@ -19,13 +19,14 @@ interface PageProps {
   searchParams: Promise<{ page?: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const page = normalizePage((await searchParams).page);
   const data = await getAuthorArticles(slug);
   if (!data) {
     return {};
   }
-  return authorMetadata(data.author);
+  return authorMetadata(data.author, page);
 }
 
 export default async function AuthorPage({ params, searchParams }: PageProps) {
