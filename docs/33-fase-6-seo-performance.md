@@ -1,7 +1,7 @@
 # Fase 6 — SEO técnico, dados estruturados e performance
 
-Data de início: 29 de agosto de 2026. Estado: em execução até aceite humano do
-candidato de staging.
+Data de início: 29 de agosto de 2026. Estado: concluída em 29 de agosto de 2026
+após aceite humano.
 
 ## Matriz de rotas
 
@@ -94,3 +94,25 @@ máxima 149,0 ms; `/conteudos` 17,6/37,4 ms; `/solucoes` 17,7/33,2 ms. Não há
 Chromium no host, portanto Lighthouse, LCP/CLS/TBT de navegador e INP de campo
 não foram declarados; o aceite deve usar inspeção humana no staging e métricas
 de campo somente após lançamento/consentimento.
+
+## Aceite humano e encerramento
+
+Em 29 de agosto de 2026, o proprietário declarou expressamente: “Fase 6
+aprovada.” A captura humana final confirmou o painel tecnológico claramente
+visível no lado direito da Hero, título legível, contraste adequado, CTAs
+preservados, ausência de sobreposição problemática e identidade visual
+restaurada.
+
+A Hero inicialmente perdeu a imagem durante a otimização. A primeira correção
+de z-index foi insuficiente e os ajustes de opacity/object-position também não
+resolveram de forma confiável. A solução definitiva restaurou o fundo com CSS
+`background-image` usando o WebP otimizado de 114.140 bytes, redução aproximada
+de 93% em relação ao PNG, com preload único e sem alterar copy, layout, altura ou
+CTAs.
+
+O PR #12 recebeu os quatro checks obrigatórios verdes e foi integrado. O staging
+permaneceu saudável. Search Console e GA4 continuam desativados; produção, n8n
+e Hermes foram preservados. A Fase 6 está concluída, nenhuma fase está em
+execução e as Fases 7–12 permanecem pendentes. Os dois gates pré-produção —
+homologação responsiva integral nos cinco viewports e concretização da copy
+comercial da Fase 4 — permanecem preservados e continuam bloqueando produção.

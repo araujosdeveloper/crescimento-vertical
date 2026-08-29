@@ -728,3 +728,21 @@ robots, sitemap e 404; carregamento e transformação de imagem pelo Sharp.
 O PR #8 permanece aberto e draft. A homologação visual humana nos cinco
 viewports continua pendente. Nenhum staging, produção, container ativo, banco
 persistente, DNS, Traefik, n8n ou Hermes foi alterado.
+
+## Encerramento da Fase 6 com aceite humano — 29 de agosto de 2026
+
+O proprietário declarou “Fase 6 aprovada” após captura humana final no staging,
+confirmando o painel tecnológico visível no lado direito da Hero, título
+legível, contraste adequado, CTAs preservados e identidade visual restaurada.
+Durante a fase, a Hero inicialmente perdeu a imagem; z-index e ajustes de
+opacity/object-position foram insuficientes. A solução definitiva restaurou o
+fundo por CSS `background-image` com o WebP otimizado de 114.140 bytes, redução
+aproximada de 93% sobre o PNG.
+
+O PR #12 e seus quatro checks foram aprovados, o staging permaneceu saudável e
+Search Console/GA4 continuam desativados. Produção, PostgreSQL persistente,
+n8n, Hermes, DNS e Traefik não foram alterados. A Fase 6 está concluída e
+nenhuma fase está em execução; Fases 7–12 permanecem pendentes. Os gates
+pré-produção — homologação responsiva integral nos cinco viewports e
+concretização da copy comercial da Fase 4 — continuam preservados e bloqueiam
+produção.
