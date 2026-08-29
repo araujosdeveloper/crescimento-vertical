@@ -25,7 +25,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Concluída com ressalva |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
-| 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
+| 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Em execução |
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
 | 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
 | 10 | Conteúdo inicial e validação editorial | Fase 9 | Pendente |

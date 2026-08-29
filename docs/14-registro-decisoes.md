@@ -762,3 +762,25 @@ Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
 
 Usar docs/templates/adr.md e adicionar aqui um resumo com número sequencial,
 data, status, decisão, motivo, consequências e plano de reversão.
+
+## ADR-027 — Captação first-party, consentimento versionado e entrega por outbox
+
+- Data: 2026-08-29
+- Status: aprovada para a Fase 7
+- Decisão: Payload/PostgreSQL é a fonte de verdade; o formulário usa endpoint
+  dedicado e schema estrito, sem escrita pública genérica no Payload. O
+  consentimento é explícito, separado de marketing e versionado. Dados são
+  minimizados, normalizados e protegidos por idempotência, honeypot, token HMAC,
+  limites e allowlist de origem. A entrega comercial usa outbox transacional
+  desacoplada. Logs não contêm PII; métricas first-party não identificam pessoas;
+  GA4 permanece desativado.
+- Notificação: sem credencial/provedor autorizado no preflight, o outbox fica
+  pendente e nenhum n8n/Hermes/Telegram/WhatsApp é usado como atalho.
+- Retenção: `retentionUntil` inicial de 180 dias; exclusão/anonimização manual,
+  dry-run, lote limitado e trilha mínima.
+- Motivo: permitir captação segura e auditável sem antecipar contratação de
+  provedor externo, consentimento da Fase 7 posterior ou automação da Fase 9.
+- Consequências: leads não são públicos, automation não tem acesso e o fluxo
+  pode ser homologado sem envio externo; a entrega comercial permanece pendente.
+- Reversão: desabilitar o endpoint, restaurar imagem/migration anterior via
+  backup e manter os dados sob acesso administrativo restrito.

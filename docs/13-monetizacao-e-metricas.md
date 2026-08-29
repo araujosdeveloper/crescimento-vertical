@@ -141,3 +141,10 @@ Já são metas obrigatórias desde o início:
 - Patrocinador não aprova conclusão editorial.
 - Comparativo revela critérios e relação comercial.
 - Não recomendar ferramenta apenas pela comissão.
+# Fase 7 — mensuração comercial first-party
+
+O fluxo prepara eventos não identificáveis de CTA, WhatsApp e estados do
+formulário, sem GA4, scripts externos, cookies não essenciais ou identificadores
+pessoais. A atribuição aceita apenas rota, serviço/CTA, conteúdo e UTMs
+normalizadas. Leads são persistidos no Payload/PostgreSQL e aguardam outbox de
+notificação quando houver provedor autorizado.

@@ -371,3 +371,9 @@ Foi adicionada a coleção `tags` (sem seed, `indexable=false` por padrão) e
 campos editoriais em `articles`, com migration determinística. Fontes continuam
 privadas; somente snapshots de citações HTTPS de fontes verificadas entram no
 DTO público. Usuários, roles, dossiês e notas internas nunca são expostos.
+# Fase 7 — captação segura
+
+A coleção `leads` e a outbox `lead-outbox` são privadas: somente admin/reviewer
+podem ler no Admin, e a criação pública ocorre exclusivamente por
+`POST /api/leads`, com validação estrita, consentimento e idempotência. A API
+Payload genérica não lista nem consulta leads; automation não tem acesso.

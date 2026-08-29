@@ -21,6 +21,14 @@ está concluída formalmente. Permanecem pendentes e bloqueando produção:
 homologação responsiva integral nos cinco viewports e concretização da copy
 comercial da Fase 4.
 
+## Critérios adicionais da Fase 7
+
+O aceite deve comprovar um único envio humano real no staging, sem exibir os
+dados pessoais no relatório. Validar sucesso, idempotência, outbox, acesso
+autenticado no Admin, ausência de PII em logs, retenção e exclusão/anonimização
+em dry-run. Se não houver credencial de notificação, o armazenamento é
+aprovável, mas a notificação externa permanece bloqueada.
+
 ## Aceite humano da Fase 5 — 29 de agosto de 2026
 
 Foram aprovados hubs vazios, busca/filtros, políticas editorial e de correções,

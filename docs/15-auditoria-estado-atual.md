@@ -746,3 +746,11 @@ nenhuma fase está em execução; Fases 7–12 permanecem pendentes. Os gates
 pré-produção — homologação responsiva integral nos cinco viewports e
 concretização da copy comercial da Fase 4 — continuam preservados e bloqueiam
 produção.
+
+## Início da Fase 7 — 29 de agosto de 2026
+
+A Fase 7 foi iniciada na branch `feat/phase-7-lead-capture-measurement`, com
+merge-base `7cd8aaf6b6442bd2fd8f64b4abe45b958c0c3f2f`. O preflight confirmou
+staging saudável, PostgreSQL preservado, Search Console/GA4 desativados e
+ausência de credenciais utilizáveis para notificação externa. O escopo é
+first-party, sem alteração de produção, n8n, Hermes ou runner editorial.

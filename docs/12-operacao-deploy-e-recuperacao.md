@@ -233,3 +233,10 @@ staging permanecem intactos.
 - fontes editoriais;
 - retenção de dados;
 - desempenho de clusters e serviços.
+# Fase 7 — deploy e rollback
+
+Migrations de leads devem ser aplicadas somente após backup verificável em
+PostgreSQL descartável/staging. Rollback restaura a imagem anterior e reverte a
+migration com procedimento revisado; não há cron de retenção ou notificação em
+produção nesta fase. A ausência de provedor externo deixa a outbox pendente sem
+afetar o armazenamento do lead.

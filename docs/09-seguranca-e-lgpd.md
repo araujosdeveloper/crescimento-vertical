@@ -162,3 +162,10 @@ A retenção definitiva depende da política jurídica aprovada. Até lá:
 7. Registrar causa, correção e prevenção.
 
 Nenhum incidente será “resolvido” apagando logs sem preservação.
+# Fase 7 — dados de diagnóstico
+
+O formulário coleta somente dados necessários ao atendimento, com consentimento
+explícito versionado (`2026-08-29.v1`), finalidade, revogação, retenção de 180
+dias e link para privacidade. Não há marketing, analytics, cookies não
+essenciais, IP bruto, User-Agent ou PII em logs. Exclusão/anonimização é manual,
+idempotente e dry-run por padrão; nenhuma integração externa foi ativada.

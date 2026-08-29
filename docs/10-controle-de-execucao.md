@@ -530,6 +530,19 @@ Ao concluir uma sessão de trabalho, registrar:
 - Falha reabre o item correspondente.
 - Fase só muda de estado após todos os critérios de saída.
 
+## Registro da sessão 2026-08-29 — início da Fase 7
+
+| Campo | Conteúdo |
+| --- | --- |
+| Data | 2026-08-29 |
+| Branch/merge-base | `feat/phase-7-lead-capture-measurement` / `7cd8aaf6` |
+| Fase | 7 — Captação, diagnóstico e mensuração comercial — em execução |
+| Objetivo | Implementar captação first-party com consentimento, segurança, outbox e mensuração sem PII |
+| Escopo | Coleções privadas Leads/LeadOutbox, endpoint dedicado, formulário acessível, antispam e retenção manual |
+| Integrações | Nenhuma credencial/provedor externo utilizável; Search Console, GA4, n8n e Hermes não serão ativados |
+| Riscos/gates | Dois gates pré-produção anteriores permanecem preservados e bloqueiam produção |
+| Próxima ação | Validar migration, testes, CI e staging; parar para teste humano real |
+
 ## Registro da sessão 2026-08-29 — aceite humano e encerramento da Fase 6
 
 | Campo | Conteúdo |
