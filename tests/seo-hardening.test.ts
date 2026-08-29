@@ -65,5 +65,11 @@ describe("contratos SEO da Fase 6", () => {
     expect(css).toMatch(/\.hero-layout \{[^}]*z-index: 3;/);
     expect(css).toContain("object-fit: cover");
     expect(css).toContain("object-position: right bottom");
+    expect(css).toMatch(/\.hero-background \{[^}]*opacity: 1 !important;/);
+    expect(css).not.toMatch(/\.hero-background \{[^}]*opacity:\s*\.(?:[0-5]\d*|6[0-8]?|\.69)\s*!important;/);
+    expect(css).not.toMatch(/\.hero-background\s*\{[^}]*background-position/);
+    expect(css).not.toContain("rgba(2, 6, 23, .995)");
+    expect(css).not.toContain("rgba(2, 6, 23, .97) 74%");
+    expect(css).toMatch(/\.hero-background img \{[^}]*object-position: 72% bottom !important;/);
   });
 });
