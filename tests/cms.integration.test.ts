@@ -153,6 +153,7 @@ describeIntegration("ciclo editorial completo em PostgreSQL descartável", () =>
       },
       heroImage: media.id,
       author: author.id,
+      publicReviewer: author.id,
       category: category.id,
       sources: [source.id],
       dossier: dossier.id,

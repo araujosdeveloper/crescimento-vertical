@@ -58,6 +58,11 @@ describe("DTO público — não expõe campos internos", () => {
       featuredImage: { url: "/api/media/file/img-feature.png", alt: "Imagem ilustrativa", width: 1600, height: 900 },
       author: { name: "Autor Público", slug: "autor-publico" },
       category: { name: "Categoria", slug: "categoria" },
+      contentType: "news",
+      contentTypeLabel: "Notícias",
+      publicReviewer: null,
+      readingTime: null,
+      tags: [],
     });
   });
 
@@ -88,7 +93,6 @@ describe("DTO público — não expõe campos internos", () => {
       '"noindex"',
       '"sources"',
       '"dossier"',
-      '"tags"',
     ]) {
       expect(serialized).not.toContain(forbidden);
     }

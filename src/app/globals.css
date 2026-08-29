@@ -100,11 +100,22 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .mobile-nav-link:hover,.mobile-nav-link:focus-visible,.mobile-nav-link[aria-current="page"] { background: rgba(10,132,255,.1); color: var(--color-text); }
 .mobile-contact-link { margin-top: auto; }
 .site-header .header-cta { display: none !important; }
+.site-navigation { display: none; align-items: center; gap: clamp(.55rem,1.4vw,1.5rem); min-width: 0; }
+.nav-group { position: relative; }
+.nav-group-trigger { display: inline-flex; align-items: center; gap: .3rem; border: 0; background: transparent; cursor: pointer; white-space: nowrap; }
+.nav-chevron { transition: transform var(--transition-fast); }.nav-chevron.is-open { transform: rotate(180deg); }
+.nav-dropdown { position: absolute; top: calc(100% + 1rem); right: 0; display: grid; width: min(360px,calc(100vw - 2rem)); gap: .2rem; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: rgba(5,15,29,.98); padding: .55rem; box-shadow: var(--shadow-raised); }
+.nav-dropdown-overview,.nav-dropdown-link { display: flex; min-height: 44px; flex-direction: column; justify-content: center; border-radius: var(--radius-sm); padding: .55rem .7rem; color: var(--color-text-muted); }
+.nav-dropdown-overview strong { color: var(--color-text); font-size: .85rem; }.nav-dropdown-overview span { margin-top: .15rem; font-size: .7rem; }.nav-dropdown-link { color: var(--color-text-muted); font-size: .8rem; }
+.nav-dropdown-link:hover,.nav-dropdown-link:focus-visible,.nav-dropdown-overview:hover,.nav-dropdown-overview:focus-visible,.nav-dropdown-link[aria-current="page"],.nav-dropdown-overview[aria-current="page"] { background: rgba(10,132,255,.12); color: var(--color-text); }
 
-@media (min-width: 1024px) {
+@media (min-width: 1180px) {
+  .site-navigation { display: flex; }
   .site-header .header-cta { display: inline-flex !important; }
   .site-header .mobile-menu-button,.site-header .mobile-menu { display: none !important; }
 }
+
+@media (max-width: 1179px) { .header-shell { width: min(100% - 48px,1600px); } .mobile-menu-button { display: grid; } }
 
 .interface-state { margin-top: var(--space-7); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface); padding: var(--space-6); box-shadow: var(--shadow-raised); }
 .interface-state h2 { color: var(--color-text); font-size: 1.35rem; }

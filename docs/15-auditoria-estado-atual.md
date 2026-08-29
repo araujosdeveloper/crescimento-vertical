@@ -1,5 +1,33 @@
 # Auditoria do estado atual
 
+## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
+
+O responsável pelo produto aprovou hubs editoriais vazios, busca, filtros,
+políticas, novos campos no Admin, ausência de conteúdo fictício, páginas
+comerciais e a navegação hierárquica corrigida. O primeiro nível, o menu
+compacto para tablet, a organização do Header e a ausência de títulos cortados
+foram confirmados. A Fase 5 está concluída e nenhuma próxima fase foi iniciada.
+O gate de homologação responsiva integral continua obrigatório antes da
+produção, assim como a concretização da copy comercial da Fase 4.
+
+## Correção de navegação — 28 de agosto de 2026
+
+Foi registrada regressão visual no Header: menu plano excessivamente longo,
+Contato cortado e overflow em tablet. A Fase 5 corrigiu a hierarquia usando
+fonte única tipada, grupos Conteúdos/Soluções/Empresa, CTA de diagnóstico e
+menu mobile/tablet com accordion acessível. O breakpoint desktop é 1180px.
+Nenhum banco, migration, seed, dado persistente ou integração externa foi
+alterado. A homologação responsiva integral segue pendente para o hardening
+visual final.
+
+## Início formal da Fase 5 — 28 de agosto de 2026
+
+A branch `feat/phase-5-editorial-experience` foi criada a partir da `main`
+`e153f50f9591cf74f804d57a0e213acad463fd17`, com merge-base exato. A Fase 5 é a
+única fase em execução; as Fases 6–12 permanecem pendentes. Os gates de
+homologação responsiva integral e concretização da copy comercial da Fase 4
+continuam obrigatórios antes da produção.
+
 Data da auditoria: 23 de agosto de 2026.
 
 ## Encerramento formal da Fase 4 com ressalva — 28 de agosto de 2026

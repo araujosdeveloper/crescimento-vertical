@@ -1,0 +1,2 @@
+import type { PublicCorrection } from "@/lib/editorial/types";
+export function CorrectionNotice({ corrections }: { corrections: PublicCorrection[] }) { if (!corrections.length) return null; return <section className="rounded border border-amber-400/40 p-4"><h2 className="font-semibold">Histórico de correções</h2><ul className="mt-2 space-y-1">{corrections.map((item, index) => <li key={`${item.date}-${index}`}>{item.summary}</li>)}</ul></section>; }

@@ -209,3 +209,9 @@ A Fase 2B implementou, em código, a exposição pública do conteúdo editorial
   apenas de artigos publicados.
 - `SITE_NOINDEX` preservado: staging permanece noindex; produção só indexa com
   `SITE_NOINDEX=false`.
+# Atualização Fase 5
+
+Artigos agora possuem tipo fechado, revisor público, tempo de leitura,
+impacto empresarial, citações públicas versionadas, correções, disclosure de
+IA e relações editoriais/comerciais. Busca, filtros e tags não indexáveis usam
+`noindex`; a Fase 6 permanece responsável pelo hardening avançado.

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { formatDate } from "@/lib/editorial/format";
 import type { ArticleListItem } from "@/lib/editorial/types";
 import { ArticleImage } from "./article-image";
+import { ContentTypeBadge } from "./content-type-badge";
 
 export function ArticleCard({ article }: { article: ArticleListItem }) {
   return (
@@ -27,6 +28,7 @@ export function ArticleCard({ article }: { article: ArticleListItem }) {
           {article.category ? (
             <span className="article-card-category">{article.category.name}</span>
           ) : null}
+          <ContentTypeBadge type={article.contentType} label={article.contentTypeLabel} />
           <h3 className="article-card-title">{article.title}</h3>
           {article.summary ? (
             <p className="article-card-summary">{article.summary}</p>

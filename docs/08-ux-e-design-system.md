@@ -1,5 +1,25 @@
 # UX e design system
 
+## Aceite humano da navegação da Fase 5 — 29 de agosto de 2026
+
+O responsável pelo produto aprovou os hubs vazios, busca, filtros, políticas,
+novos campos editoriais e a navegação hierárquica corrigida. O primeiro nível
+(Início, Conteúdos, Soluções, Empresa e Solicitar diagnóstico), o menu compacto
+para tablet, a organização e o espaçamento do Header e a ausência de títulos
+cortados foram confirmados. A homologação responsiva integral continua pendente
+como gate geral pré-produção.
+
+## Correção de navegação — Fase 5 — 28 de agosto de 2026
+
+Foi corrigido o Header que apresentava menu excessivamente longo, corte de
+Contato e overflow em tablet. O Header desktop usa três grupos compactos com
+controles por clique, `aria-expanded`, `aria-controls`, `aria-haspopup`, foco,
+Escape, clique externo e fechamento ao navegar. Abaixo de 1180px o menu
+compacto mobile/tablet usa accordion, foco preso, scroll lock, áreas de toque de
+44px e apenas um grupo aberto por vez. A fonte é única e tipada; a verificação
+visual específica cobre 1024, 1100, 1180, 1280 e 1440px. A homologação
+responsiva integral do projeto continua pendente no hardening final.
+
 ## Direção visual
 
 As páginas comerciais da Fase 4 reutilizam `SiteShell`, `Container`, `Section`,
@@ -144,3 +164,8 @@ Requisitos:
 Mudança visual é aprovada por comparação de screenshots de baseline e nova
 versão. Diferença intencional deve corresponder ao escopo da fase; regressão
 acidental bloqueia entrega.
+# Atualização Fase 5
+
+A experiência editorial reutiliza ArticleCard, Breadcrumbs, Pagination e estados
+existentes, acrescentando badges de tipo, autoria/revisão, fontes, correções,
+impacto, relacionados, busca e filtros, sem duplicar o shell público.

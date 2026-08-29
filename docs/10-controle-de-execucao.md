@@ -1,9 +1,36 @@
 # Controle de execução
 
+## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
+
+O responsável pelo produto aprovou os hubs editoriais vazios, busca e filtros,
+política editorial, política de correções, novos campos no Admin, ausência de
+conteúdo fictício, preservação das páginas comerciais e a navegação hierárquica
+reorganizada. A regressão do Header foi encerrada: primeiro nível curto,
+Contato dentro de Empresa, menu compacto de tablet, espaçamento corrigido e
+nenhum título cortado. A Fase 5 está concluída; nenhuma fase posterior foi
+iniciada. Permanecem os gates pré-produção de homologação responsiva integral e
+concretização da copy comercial da Fase 4.
+
+## Correção de navegação da Fase 5 — 28 de agosto de 2026
+
+Evidência humana identificou menu desktop longo, Contato cortado, competição
+entre logo/links/CTA e overflow em tablet horizontal. A correção reorganizou a
+navegação em Início, Conteúdos, Soluções, Empresa e Solicitar diagnóstico, com
+dropdowns acessíveis no desktop e accordion no mobile/tablet. O breakpoint
+adotado é 1180px; não houve migration, seed, alteração de dados ou dependência.
+Testes de componente, lint, typecheck, build e diff foram executados. A
+responsividade integral permanece gate obrigatório pré-produção.
+
 Este documento é o quadro de controle. O detalhamento das fases permanece em
 ../ROTEIRO-MESTRE.md.
 
 ## Situação
+
+- Fase ativa: Fase 5 — Portal editorial e experiência de leitura, iniciada em
+  28 de agosto de 2026 a partir da `main` `e153f50f9591cf74f804d57a0e213acad463fd17`.
+- Fases 0–4 concluídas; Fases 6–12 pendentes.
+- Gates pré-produção preservados: homologação responsiva integral e
+  concretização da copy comercial da Fase 4.
 
 - Fase ativa: nenhuma; a Fase 4 — Arquitetura pública e páginas comerciais foi
   concluída com ressalva em 28 de agosto de 2026.

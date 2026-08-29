@@ -7,6 +7,9 @@ export const WORKFLOW_STATUSES = [
   "published",
   "archived",
 ] as const;
+export const CONTENT_TYPES = ["news", "analysis", "guide", "tool", "comparison"] as const;
+export type ContentType = (typeof CONTENT_TYPES)[number];
+export const CONTENT_TYPE_LABELS: Record<ContentType, string> = { news: "Notícias", analysis: "Análises", guide: "Guias", tool: "Ferramentas", comparison: "Comparativos" };
 
 export type WorkflowStatus = (typeof WORKFLOW_STATUSES)[number];
 

@@ -29,6 +29,7 @@
 - [Fundação editorial — Payload + PostgreSQL](17-fundacao-editorial-payload.md)
 - [Fase 3 — CMS, PostgreSQL e autenticação](30-fase-3-cms-postgresql-autenticacao.md)
 - [Fase 4 — Arquitetura pública e páginas comerciais](31-fase-4-arquitetura-publica-paginas-comerciais.md)
+- [Fase 5 — Portal editorial e experiência de leitura](32-fase-5-portal-editorial-experiencia-leitura.md)
 - [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 - [Portal editorial público](19-portal-editorial-publico.md)
 - [Deploy do portal editorial público no staging](20-deploy-phase2b-staging.md)

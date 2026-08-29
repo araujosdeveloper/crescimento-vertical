@@ -153,6 +153,7 @@ export const sourcesDelete: Access = ({ req: { user } }) => isAdmin(user);
 // ---------------------------------------------------------------------------
 
 export const publicRead: Access = () => true;
+export const tagsRead: Access = () => ({ active: { equals: true } });
 
 export const taxonomyCreate: Access = ({ req: { user } }) => {
   if (!user) {

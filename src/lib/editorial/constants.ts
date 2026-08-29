@@ -29,6 +29,7 @@ export const EDITORIAL_TAGS = {
   articles: "editorial-articles",
   authors: "editorial-authors",
   categories: "editorial-categories",
+  tags: "editorial-tags",
 } as const;
 
 /** Caminhos públicos revalidados após qualquer mudança editorial. */
@@ -37,4 +38,10 @@ export const EDITORIAL_REVALIDATE_PATHS = [
   "/conteudos",
   "/feed.xml",
   "/sitemap.xml",
+  "/noticias",
+  "/analises",
+  "/guias",
+  "/ferramentas",
+  "/comparativos",
+  "/busca",
 ] as const;

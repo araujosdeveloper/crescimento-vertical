@@ -1,0 +1,2 @@
+import type { PublicCitation } from "@/lib/editorial/types";
+export function SourceList({ citations }: { citations: PublicCitation[] }) { if (!citations.length) return null; return <section><h2 className="text-2xl font-semibold">Fontes consultadas</h2><ul className="mt-3 space-y-2">{citations.map((source) => <li key={`${source.url}-${source.accessedAt}`}><a className="underline" href={source.url} rel="noreferrer" target="_blank">{source.title || source.publisher}</a>{source.isPrimary ? " · fonte primária" : ""}</li>)}</ul></section>; }

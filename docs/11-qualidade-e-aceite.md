@@ -1,5 +1,23 @@
 # Qualidade e aceite
 
+## Aceite humano da Fase 5 — 29 de agosto de 2026
+
+Foram aprovados hubs vazios, busca/filtros, políticas editorial e de correções,
+campos administrativos, ausência de conteúdo fictício, páginas comerciais e a
+correção de navegação. A validação humana confirmou o primeiro nível Início,
+Conteúdos, Soluções, Empresa e Solicitar diagnóstico, menu compacto em tablet,
+Header organizado e ausência de cortes. A Fase 5 está concluída. A
+homologação responsiva integral permanece gate obrigatório pré-produção.
+
+## Aceite técnico da correção de navegação — 28 de agosto de 2026
+
+O Header foi validado contra a regressão de menu cortado: primeiro nível curto,
+grupos lógicos, Contato dentro de Empresa, CTA destacado, `aria-expanded`,
+`aria-controls`, `aria-haspopup`, `aria-current`, Escape, clique externo,
+retorno de foco, teclado e focus trap no menu compacto. O breakpoint de 1180px
+mantém 1024px em menu compacto e evita sobreposição nas larguras intermediárias.
+O gate de homologação responsiva completa em cinco viewports continua aberto.
+
 ## Pirâmide de testes
 
 ### Unitários
@@ -224,3 +242,9 @@ Resultado esperado: o sistema bloqueia os casos inseguros e registra o motivo.
 | P1 | Site indisponível, lead perdido, login quebrado | Bloqueia release |
 | P2 | SEO importante, layout quebrado, erro funcional parcial | Corrigir antes |
 | P3 | Refinamento sem impacto material | Pode ser planejado |
+### Fase 5 — critérios adicionais
+
+Os cinco tipos, hubs, busca, filtros, tags, atribuição pública, citações,
+correções, relacionados, RSS, sitemap e estados vazios devem preservar DTOs
+whitelist, drafts/futuros privados, canonical correto e noindex de busca/filtros
+e tags não indexáveis.

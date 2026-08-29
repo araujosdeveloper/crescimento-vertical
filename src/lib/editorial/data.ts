@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { getPayload } from "payload";
+import type { Where } from "payload";
 import type { Payload } from "payload";
 import type { User } from "@/payload-types";
 
@@ -17,6 +18,7 @@ import {
   toArticleListItem,
   toPublicAuthor,
   toPublicCategory,
+  toPublicTag,
 } from "./mappers";
 import { computePagination } from "./pagination";
 import { publicArticlesWhere, withPublicArticlesWhere } from "./query";
@@ -27,6 +29,8 @@ import type {
   PaginatedArticles,
   PublicAuthor,
   PublicCategory,
+  PublicTag,
+  EditorialSearchParams,
 } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -516,4 +520,24 @@ const getPublishedAuthorsCached = unstable_cache(
 
 export function getPublishedAuthors(): Promise<PublicAuthor[]> {
   return getPublishedAuthorsCached();
+}
+
+const getPublicTagsCached = unstable_cache(async (): Promise<PublicTag[]> => {
+  const payload = await getPayloadInstance(); if (!payload) return [];
+  const result = await payload.find({ collection: "tags", where: { active: { equals: true } }, draft: false, overrideAccess: false, limit: 500, sort: "order" });
+  return result.docs.map(toPublicTag).filter((tag): tag is PublicTag => tag !== null);
+}, ["editorial-tags"], { revalidate: EDITORIAL_REVALIDATE_SECONDS, tags: [EDITORIAL_TAGS.tags] });
+export function getPublicTags(): Promise<PublicTag[]> { return getPublicTagsCached(); }
+
+function normalizeSearch(value: unknown, max = 80): string { return typeof value === "string" ? value.trim().replace(/[<>]/g, "").slice(0, max) : ""; }
+export async function searchPublicArticles(params: EditorialSearchParams = {}): Promise<PaginatedArticles> {
+  const payload = await getPayloadInstance(); const page = Math.max(1, Math.floor(params.page ?? 1)); if (!payload) return emptyPaginated(page);
+  const q = normalizeSearch(params.q); const type = normalizeSearch(params.type, 20); const category = normalizeSearch(params.category, 80); const tag = normalizeSearch(params.tag, 80);
+  const extra: Where[] = [];
+  if (q) extra.push({ or: [{ title: { contains: q } }, { excerpt: { contains: q } }] });
+  if (type && ["news", "analysis", "guide", "tool", "comparison"].includes(type)) extra.push({ contentType: { equals: type } });
+  if (category) extra.push({ "category.slug": { equals: category } });
+  if (tag) extra.push({ "tagRelations.slug": { equals: tag } });
+  const result = await payload.find({ collection: "articles", where: withPublicArticlesWhere(extra.length ? { and: extra } : {}), draft: false, overrideAccess: false, depth: 1, limit: EDITORIAL_PAGE_SIZE, page, sort: "-publishedAt" });
+  return { items: filterPublic(result.docs).map(toArticleListItem), page, ...computePagination(result.totalDocs, page, EDITORIAL_PAGE_SIZE) };
 }
