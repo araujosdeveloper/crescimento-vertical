@@ -732,6 +732,22 @@ anterior via backup/migration aprovada; não autoriza expor fontes ou usuários.
 
 ## Decisões operacionais pendentes
 
+## ADR-026 — Ativação externa condicionada ao lançamento
+
+- Data: 2026-08-29
+- Status: aprovada
+- Fase afetada: 6, com ativação operacional posterior
+- Decisão: Search Console e analytics só podem ser ativados no lançamento,
+  com credenciais reais e, para analytics, consentimento adequado. Staging não
+  coleta dados. Nenhum token, Measurement ID ou código de verificação é
+  inventado; nenhum script é emitido por padrão.
+- Motivo: preparar descoberta e mensuração sem antecipar a Fase 7, expor dados
+  pessoais ou criar uma integração externa incompleta.
+- Consequências: sitemap e metadata ficam prontos para cadastro manual futuro;
+  verificação de propriedade, consentimento e coleta permanecem gates externos.
+- Reversão: remover eventual configuração externa e manter a aplicação sem
+  adaptador/script, que é o estado seguro padrão.
+
 Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
 
 | Decisão | Fase | Critério |
