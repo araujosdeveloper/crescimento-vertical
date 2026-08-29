@@ -8,9 +8,14 @@ describe("contratos da captação first-party", () => {
   beforeEach(() => vi.stubEnv("LEADS_FORM_SECRET", "phase7-test-value"));
   afterEach(() => vi.unstubAllEnvs());
   it("exige consentimento versionado e rejeita propriedades extras", () => {
-    expect(validateLeadInput(valid()).value).toBeTruthy();
+    const result = validateLeadInput(valid());
+    expect(result.value).toMatchObject({ consentVersion: CONSENT_VERSION, consentTextHash: consentTextHash() });
     expect(validateLeadInput({ ...valid(), consent: false })).toEqual({ error: "invalid" });
     expect(validateLeadInput({ ...valid(), extra: "rejeitar" })).toEqual({ error: "invalid" });
+  });
+  it("retorna os campos obrigatórios para persistência atômica sem provedor", () => {
+    const result = validateLeadInput(valid());
+    expect(result.value).toMatchObject({ idempotencyKey: "test-key", consentVersion: CONSENT_VERSION });
   });
   it("assina tokens com expiração e normaliza UTMs", () => {
     const token = issueFormToken();
