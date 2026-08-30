@@ -58,7 +58,7 @@ Erros: 400 (JSON inválido), 401 (assinatura/timestamp), 409 (nonce repetido),
 
 ## Testes
 
-`services/hermes-editorial-runner/tests/` (32 testes, `unittest`): HMAC, nonce,
+`services/hermes-editorial-runner/tests/` (37 testes, `unittest`): HMAC, nonce,
 schemas, dupla trava, comando sem shell e integração HTTP (401/409/413/400/422/
 503/404/200). Execução: `python3 -m unittest discover -s tests -t .`.
 
@@ -68,3 +68,8 @@ O n8n consome o runner por meio do node privado `hermesEditorial` (docs/26),
 assinando com o mesmo HMAC-SHA256 e usando a credencial
 `crescimentoVerticalHermesApi` (URL interna). A conectividade foi validada com
 health/validate 200, createJob 503 e getJob 404.
+
+Na Fase 8 o runner também aplica política de escopo, canonicalização e hash de
+fontes, fingerprint de pauta, estado SQLite idempotente, limite de concorrência
+1, timeout, limite de saída, usage file obrigatório e validação integral do
+dossiê. A execução real continua bloqueada sem credencial exclusiva.

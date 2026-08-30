@@ -26,7 +26,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Concluída |
-| 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
+| 8 | Hermes Agent e política editorial automatizada | Fase 7 | Em execução |
 | 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
 | 10 | Conteúdo inicial e validação editorial | Fase 9 | Pendente |
 | 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Pendente |
@@ -82,6 +82,15 @@ atômico completo. Produção, n8n e Hermes foram preservados; GA4 e Search Cons
 seguem desativados. As Fases 0–7 estão concluídas, as Fases 8–12 permanecem
 pendentes e nenhuma fase está em execução. Os dois gates pré-produção acima
 continuam bloqueando produção.
+
+A Fase 8 foi iniciada em 30 de agosto de 2026 a partir da `main`
+`b8fbd9484b6ffe334747352eb2b1ef11ecb53165`. A reconciliação implementa a
+política editorial, canonicalização, deduplicação, estado persistente mínimo,
+limites firmes, usage file e validação estrita no runner. O preflight classificou
+a única credencial disponível como compartilhada (B), sem autorização de
+reutilização; por isso a execução real, a bateria e qualquer pesquisa ficam
+fechadas até existir credencial exclusiva. Os gates pré-produção permanecem
+inalterados e as Fases 9–12 continuam pendentes.
 
 A Fase 6 foi iniciada e concluída em 29 de agosto de 2026 após aceite humano
 expresso. O aceite cobriu SEO técnico, metadata, canonicals, Open Graph, Twitter,

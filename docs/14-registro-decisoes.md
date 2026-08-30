@@ -763,6 +763,33 @@ Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
 Usar docs/templates/adr.md e adicionar aqui um resumo com número sequencial,
 data, status, decisão, motivo, consequências e plano de reversão.
 
+## ADR-029 — Execução editorial controlada, credencial isolada e fail-closed do Hermes
+
+- Data: 2026-08-30
+- Status: aprovada para implementação controlada; execução real bloqueada
+- Fase afetada: 8
+- Decisão: o perfil `crescimento-vertical-editorial` deve usar credencial
+  exclusiva própria e o runner é a única fronteira de execução. Jobs são
+  one-shot, sem shell, com comando interno, saída somente por schema, estado
+  mínimo persistente, idempotência, lock de concorrência, usage file obrigatório,
+  limites de 40 turnos/10 buscas/8 fontes, timeout e fail-closed. Nenhuma
+  publicação, Payload ou banco editorial é permitida.
+- Operação: n8n continua somente validate-only e será orquestrador futuro da
+  Fase 9. Agenda é declarada apenas documentalmente; cron, gateway, webhook e
+  workflow ativo permanecem proibidos. Dupla trava e janela temporária só podem
+  existir após CI verde, validação de credencial exclusiva e aceite específico.
+- Segurança: fontes externas são dados não confiáveis; prompt injection,
+  escopo fora dos cinco pilares, URLs inseguras e evidência insuficiente são
+  recusados. Credenciais compartilhadas (incluindo o default/global) nunca são
+  copiadas ou reutilizadas.
+- Consequências: o preflight atual é classificação B; toda bateria real fica
+  bloqueada até provisionar e autorizar uma credencial isolada. O runner volta
+  sempre a desabilitado após qualquer janela de teste.
+- Reversão: desabilitar a flag e remover o arquivo de habilitação, recriar
+  somente o runner candidato com a imagem anterior, preservar o volume de estado
+  para auditoria sanitizada e manter produção, portal, PostgreSQL, n8n e Hermes
+  compartilhado intactos.
+
 ## ADR-027 — Captação first-party, consentimento versionado e entrega por outbox
 
 - Data: 2026-08-29

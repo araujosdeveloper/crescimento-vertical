@@ -248,3 +248,11 @@ Nenhuma falha é contornada por publicação direta.
 - [Ferramentas disponíveis](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools/)
 - [Pesquisa e extração web](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-search)
 - [Tarefas agendadas, continuidade e histórico](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)
+
+## Fase 8 — execução controlada
+
+O perfil `crescimento-vertical-editorial` usa somente a skill editorial e o
+toolset web. O runner aplica canonicalização HTTPS, remoção de trackers,
+fingerprints de pauta, deduplicação, limites firmes, usage file e validação
+estrita do dossiê. Execução depende de credencial exclusiva e dupla trava; a
+credencial compartilhada observada no perfil default não é reutilizada.

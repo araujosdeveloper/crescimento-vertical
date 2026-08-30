@@ -788,3 +788,19 @@ mensagem foi enviada e recebida. Produção, n8n e Hermes foram preservados; GA4
 e Search Console continuam desativados. A Fase 7 está concluída, nenhuma fase
 está em execução e as Fases 8–12 permanecem pendentes. A homologação responsiva
 integral e a concretização da copy da Fase 4 continuam gates de produção.
+
+## Início formal da Fase 8 — 30 de agosto de 2026
+
+A `main` de referência é `b8fbd9484b6ffe334747352eb2b1ef11ecb53165`. A
+auditoria read-only confirmou Hermes v0.20.4, perfil editorial somente leitura,
+runner não-root com rootfs read-only, `cap_drop=ALL`, sem portas públicas ou
+Docker Socket, e workflow n8n validate-only inativo. A execução continua
+desabilitada por dupla trava. A única credencial de modelo observada está no
+perfil default compartilhado; classificação B, sem reutilização autorizada.
+
+Foram reconciliados política editorial, escopo, canonicalização, fingerprints,
+estado persistente mínimo, idempotência, limites e validação estrita. Não houve
+pesquisa, chamada de modelo, publicação, criação no Payload ou alteração de
+portal, PostgreSQL, n8n, Hermes compartilhado ou produção. A Fase 8 aguarda
+credencial exclusiva para qualquer bateria real; Fases 9–12 permanecem
+pendentes e os dois gates pré-produção continuam preservados.

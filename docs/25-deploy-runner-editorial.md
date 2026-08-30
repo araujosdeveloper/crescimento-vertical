@@ -50,6 +50,14 @@ docker compose --env-file .env.hermes-editorial \
 Execução desabilitada; nenhum workflow n8n, nenhuma credencial Payload, nenhuma
 pesquisa real ou chamada de LLM, nenhum conteúdo criado.
 
+## Fase 8 — candidato controlado
+
+O candidato só pode ser construído após CI verde e backup. O compose mantém
+usuário não-root, rootfs read-only, `cap_drop: ALL`, `no-new-privileges`, sem
+ports e sem Docker Socket. A flag e o arquivo de habilitação permanecem ausentes
+por padrão; não há cron, gateway ou workflow ativo. Sem credencial exclusiva de
+modelo, não se recria o runner nem se inicia bateria real.
+
 ## Integração com o n8n (Fase 3C)
 
 O n8n acessa o runner via node privado e credencial HMAC; ver docs/26 e

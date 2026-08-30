@@ -590,3 +590,12 @@ Ao concluir uma sessão de trabalho, registrar:
 | Preservado | Produção, n8n, Hermes, GA4 e Search Console; nenhuma nova mensagem ou lead |
 | Estado | Fase 7 concluída; Fases 0–7 concluídas; Fases 8–12 pendentes; nenhuma fase em execução |
 | Gates | Homologação responsiva integral e concretização da copy da Fase 4 continuam bloqueando produção |
+
+## Controle editorial da Fase 8
+
+O runner aceita somente requisição estruturada, aplica escopo fechado,
+canonicalização e deduplicação, e persiste apenas estado operacional mínimo.
+Há uma execução ativa no máximo, limite de 40 turnos, 10 buscas, 8 fontes, 900
+segundos e 512 KiB de saída. A agenda candidata é apenas declarada; cron,
+webhook, gateway e workflow n8n permanecem desativados. Sem credencial exclusiva
+de modelo, a execução e a bateria real permanecem bloqueadas.
