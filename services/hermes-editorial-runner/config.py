@@ -34,6 +34,13 @@ EXECUTION_ENABLE_FILE = os.environ.get(
     "EXECUTION_ENABLE_FILE", "/run/secrets/execution-enable"
 )
 JOB_TIMEOUT_SECONDS = _env_int("JOB_TIMEOUT_SECONDS", 900)
+MAX_TURNS = _env_int("MAX_TURNS", 40)
+MAX_WEB_SEARCHES = _env_int("MAX_WEB_SEARCHES", 10)
+MAX_FINAL_SOURCES = _env_int("MAX_FINAL_SOURCES", 8)
+OUTPUT_MAX_BYTES = _env_int("OUTPUT_MAX_BYTES", 512 * 1024)
+MAX_CONCURRENT_JOBS = 1
+STATE_DIR = os.environ.get("RUNNER_STATE_DIR", "/tmp/hermes-runner-state")
+USAGE_DIR = os.environ.get("RUNNER_USAGE_DIR", os.path.join(STATE_DIR, "usage"))
 LISTEN_HOST = os.environ.get("RUNNER_HOST", "0.0.0.0")
 LISTEN_PORT = _env_int("RUNNER_PORT", 8100)
 
@@ -49,3 +56,10 @@ def execution_enabled() -> bool:
 def load_hmac_secret() -> bytes:
     with open(HMAC_SECRET_FILE, "rb") as fh:
         return fh.read().strip()
+
+
+def validate_limits() -> None:
+    if MAX_TURNS > 40 or MAX_WEB_SEARCHES > 10 or MAX_FINAL_SOURCES > 8:
+        raise ValueError("configured_limits_exceeded")
+    if JOB_TIMEOUT_SECONDS <= 0 or OUTPUT_MAX_BYTES <= 0:
+        raise ValueError("configured_limits_invalid")

@@ -8,6 +8,8 @@ executado com ``shell=False``.
 
 import subprocess
 import threading
+import json
+import os
 
 import config
 
@@ -45,7 +47,18 @@ def build_hermes_command(request: dict) -> list[str]:
     perfil ``crescimento-vertical-editorial``), sem ``-p`` e sem mutar o perfil
     ativo.
     """
-    return [config.HERMES_BIN, "-z", build_prompt(request)]
+    usage_dir = config.USAGE_DIR
+    usage_path = os.path.join(usage_dir, f"usage-{request['idempotencyKey'][:48]}.json")
+    return [
+        config.HERMES_BIN,
+        "-z",
+        build_prompt(request),
+        "--usage-file",
+        usage_path,
+        "--skills",
+        "editorial-research",
+        "--no-restore-cwd",
+    ]
 
 
 def run_hermes(request: dict) -> dict:
@@ -54,6 +67,7 @@ def run_hermes(request: dict) -> dict:
         raise ExecutionDisabledError("execution_disabled")
 
     with _execution_lock:
+        os.makedirs(config.USAGE_DIR, exist_ok=True)
         proc = subprocess.run(
             build_hermes_command(request),
             capture_output=True,
@@ -63,4 +77,21 @@ def run_hermes(request: dict) -> dict:
         )
         if proc.returncode != 0:
             raise RuntimeError("hermes_nonzero_exit")
-        return {"output": proc.stdout.strip()}
+        output = proc.stdout.strip()
+        if len(output.encode("utf-8")) > config.OUTPUT_MAX_BYTES:
+            raise RuntimeError("output_too_large")
+        try:
+            dossier = json.loads(output)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            raise RuntimeError("invalid_dossier_json") from None
+        errors = __import__("schemas").validate_dossier(dossier)
+        if errors:
+            raise RuntimeError("invalid_dossier_schema")
+        usage = None
+        usage_path = os.path.join(config.USAGE_DIR, f"usage-{request['idempotencyKey'][:48]}.json")
+        try:
+            with open(usage_path, encoding="utf-8") as usage_file:
+                usage = json.load(usage_file)
+        except (OSError, json.JSONDecodeError):
+            raise RuntimeError("usage_file_missing_or_invalid") from None
+        return {"dossier": dossier, "usage": usage}

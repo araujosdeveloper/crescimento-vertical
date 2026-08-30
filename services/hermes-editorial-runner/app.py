@@ -19,6 +19,8 @@ import config
 import hmac_auth
 import hermline
 import schemas
+import policy
+from state import JobStore
 from nonce_store import NonceStore
 
 logging.basicConfig(
@@ -30,10 +32,27 @@ logger = logging.getLogger("hermes-editorial-runner")
 _nonce_store = NonceStore()
 _job_queue: "queue.Queue[str] | None" = queue.Queue(maxsize=10)
 _job_store: dict[str, dict] = {}
+_persistent_store: JobStore | None = None
+_store_lock = __import__("threading").Lock()
+
+
+def _get_persistent_store() -> JobStore:
+    global _persistent_store
+    with _store_lock:
+        if _persistent_store is None:
+            _persistent_store = JobStore()
+        return _persistent_store
 
 
 def _safe_job_state(job_id: str) -> dict | None:
-    return _job_store.get(job_id)
+    state = _job_store.get(job_id)
+    if state is not None:
+        return state
+    try:
+        job = _get_persistent_store().get_by_id(job_id)
+    except OSError:
+        return None
+    return _get_persistent_store().public(job) if job else None
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -156,6 +175,15 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
             return
+        decision, reasons = policy.classify_request(data)
+        if decision != "accepted":
+            self._send_json(422, {"error": "topic_rejected", "status": "rejected", "reasons": reasons, "correlationId": cid})
+            return
+        try:
+            data["seedSources"] = policy.canonical_seed_sources(data)
+        except ValueError as exc:
+            self._send_json(422, {"error": str(exc), "correlationId": cid})
+            return
         logger.info("validate correlationId=%s ok", cid)
         self._send_json(200, {"valid": True, "correlationId": cid})
 
@@ -172,16 +200,48 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
+        decision, reasons = policy.classify_request(data)
+        if decision != "accepted":
+            logger.info("job correlationId=%s rejected reasons=%s", cid, ",".join(reasons))
+            self._send_json(422, {"error": "topic_rejected", "status": "rejected", "reasons": reasons, "correlationId": cid})
+            return
+        try:
+            data["seedSources"] = policy.canonical_seed_sources(data)
+        except ValueError as exc:
+            self._send_json(422, {"error": str(exc), "correlationId": cid})
+            return
+
         if not config.execution_enabled():
             logger.info("job correlationId=%s execution_disabled", cid)
             self._send_json(503, {"error": "execution_disabled"})
             return
 
-        # Execução futura: enfileira e devolve jobId. Não alcançável nesta fase.
-        self._send_json(503, {"error": "execution_disabled"})
+        fingerprint = policy.topic_fingerprint(data["topic"], data["primaryPillar"])
+        store = _get_persistent_store()
+        semantic_match = store.get_by_fingerprint(fingerprint)
+        if semantic_match and semantic_match["idempotency_key"] != data["idempotencyKey"]:
+            self._send_json(409, {"error": "semantic_duplicate_review", "status": "rejected", "correlationId": cid})
+            return
+        job, created = store.create_or_get(data, fingerprint)
+        if not created:
+            self._send_json(200, {**store.public(job), "idempotentReplay": True})
+            return
+        store.update(job["id"], "running")
+        try:
+            result = hermline.run_hermes(data)
+            store.update(job["id"], "succeeded", result=result["dossier"], usage=result["usage"])
+            self._send_json(202, {"jobId": job["id"], "correlationId": cid, "state": "succeeded"})
+        except TimeoutError:
+            store.update(job["id"], "timed_out", error_code="timeout")
+            self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
+        except Exception as exc:  # sanitized, no exception text
+            code = str(exc) if str(exc) in {"output_too_large", "invalid_dossier_json", "invalid_dossier_schema", "usage_file_missing_or_invalid", "hermes_nonzero_exit", "execution_disabled"} else "job_failed"
+            store.update(job["id"], "failed", error_code=code)
+            self._send_json(502, {"error": code, "jobId": job["id"]})
 
 
 def main() -> None:
+    config.validate_limits()
     server = ThreadingHTTPServer(
         (config.LISTEN_HOST, config.LISTEN_PORT), Handler
     )

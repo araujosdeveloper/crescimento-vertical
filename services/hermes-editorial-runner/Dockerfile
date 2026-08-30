@@ -11,6 +11,8 @@ COPY services/hermes-editorial-runner/app.py \
      services/hermes-editorial-runner/nonce_store.py \
      services/hermes-editorial-runner/schemas.py \
      services/hermes-editorial-runner/hermline.py \
+     services/hermes-editorial-runner/policy.py \
+     services/hermes-editorial-runner/state.py \
      ./
 COPY docs/schemas/ ./schemas/
 
