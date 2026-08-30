@@ -1,8 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import { processOutbox, retryAt, sanitizedSmtpError, type ClaimedOutbox, type OutboxStore } from "../src/lib/lead-outbox-processor";
 
 class MemoryStore implements OutboxStore {
-  item: (ClaimedOutbox & {state:"pending"|"processing"|"sent"|"failed"; next?:Date|null; messageId?:string; error?:string}) = {id:1,leadId:1,notificationKey:"afe80baa-c4dd-4c50-b0af-149f348b2720",attempts:0,createdAt:new Date(),state:"pending"};
+  item: (ClaimedOutbox & {state:"pending"|"processing"|"sent"|"failed"; next?:Date|null; messageId?:string; error?:string}) = {id:1,leadId:1,notificationKey:randomUUID(),attempts:0,createdAt:new Date(),state:"pending"};
   async claim() { if(this.item.state!=="pending") return []; this.item.state="processing"; this.item.attempts++; return [this.item]; }
   async sent(_item:ClaimedOutbox,messageId:string) { this.item.state="sent"; this.item.messageId=messageId; }
   async failed(_item:ClaimedOutbox,error:string,next:Date|null) { this.item.state=next?"pending":"failed"; this.item.error=error; this.item.next=next; }
