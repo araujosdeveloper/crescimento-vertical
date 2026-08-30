@@ -15,6 +15,8 @@ import { Users } from "./src/collections/Users";
 import { Services } from "./src/collections/Services";
 import { Cases } from "./src/collections/Cases";
 import { Tags } from "./src/collections/Tags";
+import { Leads } from "./src/collections/Leads";
+import { LeadOutbox } from "./src/collections/LeadOutbox";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -38,6 +40,8 @@ export default buildConfig({
     Services,
     Cases,
     Tags,
+    Leads,
+    LeadOutbox,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || "",

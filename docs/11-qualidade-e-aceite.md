@@ -21,6 +21,31 @@ está concluída formalmente. Permanecem pendentes e bloqueando produção:
 homologação responsiva integral nos cinco viewports e concretização da copy
 comercial da Fase 4.
 
+## Critérios adicionais da Fase 7
+
+### Aceite humano — 30 de agosto de 2026
+
+O responsável aprovou o contraste do formulário — painel claro com textos
+escuros —, o envio real, a mensagem de sucesso, o consentimento versionado, a
+captação de um único lead ligado a um único outbox e o recebimento da única
+notificação comercial. A declaração final foi “Notificação recebida.”
+
+O primeiro envio falhou antes da persistência por remoção indevida de campos
+canônicos de consentimento. A correção foi testada; o segundo e único envio
+válido comprovou persistência atômica, idempotência, retenção, entrega por
+outbox e ausência de PII no e-mail, eventos e logs. O estado final possui uma
+tentativa de outbox, zero duplicidades, zero órfãos e zero itens elegíveis para
+novo processamento.
+
+Esse aceite encerra a Fase 7, mas não conclui a homologação responsiva integral
+nos cinco viewports nem a concretização da copy comercial da Fase 4.
+
+O aceite deve comprovar um único envio humano real no staging, sem exibir os
+dados pessoais no relatório. Validar sucesso, idempotência, outbox, acesso
+autenticado no Admin, ausência de PII em logs, retenção e exclusão/anonimização
+em dry-run. Se não houver credencial de notificação, o armazenamento é
+aprovável, mas a notificação externa permanece bloqueada.
+
 ## Aceite humano da Fase 5 — 29 de agosto de 2026
 
 Foram aprovados hubs vazios, busca/filtros, políticas editorial e de correções,

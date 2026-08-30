@@ -141,3 +141,25 @@ Já são metas obrigatórias desde o início:
 - Patrocinador não aprova conclusão editorial.
 - Comparativo revela critérios e relação comercial.
 - Não recomendar ferramenta apenas pela comissão.
+# Fase 7 — mensuração comercial first-party
+
+A notificação comercial por Hostinger SMTP não é fonte de verdade nem evento de
+analytics. Aceite SMTP atualiza apenas o estado técnico do outbox e do lead;
+nenhum dado pessoal vai ao assunto/corpo, GA4 permanece desativado e n8n/Hermes
+não participam. Métricas operacionais usam somente contagens, tentativas, estado
+e timestamps.
+
+O fluxo prepara eventos não identificáveis de CTA, WhatsApp e estados do
+formulário, sem GA4, scripts externos, cookies não essenciais ou identificadores
+pessoais. A atribuição aceita apenas rota, serviço/CTA, conteúdo e UTMs
+normalizadas. Leads são persistidos no Payload/PostgreSQL e aguardam outbox de
+notificação quando houver provedor autorizado.
+
+## Aceite comercial da Fase 7 — 30 de agosto de 2026
+
+O fluxo real comprovou uma captação consentida, um outbox entregue em uma
+tentativa e uma notificação recebida, sem duplicidade, órfão ou evento com PII.
+Hostinger SMTP é somente transporte; Payload/PostgreSQL permanece fonte de
+verdade. A mensagem contém apenas aviso mínimo e acesso autenticado ao Admin.
+GA4 e Search Console permanecem desativados, e nenhuma métrica de negócio foi
+inventada a partir deste único fluxo.

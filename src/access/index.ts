@@ -215,3 +215,19 @@ export const casesRead: Access = commercialRead;
 export const casesCreate: Access = commercialCreate;
 export const casesUpdate: Access = commercialUpdate;
 export const casesDelete: Access = commercialDelete;
+
+// Leads are never publicly readable or writable through the generic Payload API.
+// The dedicated intake route uses an internal override after its own validation.
+export const leadsRead: Access = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "reviewer"]);
+export const leadsCreate: Access = () => false;
+export const leadsUpdate: Access = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "reviewer"]);
+export const leadsDelete: Access = ({ req: { user } }) => isAdmin(user);
+
+export const leadOutboxRead: Access = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "reviewer"]);
+export const leadOutboxCreate: Access = () => false;
+export const leadOutboxUpdate: Access = ({ req: { user } }) =>
+  hasAnyRole(user, ["admin", "reviewer"]);
+export const leadOutboxDelete: Access = ({ req: { user } }) => isAdmin(user);

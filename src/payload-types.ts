@@ -77,6 +77,8 @@ export interface Config {
     services: Service;
     cases: Case;
     tags: Tag;
+    leads: Lead;
+    'lead-outbox': LeadOutbox;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +96,8 @@ export interface Config {
     services: ServicesSelect<false> | ServicesSelect<true>;
     cases: CasesSelect<false> | CasesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    leads: LeadsSelect<false> | LeadsSelect<true>;
+    'lead-outbox': LeadOutboxSelect<false> | LeadOutboxSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -486,6 +490,61 @@ export interface Case {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads".
+ */
+export interface Lead {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  company?: string | null;
+  serviceInterest: string;
+  operationalContext?: string | null;
+  challenge: string;
+  contactPreference: 'email' | 'phone' | 'whatsapp';
+  source?: string | null;
+  sourcePage?: string | null;
+  sourceContent?: string | null;
+  utmSource?: string | null;
+  utmMedium?: string | null;
+  utmCampaign?: string | null;
+  utmTerm?: string | null;
+  utmContent?: string | null;
+  referrer?: string | null;
+  consentVersion: string;
+  consentTextHash: string;
+  consentedAt: string;
+  status?: ('new' | 'in_progress' | 'closed' | 'discarded') | null;
+  idempotencyKey: string;
+  retentionUntil: string;
+  notificationStatus?: ('pending' | 'sent' | 'failed') | null;
+  notificationAttempts?: number | null;
+  lastError?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-outbox".
+ */
+export interface LeadOutbox {
+  id: number;
+  lead: number | Lead;
+  type: 'commercial_notification';
+  state?: ('pending' | 'processing' | 'sent' | 'failed') | null;
+  attempts?: number | null;
+  nextAttemptAt?: string | null;
+  lastError?: string | null;
+  notificationKey: string;
+  claimedAt?: string | null;
+  sentAt?: string | null;
+  deliveredAt?: string | null;
+  messageId?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -547,6 +606,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: number | Tag;
+      } | null)
+    | ({
+        relationTo: 'leads';
+        value: number | Lead;
+      } | null)
+    | ({
+        relationTo: 'lead-outbox';
+        value: number | LeadOutbox;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -914,6 +981,59 @@ export interface TagsSelect<T extends boolean = true> {
         metaDescription?: T;
         canonicalUrl?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leads_select".
+ */
+export interface LeadsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  phone?: T;
+  company?: T;
+  serviceInterest?: T;
+  operationalContext?: T;
+  challenge?: T;
+  contactPreference?: T;
+  source?: T;
+  sourcePage?: T;
+  sourceContent?: T;
+  utmSource?: T;
+  utmMedium?: T;
+  utmCampaign?: T;
+  utmTerm?: T;
+  utmContent?: T;
+  referrer?: T;
+  consentVersion?: T;
+  consentTextHash?: T;
+  consentedAt?: T;
+  status?: T;
+  idempotencyKey?: T;
+  retentionUntil?: T;
+  notificationStatus?: T;
+  notificationAttempts?: T;
+  lastError?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lead-outbox_select".
+ */
+export interface LeadOutboxSelect<T extends boolean = true> {
+  lead?: T;
+  type?: T;
+  state?: T;
+  attempts?: T;
+  nextAttemptAt?: T;
+  lastError?: T;
+  notificationKey?: T;
+  claimedAt?: T;
+  sentAt?: T;
+  deliveredAt?: T;
+  messageId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

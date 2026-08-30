@@ -233,3 +233,19 @@ staging permanecem intactos.
 - fontes editoriais;
 - retenção de dados;
 - desempenho de clusters e serviços.
+# Fase 7 — deploy e rollback
+
+Para SMTP, validar primeiro o backup pré-redeploy, manter o segredo `root:root`
+0640 e o app como UID 1001/GID 0 sem capabilities, e recriar exclusivamente
+`cv-phase2-staging-app`. Confirmar mount read-only, conteúdo ausente de inspect e
+logs e executar `npm run leads:outbox -- --verify` antes de qualquer `--process`.
+Rollback: desabilitar a notificação, restaurar a imagem anterior e recriar só o
+app; PostgreSQL/outbox não são revertidos nem apagados. Em rotação ou incidente,
+revogar a senha na Hostinger, substituir o arquivo 0600 e repetir o verify sem
+envio. Nunca incluir o segredo no backup sanitizado.
+
+Migrations de leads devem ser aplicadas somente após backup verificável em
+PostgreSQL descartável/staging. Rollback restaura a imagem anterior e reverte a
+migration com procedimento revisado; não há cron de retenção ou notificação em
+produção nesta fase. A ausência de provedor externo deixa a outbox pendente sem
+afetar o armazenamento do lead.

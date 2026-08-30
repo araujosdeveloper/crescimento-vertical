@@ -746,3 +746,45 @@ nenhuma fase está em execução; Fases 7–12 permanecem pendentes. Os gates
 pré-produção — homologação responsiva integral nos cinco viewports e
 concretização da copy comercial da Fase 4 — continuam preservados e bloqueiam
 produção.
+
+## Início da Fase 7 — 29 de agosto de 2026
+
+A Fase 7 foi iniciada na branch `feat/phase-7-lead-capture-measurement`, com
+merge-base `7cd8aaf6b6442bd2fd8f64b4abe45b958c0c3f2f`. O preflight confirmou
+staging saudável, PostgreSQL preservado, Search Console/GA4 desativados e
+ausência de credenciais utilizáveis para notificação externa. O escopo é
+first-party, sem alteração de produção, n8n, Hermes ou runner editorial.
+
+## Transporte SMTP autorizado da Fase 7 — 30 de agosto de 2026
+
+O preflight do HEAD `c3b4ca6` confirmou PR #13 aberto/draft e quatro checks
+verdes, app e PostgreSQL healthy, um lead ligado a um outbox pending com zero
+tentativas, sem duplicidade ou órfão. TLS de `smtp.hostinger.com:465` foi
+validado sem envio. O app executa como UID 1001; o segredo original permanece
+fora do Git e será montado read-only somente no app; o UID 1001 usa GID 0 para
+ler o arquivo `root:root` 0640, sem world-read ou capabilities. Produção,
+PostgreSQL, n8n, Hermes, runner, DNS e Traefik global não
+serão alterados, exceto as atualizações normais do próprio outbox após o aceite
+SMTP autorizado.
+
+## Encerramento da Fase 7 — 30 de agosto de 2026
+
+O responsável aprovou o formulário claro, o envio real, a mensagem de sucesso,
+o consentimento versionado, a captação única e declarou “Notificação recebida.”
+O primeiro envio falhou antes de persistir por remoção indevida de campos
+canônicos do consentimento; a correção foi coberta por testes. O segundo e único
+envio válido criou atomicamente um lead e um outbox.
+
+O estado sanitizado final registra um lead `new`, consentimento
+`2026-08-29.v1`, hash de consentimento presente, chave de idempotência presente
+e única e retenção até 2027-02-25. Há um outbox `sent`, attempts 1, `sentAt` e
+`deliveredAt` presentes, com entrega em 2026-08-30 04:10:24.502 UTC. Há zero
+leads sem outbox, zero outboxes órfãos, zero duplicidades e zero eventos com PII;
+o dry-run final não possui itens elegíveis.
+
+Hostinger SMTP em 465/TLS foi verificado antes do envio; a senha permaneceu
+somente em arquivo protegido e o e-mail mínimo não transportou PII. Uma única
+mensagem foi enviada e recebida. Produção, n8n e Hermes foram preservados; GA4
+e Search Console continuam desativados. A Fase 7 está concluída, nenhuma fase
+está em execução e as Fases 8–12 permanecem pendentes. A homologação responsiva
+integral e a concretização da copy da Fase 4 continuam gates de produção.

@@ -6,6 +6,11 @@ COPY package*.json ./
 # validates the lock file identically to the development environment.
 RUN npm install --global npm@11 && npm ci
 
+# Dependências de produção necessárias pelo worker manual do outbox. O trace do
+# Next não inclui o CLI/Local API do Payload, pois eles não são usados no server.js.
+FROM deps AS prod-deps
+RUN npm prune --omit=dev
+
 FROM node:22-alpine AS builder
 WORKDIR /app
 
@@ -74,6 +79,7 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 

@@ -26,6 +26,14 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
+- Estado consolidado em 30 de agosto de 2026: Fases 0–7 concluídas; Fases 8–12
+  pendentes; nenhuma fase em execução.
+- Fase 7 encerrada após aceite humano do formulário, captação real única,
+  consentimento versionado, outbox idempotente e recebimento da notificação
+  SMTP sem PII.
+- Gates pré-produção preservados: homologação responsiva integral nos cinco
+  viewports e concretização da copy comercial da Fase 4.
+
 - Fase ativa: Fase 5 — Portal editorial e experiência de leitura, iniciada em
   28 de agosto de 2026 a partir da `main` `e153f50f9591cf74f804d57a0e213acad463fd17`.
 - Fases 0–4 concluídas; Fases 6–12 pendentes.
@@ -530,6 +538,19 @@ Ao concluir uma sessão de trabalho, registrar:
 - Falha reabre o item correspondente.
 - Fase só muda de estado após todos os critérios de saída.
 
+## Registro da sessão 2026-08-29 — início da Fase 7
+
+| Campo | Conteúdo |
+| --- | --- |
+| Data | 2026-08-29 |
+| Branch/merge-base | `feat/phase-7-lead-capture-measurement` / `7cd8aaf6` |
+| Fase | 7 — Captação, diagnóstico e mensuração comercial — em execução |
+| Objetivo | Implementar captação first-party com consentimento, segurança, outbox e mensuração sem PII |
+| Escopo | Coleções privadas Leads/LeadOutbox, endpoint dedicado, formulário acessível, antispam e retenção manual |
+| Integrações | Nenhuma credencial/provedor externo utilizável; Search Console, GA4, n8n e Hermes não serão ativados |
+| Riscos/gates | Dois gates pré-produção anteriores permanecem preservados e bloqueiam produção |
+| Próxima ação | Validar migration, testes, CI e staging; parar para teste humano real |
+
 ## Registro da sessão 2026-08-29 — aceite humano e encerramento da Fase 6
 
 | Campo | Conteúdo |
@@ -544,3 +565,28 @@ Ao concluir uma sessão de trabalho, registrar:
 | Integrações | Search Console e GA4 continuam desativados; produção, n8n e Hermes preservados |
 | Riscos/gates | Homologação responsiva integral nos cinco viewports e concretização da copy comercial da Fase 4 continuam bloqueando produção |
 | Próxima ação | Nenhuma fase em execução; Fases 7–12 pendentes |
+
+## Registro da sessão 2026-08-30 — transporte SMTP da Fase 7
+
+| Campo | Conteúdo |
+| --- | --- |
+| Escopo | Hostinger SMTP somente no app de staging; ADR-028 |
+| Fonte de verdade | LeadOutbox/PostgreSQL; SMTP apenas transporte |
+| Segurança | porta 465/TLS; segredo por arquivo; mensagem sem PII; n8n/Hermes ausentes |
+| Execução | verify sem envio antes de processar uma única vez o item explicitamente selecionado |
+| Rollback | imagem anterior + notificação desabilitada; banco e outbox preservados |
+| Gate | commit, quatro checks verdes, backup validado e redeploy exclusivo do app antes do envio |
+
+## Aceite humano e encerramento da Fase 7 — 30 de agosto de 2026
+
+| Campo | Conteúdo |
+| --- | --- |
+| Aceite | Formulário claro com textos escuros, envio real, sucesso, consentimento e recebimento da notificação aprovados; declaração final: “Notificação recebida.” |
+| Primeira tentativa | Falhou antes de persistir por remoção indevida dos campos canônicos de consentimento; correção coberta por testes |
+| Fluxo válido | Segundo e único envio válido criou atomicamente um lead e um outbox; sem duplicidade ou órfão |
+| Retenção | Consentimento `2026-08-29.v1` e retenção até 2027-02-25 registrados |
+| SMTP | Hostinger 465/TLS, senha somente por arquivo, verify aprovado, mensagem mínima sem PII e outbox processado uma única vez |
+| Evidência | 1 lead; 1 outbox sent; attempts 1; timestamps de envio/entrega presentes; dry-run posterior sem elegíveis; notificação recebida |
+| Preservado | Produção, n8n, Hermes, GA4 e Search Console; nenhuma nova mensagem ou lead |
+| Estado | Fase 7 concluída; Fases 0–7 concluídas; Fases 8–12 pendentes; nenhuma fase em execução |
+| Gates | Homologação responsiva integral e concretização da copy da Fase 4 continuam bloqueando produção |

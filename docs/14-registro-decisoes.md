@@ -762,3 +762,48 @@ Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
 
 Usar docs/templates/adr.md e adicionar aqui um resumo com número sequencial,
 data, status, decisão, motivo, consequências e plano de reversão.
+
+## ADR-027 — Captação first-party, consentimento versionado e entrega por outbox
+
+- Data: 2026-08-29
+- Status: aprovada para a Fase 7
+- Decisão: Payload/PostgreSQL é a fonte de verdade; o formulário usa endpoint
+  dedicado e schema estrito, sem escrita pública genérica no Payload. O
+  consentimento é explícito, separado de marketing e versionado. Dados são
+  minimizados, normalizados e protegidos por idempotência, honeypot, token HMAC,
+  limites e allowlist de origem. A entrega comercial usa outbox transacional
+  desacoplada. Logs não contêm PII; métricas first-party não identificam pessoas;
+  GA4 permanece desativado.
+- Notificação: sem credencial/provedor autorizado no preflight, o outbox fica
+  pendente e nenhum n8n/Hermes/Telegram/WhatsApp é usado como atalho.
+- Retenção: `retentionUntil` inicial de 180 dias; exclusão/anonimização manual,
+  dry-run, lote limitado e trilha mínima.
+- Motivo: permitir captação segura e auditável sem antecipar contratação de
+  provedor externo, consentimento da Fase 7 posterior ou automação da Fase 9.
+- Consequências: leads não são públicos, automation não tem acesso e o fluxo
+  pode ser homologado sem envio externo; a entrega comercial permanece pendente.
+- Reversão: desabilitar o endpoint, restaurar imagem/migration anterior via
+  backup e manter os dados sob acesso administrativo restrito.
+
+## ADR-028 — Hostinger SMTP como transporte da notificação comercial da Fase 7
+
+- Data: 2026-08-30
+- Status: aprovada para staging
+- Decisão: `LeadOutbox` permanece a fonte de verdade e SMTP é somente o
+  transporte. Hostinger usa `smtp.hostinger.com:465`, TLS implícito obrigatório,
+  remetente e destinatário fixos. A senha é lida apenas do arquivo montado em
+  `/run/secrets/lead_smtp_password`; não é variável, argumento, imagem ou log.
+- Conteúdo: aviso mínimo com data/hora, UUID interno e link HTTPS ao registro no
+  Payload Admin. O link exige BasicAuth, autenticação Payload e autorização de
+  leitura de Leads. Não há PII, anexos, scripts, pixel ou token mágico.
+- Entrega: claim atômico com `FOR UPDATE SKIP LOCKED`, lease recuperável, lotes
+  pequenos, até cinco tentativas e backoff exponencial limitado. O Message-ID é
+  estável e derivado do UUID do outbox, sem segredo ou PII. A entrega SMTP é
+  tecnicamente at-least-once; Message-ID estável reduz duplicações sem prometer
+  exactly-once após falha entre aceite remoto e persistência local.
+- Falhas: SMTP ausente ou indisponível nunca apaga/rejeita o lead aceito;
+  mantém o outbox pendente enquanto houver retry. A automação recorrente será
+  reconciliada na Fase 11. n8n e Hermes não participam.
+- Reversão: desabilitar `LEAD_NOTIFICATION_ENABLED`, restaurar a imagem anterior
+  e manter lead/outbox no PostgreSQL. Rotacionar/revogar a senha na Hostinger e
+  substituir somente o arquivo protegido quando necessário.

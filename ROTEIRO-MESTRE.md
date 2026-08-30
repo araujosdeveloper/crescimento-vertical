@@ -25,7 +25,7 @@ um portal editorial e comercial orientado à geração de receita.
 | 4 | Arquitetura pública e páginas comerciais | Fase 3 | Concluída com ressalva |
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
-| 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Pendente |
+| 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Concluída |
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
 | 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
 | 10 | Conteúdo inicial e validação editorial | Fase 9 | Pendente |
@@ -71,6 +71,17 @@ produção. As Fases 5 a 12 permanecem pendentes.
    limites e CTAs.
 
 Nenhum dos dois gates pode ser declarado concluído por este encerramento.
+
+A Fase 7 foi concluída em 30 de agosto de 2026 após aceite humano expresso do
+formulário claro, envio real, mensagem de sucesso, captação consentida e
+idempotente de um único lead, outbox único e notificação comercial mínima
+recebida via Hostinger SMTP. O primeiro envio falhou antes de persistir porque
+campos canônicos de consentimento foram removidos indevidamente; a correção foi
+coberta por testes e o segundo envio — único envio válido — comprovou o fluxo
+atômico completo. Produção, n8n e Hermes foram preservados; GA4 e Search Console
+seguem desativados. As Fases 0–7 estão concluídas, as Fases 8–12 permanecem
+pendentes e nenhuma fase está em execução. Os dois gates pré-produção acima
+continuam bloqueando produção.
 
 A Fase 6 foi iniciada e concluída em 29 de agosto de 2026 após aceite humano
 expresso. O aceite cobriu SEO técnico, metadata, canonicals, Open Graph, Twitter,

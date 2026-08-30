@@ -33,6 +33,8 @@ services:
         - SITE_NOINDEX=true
     image: cv-phase2-staging-app:latest
     container_name: cv-phase2-staging-app
+    # UID não-root da imagem; GID 0 somente para ler o secret 0640 root:root.
+    user: "1001:0"
     restart: unless-stopped
     init: true
     security_opt:
@@ -48,6 +50,15 @@ services:
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       PAYLOAD_MEDIA_DIR: /app/media
       SITE_NOINDEX: ${SITE_NOINDEX}
+      LEAD_NOTIFICATION_ENABLED: ${LEAD_NOTIFICATION_ENABLED:-false}
+      LEAD_SMTP_HOST: ${LEAD_SMTP_HOST:-smtp.hostinger.com}
+      LEAD_SMTP_PORT: ${LEAD_SMTP_PORT:-465}
+      LEAD_SMTP_SECURE: ${LEAD_SMTP_SECURE:-true}
+      LEAD_SMTP_USER: ${LEAD_SMTP_USER:-contato@crescimentovertical.com}
+      LEAD_SMTP_FROM: ${LEAD_SMTP_FROM:-contato@crescimentovertical.com}
+      LEAD_NOTIFICATION_TO: ${LEAD_NOTIFICATION_TO:-contato@crescimentovertical.com}
+      LEAD_SMTP_PASSWORD_FILE: /run/secrets/lead_smtp_password
+      LEAD_ADMIN_BASE_URL: ${LEAD_ADMIN_BASE_URL:-https://staging.crescimentovertical.com}
     depends_on:
       postgres:
         condition: service_healthy
@@ -56,6 +67,10 @@ services:
       - n8n_default
     volumes:
       - media:/app/media
+      - type: bind
+        source: /opt/crescimento-vertical/.secrets/lead-smtp-password
+        target: /run/secrets/lead_smtp_password
+        read_only: true
     healthcheck:
       test:
         - CMD

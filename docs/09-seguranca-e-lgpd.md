@@ -162,3 +162,21 @@ A retenção definitiva depende da política jurídica aprovada. Até lá:
 7. Registrar causa, correção e prevenção.
 
 Nenhum incidente será “resolvido” apagando logs sem preservação.
+# Fase 7 — dados de diagnóstico
+
+O formulário coleta somente dados necessários ao atendimento, com consentimento
+explícito versionado (`2026-08-29.v1`), finalidade, revogação, retenção de 180
+dias e link para privacidade. Não há marketing, analytics, cookies não
+essenciais, IP bruto, User-Agent ou PII em logs. Exclusão/anonimização é manual,
+idempotente e dry-run por padrão; nenhuma integração externa foi ativada.
+
+### Transporte comercial por SMTP
+
+No staging, a notificação usa Hostinger na porta 465 com TLS implícito e
+validação normal de certificado. A senha é arquivo 0640 `root:root`; o app roda
+com UID 1001 e GID 0, sem capabilities, e recebe bind mount read-only exclusivo.
+O segredo não entra no Git,
+ambiente, inspect, imagem, processo, log ou backup. O e-mail não contém PII:
+somente horário, UUID e link ao Admin protegido por BasicAuth + Payload + role.
+Rotação/revogação consiste em trocar o arquivo protegido e recriar apenas o app;
+falha mantém o registro no outbox.
