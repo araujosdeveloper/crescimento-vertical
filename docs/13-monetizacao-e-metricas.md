@@ -154,3 +154,12 @@ formulário, sem GA4, scripts externos, cookies não essenciais ou identificador
 pessoais. A atribuição aceita apenas rota, serviço/CTA, conteúdo e UTMs
 normalizadas. Leads são persistidos no Payload/PostgreSQL e aguardam outbox de
 notificação quando houver provedor autorizado.
+
+## Aceite comercial da Fase 7 — 30 de agosto de 2026
+
+O fluxo real comprovou uma captação consentida, um outbox entregue em uma
+tentativa e uma notificação recebida, sem duplicidade, órfão ou evento com PII.
+Hostinger SMTP é somente transporte; Payload/PostgreSQL permanece fonte de
+verdade. A mensagem contém apenas aviso mínimo e acesso autenticado ao Admin.
+GA4 e Search Console permanecem desativados, e nenhuma métrica de negócio foi
+inventada a partir deste único fluxo.

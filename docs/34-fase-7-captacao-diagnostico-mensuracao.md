@@ -1,6 +1,6 @@
 # Fase 7 — Captação, diagnóstico e mensuração comercial
 
-Estado: em execução até teste e aceite humano no staging.
+Estado: concluída em 30 de agosto de 2026 após teste e aceite humano no staging.
 
 ## Fluxo e modelo
 
@@ -64,3 +64,23 @@ WhatsApp, webhook, analytics e automação operacional estão fora do escopo.
 
 Os gates pré-produção — homologação responsiva integral nos cinco viewports e
 concretização da copy comercial da Fase 4 — permanecem preservados.
+
+## Aceite humano e encerramento
+
+O formulário claro com textos escuros, o envio real e a mensagem de sucesso
+foram aprovados. O primeiro envio falhou antes de persistir porque campos
+canônicos do consentimento foram removidos indevidamente; a correção foi coberta
+por testes. O segundo e único envio válido persistiu atomicamente um lead e um
+outbox, com consentimento `2026-08-29.v1`, retenção registrada e idempotência
+comprovada.
+
+O verify do Hostinger SMTP foi aprovado antes da entrega. O outbox foi
+processado uma única vez, ficou `sent` com attempts 1 e timestamps presentes, e
+a notificação mínima sem PII foi recebida humanamente — “Notificação recebida.”
+O estado final tem zero duplicidades, zero órfãos, zero eventos com PII e zero
+itens elegíveis em dry-run. Produção, n8n e Hermes foram preservados; GA4 e
+Search Console permanecem desativados.
+
+A Fase 7 está concluída. As Fases 0–7 estão concluídas, as Fases 8–12 estão
+pendentes e nenhuma fase está em execução. Os dois gates pré-produção continuam
+obrigatórios e não foram encerrados por este aceite.

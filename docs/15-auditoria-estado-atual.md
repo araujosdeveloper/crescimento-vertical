@@ -766,3 +766,25 @@ ler o arquivo `root:root` 0640, sem world-read ou capabilities. Produção,
 PostgreSQL, n8n, Hermes, runner, DNS e Traefik global não
 serão alterados, exceto as atualizações normais do próprio outbox após o aceite
 SMTP autorizado.
+
+## Encerramento da Fase 7 — 30 de agosto de 2026
+
+O responsável aprovou o formulário claro, o envio real, a mensagem de sucesso,
+o consentimento versionado, a captação única e declarou “Notificação recebida.”
+O primeiro envio falhou antes de persistir por remoção indevida de campos
+canônicos do consentimento; a correção foi coberta por testes. O segundo e único
+envio válido criou atomicamente um lead e um outbox.
+
+O estado sanitizado final registra um lead `new`, consentimento
+`2026-08-29.v1`, hash de consentimento presente, chave de idempotência presente
+e única e retenção até 2027-02-25. Há um outbox `sent`, attempts 1, `sentAt` e
+`deliveredAt` presentes, com entrega em 2026-08-30 04:10:24.502 UTC. Há zero
+leads sem outbox, zero outboxes órfãos, zero duplicidades e zero eventos com PII;
+o dry-run final não possui itens elegíveis.
+
+Hostinger SMTP em 465/TLS foi verificado antes do envio; a senha permaneceu
+somente em arquivo protegido e o e-mail mínimo não transportou PII. Uma única
+mensagem foi enviada e recebida. Produção, n8n e Hermes foram preservados; GA4
+e Search Console continuam desativados. A Fase 7 está concluída, nenhuma fase
+está em execução e as Fases 8–12 permanecem pendentes. A homologação responsiva
+integral e a concretização da copy da Fase 4 continuam gates de produção.

@@ -26,6 +26,14 @@ Este documento é o quadro de controle. O detalhamento das fases permanece em
 
 ## Situação
 
+- Estado consolidado em 30 de agosto de 2026: Fases 0–7 concluídas; Fases 8–12
+  pendentes; nenhuma fase em execução.
+- Fase 7 encerrada após aceite humano do formulário, captação real única,
+  consentimento versionado, outbox idempotente e recebimento da notificação
+  SMTP sem PII.
+- Gates pré-produção preservados: homologação responsiva integral nos cinco
+  viewports e concretização da copy comercial da Fase 4.
+
 - Fase ativa: Fase 5 — Portal editorial e experiência de leitura, iniciada em
   28 de agosto de 2026 a partir da `main` `e153f50f9591cf74f804d57a0e213acad463fd17`.
 - Fases 0–4 concluídas; Fases 6–12 pendentes.
@@ -568,3 +576,17 @@ Ao concluir uma sessão de trabalho, registrar:
 | Execução | verify sem envio antes de processar uma única vez o item explicitamente selecionado |
 | Rollback | imagem anterior + notificação desabilitada; banco e outbox preservados |
 | Gate | commit, quatro checks verdes, backup validado e redeploy exclusivo do app antes do envio |
+
+## Aceite humano e encerramento da Fase 7 — 30 de agosto de 2026
+
+| Campo | Conteúdo |
+| --- | --- |
+| Aceite | Formulário claro com textos escuros, envio real, sucesso, consentimento e recebimento da notificação aprovados; declaração final: “Notificação recebida.” |
+| Primeira tentativa | Falhou antes de persistir por remoção indevida dos campos canônicos de consentimento; correção coberta por testes |
+| Fluxo válido | Segundo e único envio válido criou atomicamente um lead e um outbox; sem duplicidade ou órfão |
+| Retenção | Consentimento `2026-08-29.v1` e retenção até 2027-02-25 registrados |
+| SMTP | Hostinger 465/TLS, senha somente por arquivo, verify aprovado, mensagem mínima sem PII e outbox processado uma única vez |
+| Evidência | 1 lead; 1 outbox sent; attempts 1; timestamps de envio/entrega presentes; dry-run posterior sem elegíveis; notificação recebida |
+| Preservado | Produção, n8n, Hermes, GA4 e Search Console; nenhuma nova mensagem ou lead |
+| Estado | Fase 7 concluída; Fases 0–7 concluídas; Fases 8–12 pendentes; nenhuma fase em execução |
+| Gates | Homologação responsiva integral e concretização da copy da Fase 4 continuam bloqueando produção |
