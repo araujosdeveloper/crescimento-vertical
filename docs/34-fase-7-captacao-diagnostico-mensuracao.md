@@ -37,10 +37,16 @@ essenciais, nome, e-mail, telefone, mensagem ou leadId.
 
 ## Outbox e notificação
 
-Nenhuma credencial ou provedor externo de notificação estava presente/utilizável
-no preflight. O lead é salvo com outbox `pending`; a integração externa fica
-explicitamente pendente. Não são usados n8n, Hermes, Telegram ou WhatsApp como
-atalho. A notificação futura deverá ser mínima, idempotente e desacoplada.
+O ADR-028 autoriza Hostinger SMTP em `smtp.hostinger.com:465` com TLS implícito.
+O lead é salvo atomicamente antes de qualquer entrega; o comando manual
+`npm run leads:outbox -- --dry-run`, `--verify` ou `--process --limit 1 --id ID`
+opera lotes pequenos com claim atômico, lease, Message-ID estável, até cinco
+tentativas e backoff. Falha não rejeita nem apaga o lead.
+
+O e-mail contém somente data/hora, UUID interno e link HTTPS autenticado ao
+Payload Admin, sem PII, anexos ou rastreamento. A senha existe somente no arquivo
+montado read-only. n8n e Hermes não participam; agendamento/reconciliação futura
+pertence à Fase 11.
 
 ## Retenção e exclusão
 

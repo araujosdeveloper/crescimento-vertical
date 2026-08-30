@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
@@ -28,7 +29,7 @@ export async function POST(request: Request) {
     const transactionReq = { payload, transactionID } as never;
     try {
       const lead = await payload.create({ collection: "leads", data: { ...checked.value, consentedAt: new Date().toISOString(), retentionUntil: new Date(Date.now() + 180 * 86400000).toISOString(), notificationStatus: "pending", notificationAttempts: 0 } as never, overrideAccess: true, req: transactionReq, disableTransaction: true });
-      await payload.create({ collection: "lead-outbox", data: { lead: lead.id, type: "commercial_notification", state: "pending", attempts: 0 } as never, overrideAccess: true, req: transactionReq, disableTransaction: true });
+      await payload.create({ collection: "lead-outbox", data: { lead: lead.id, type: "commercial_notification", state: "pending", attempts: 0, notificationKey: randomUUID() } as never, overrideAccess: true, req: transactionReq, disableTransaction: true });
       await payload.db.commitTransaction(transactionID);
     } catch (error) {
       await payload.db.rollbackTransaction(transactionID);

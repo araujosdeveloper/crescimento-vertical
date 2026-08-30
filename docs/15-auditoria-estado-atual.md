@@ -754,3 +754,15 @@ merge-base `7cd8aaf6b6442bd2fd8f64b4abe45b958c0c3f2f`. O preflight confirmou
 staging saudável, PostgreSQL preservado, Search Console/GA4 desativados e
 ausência de credenciais utilizáveis para notificação externa. O escopo é
 first-party, sem alteração de produção, n8n, Hermes ou runner editorial.
+
+## Transporte SMTP autorizado da Fase 7 — 30 de agosto de 2026
+
+O preflight do HEAD `c3b4ca6` confirmou PR #13 aberto/draft e quatro checks
+verdes, app e PostgreSQL healthy, um lead ligado a um outbox pending com zero
+tentativas, sem duplicidade ou órfão. TLS de `smtp.hostinger.com:465` foi
+validado sem envio. O app executa como UID 1001; o segredo original permanece
+fora do Git e será montado read-only somente no app; o UID 1001 usa GID 0 para
+ler o arquivo `root:root` 0640, sem world-read ou capabilities. Produção,
+PostgreSQL, n8n, Hermes, runner, DNS e Traefik global não
+serão alterados, exceto as atualizações normais do próprio outbox após o aceite
+SMTP autorizado.

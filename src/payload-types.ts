@@ -531,10 +531,15 @@ export interface LeadOutbox {
   id: number;
   lead: number | Lead;
   type: 'commercial_notification';
-  state?: ('pending' | 'sent' | 'failed') | null;
+  state?: ('pending' | 'processing' | 'sent' | 'failed') | null;
   attempts?: number | null;
   nextAttemptAt?: string | null;
   lastError?: string | null;
+  notificationKey: string;
+  claimedAt?: string | null;
+  sentAt?: string | null;
+  deliveredAt?: string | null;
+  messageId?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1024,6 +1029,11 @@ export interface LeadOutboxSelect<T extends boolean = true> {
   attempts?: T;
   nextAttemptAt?: T;
   lastError?: T;
+  notificationKey?: T;
+  claimedAt?: T;
+  sentAt?: T;
+  deliveredAt?: T;
+  messageId?: T;
   updatedAt?: T;
   createdAt?: T;
 }

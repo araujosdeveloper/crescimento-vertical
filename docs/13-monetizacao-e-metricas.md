@@ -143,6 +143,12 @@ Já são metas obrigatórias desde o início:
 - Não recomendar ferramenta apenas pela comissão.
 # Fase 7 — mensuração comercial first-party
 
+A notificação comercial por Hostinger SMTP não é fonte de verdade nem evento de
+analytics. Aceite SMTP atualiza apenas o estado técnico do outbox e do lead;
+nenhum dado pessoal vai ao assunto/corpo, GA4 permanece desativado e n8n/Hermes
+não participam. Métricas operacionais usam somente contagens, tentativas, estado
+e timestamps.
+
 O fluxo prepara eventos não identificáveis de CTA, WhatsApp e estados do
 formulário, sem GA4, scripts externos, cookies não essenciais ou identificadores
 pessoais. A atribuição aceita apenas rota, serviço/CTA, conteúdo e UTMs

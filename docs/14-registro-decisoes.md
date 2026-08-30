@@ -784,3 +784,26 @@ data, status, decisão, motivo, consequências e plano de reversão.
   pode ser homologado sem envio externo; a entrega comercial permanece pendente.
 - Reversão: desabilitar o endpoint, restaurar imagem/migration anterior via
   backup e manter os dados sob acesso administrativo restrito.
+
+## ADR-028 — Hostinger SMTP como transporte da notificação comercial da Fase 7
+
+- Data: 2026-08-30
+- Status: aprovada para staging
+- Decisão: `LeadOutbox` permanece a fonte de verdade e SMTP é somente o
+  transporte. Hostinger usa `smtp.hostinger.com:465`, TLS implícito obrigatório,
+  remetente e destinatário fixos. A senha é lida apenas do arquivo montado em
+  `/run/secrets/lead_smtp_password`; não é variável, argumento, imagem ou log.
+- Conteúdo: aviso mínimo com data/hora, UUID interno e link HTTPS ao registro no
+  Payload Admin. O link exige BasicAuth, autenticação Payload e autorização de
+  leitura de Leads. Não há PII, anexos, scripts, pixel ou token mágico.
+- Entrega: claim atômico com `FOR UPDATE SKIP LOCKED`, lease recuperável, lotes
+  pequenos, até cinco tentativas e backoff exponencial limitado. O Message-ID é
+  estável e derivado do UUID do outbox, sem segredo ou PII. A entrega SMTP é
+  tecnicamente at-least-once; Message-ID estável reduz duplicações sem prometer
+  exactly-once após falha entre aceite remoto e persistência local.
+- Falhas: SMTP ausente ou indisponível nunca apaga/rejeita o lead aceito;
+  mantém o outbox pendente enquanto houver retry. A automação recorrente será
+  reconciliada na Fase 11. n8n e Hermes não participam.
+- Reversão: desabilitar `LEAD_NOTIFICATION_ENABLED`, restaurar a imagem anterior
+  e manter lead/outbox no PostgreSQL. Rotacionar/revogar a senha na Hostinger e
+  substituir somente o arquivo protegido quando necessário.

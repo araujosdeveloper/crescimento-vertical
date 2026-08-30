@@ -557,3 +557,14 @@ Ao concluir uma sessão de trabalho, registrar:
 | Integrações | Search Console e GA4 continuam desativados; produção, n8n e Hermes preservados |
 | Riscos/gates | Homologação responsiva integral nos cinco viewports e concretização da copy comercial da Fase 4 continuam bloqueando produção |
 | Próxima ação | Nenhuma fase em execução; Fases 7–12 pendentes |
+
+## Registro da sessão 2026-08-30 — transporte SMTP da Fase 7
+
+| Campo | Conteúdo |
+| --- | --- |
+| Escopo | Hostinger SMTP somente no app de staging; ADR-028 |
+| Fonte de verdade | LeadOutbox/PostgreSQL; SMTP apenas transporte |
+| Segurança | porta 465/TLS; segredo por arquivo; mensagem sem PII; n8n/Hermes ausentes |
+| Execução | verify sem envio antes de processar uma única vez o item explicitamente selecionado |
+| Rollback | imagem anterior + notificação desabilitada; banco e outbox preservados |
+| Gate | commit, quatro checks verdes, backup validado e redeploy exclusivo do app antes do envio |
