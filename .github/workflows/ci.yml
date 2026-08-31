@@ -127,6 +127,7 @@ jobs:
         run: |
           mkdir -p .secrets /tmp/fake-profile
           printf 'ci-fake-hmac-secret-not-used-anywhere-1234567890' > .secrets/hmac-secret
+          printf 'ci-fake-deepseek-key-not-used-anywhere' > .secrets/deepseek-api-key
           docker compose -f docker-compose.hermes-editorial.yml config --quiet
 
       - name: Docker build do runner (imagem Hermes pinada por digest)

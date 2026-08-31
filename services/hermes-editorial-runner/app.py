@@ -235,7 +235,16 @@ class Handler(BaseHTTPRequestHandler):
             store.update(job["id"], "timed_out", error_code="timeout")
             self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
         except Exception as exc:  # sanitized, no exception text
-            code = str(exc) if str(exc) in {"output_too_large", "invalid_dossier_json", "invalid_dossier_schema", "usage_file_missing_or_invalid", "hermes_nonzero_exit", "execution_disabled"} else "job_failed"
+            safe_codes = {
+                "output_too_large",
+                "invalid_dossier_json",
+                "invalid_dossier_schema",
+                "usage_file_missing_or_invalid",
+                "hermes_nonzero_exit",
+                "execution_disabled",
+                "deepseek_credential_unavailable",
+            }
+            code = str(exc) if str(exc) in safe_codes else "job_failed"
             store.update(job["id"], "failed", error_code=code)
             self._send_json(502, {"error": code, "jobId": job["id"]})
 

@@ -29,6 +29,7 @@ services:
       RUNNER_EXECUTION_ENABLED: "false"
       SCHEMAS_DIR: /app/schemas
       HERMES_HOME: /home/hermes/editorial-profile
+      DEEPSEEK_API_KEY_FILE: /run/secrets/deepseek-api-key
       RUNNER_STATE_DIR: /state
       MAX_TURNS: "40"
       MAX_WEB_SEARCHES: "10"
@@ -43,6 +44,10 @@ services:
       - type: bind
         source: ./.secrets/hmac-secret
         target: /run/secrets/hmac-secret
+        read_only: true
+      - type: bind
+        source: ./.secrets/deepseek-api-key
+        target: /run/secrets/deepseek-api-key
         read_only: true
       - runner-state:/state
     expose:

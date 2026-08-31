@@ -65,6 +65,34 @@ Limites firmes: 40 turnos, 10 buscas, 8 fontes finais, 900 segundos por job,
 documentada (sem cron, workflow n8n ou gateway). O n8n permanece futuro
 orquestrador da Fase 9 e validate-only.
 
+## Compatibilidade DeepSeek V4 Flash
+
+A imagem pinada contém Hermes v0.20.4 e OpenAI SDK 2.24.0. O provider nativo
+correto é `deepseek`, com `DEEPSEEK_API_KEY`, base URL
+`https://api.deepseek.com/v1` e transporte OpenAI Chat Completions para
+`POST /chat/completions`. O ID oficial e fixado é `deepseek-v4-flash`.
+
+A documentação oficial confirma JSON Output, tool calls e os modos thinking e
+non-thinking. Thinking é o padrão da API; o candidato fixa esforço `high`. O
+Hermes preserva `reasoning_content` e o reenvia nas chamadas seguintes com
+ferramentas, atendendo ao contrato que, se violado, causa HTTP 400. A resposta
+é normalizada com `prompt_tokens`, `completion_tokens` e `total_tokens`; o
+`--usage-file` obrigatório agrega tokens, modelo, chamadas e estimativa local.
+`model.max_tokens` fica em 32768, enquanto o runner mantém timeout total de 900
+s e saída final de 512 KiB.
+
+Referências oficiais consultadas em 31 de agosto de 2026:
+
+- [modelos e limites](https://api-docs.deepseek.com/quick_start/pricing/);
+- [Chat Completions](https://api-docs.deepseek.com/api/create-chat-completion/);
+- [thinking e continuidade](https://api-docs.deepseek.com/guides/thinking_mode/);
+- [tool calls](https://api-docs.deepseek.com/guides/tool_calls/);
+- [erros](https://api-docs.deepseek.com/quick_start/error_codes/).
+
+Erros de autenticação, saldo, rate limit, parâmetros, servidor, timeout,
+resposta inválida, usage ausente ou credencial ausente terminam o job sem
+fallback pago. Nenhuma dessas verificações realizou chamada autenticada.
+
 ## ADR-029
 
 “Execução editorial controlada, credencial isolada e fail-closed do Hermes”.
@@ -73,6 +101,9 @@ n8n somente na Fase 9; nenhuma publicação; dupla trava; janela temporária;
 limites de custo; fontes como dados não confiáveis; falha fechada; saídas por
 schema; desabilitação após testes; proibição de reutilizar credencial
 compartilhada. A credencial B impede a janela e a bateria nesta execução.
+
+O ADR-030 registra a substituição controlada do candidato OpenAI pelo DeepSeek
+V4 Flash sem habilitar execução nem alterar a instalação compartilhada.
 
 ## Estado seguro e aceite
 

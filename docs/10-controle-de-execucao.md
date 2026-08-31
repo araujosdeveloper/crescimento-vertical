@@ -599,3 +599,9 @@ Há uma execução ativa no máximo, limite de 40 turnos, 10 buscas, 8 fontes, 9
 segundos e 512 KiB de saída. A agenda candidata é apenas declarada; cron,
 webhook, gateway e workflow n8n permanecem desativados. Sem credencial exclusiva
 de modelo, a execução e a bateria real permanecem bloqueadas.
+
+Em 31 de agosto de 2026, o provider candidato foi substituído localmente por
+DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo/thinking, aceita a
+credencial exclusiva somente por arquivo e falha fechado quando ausente. Não
+houve chamada de API, pesquisa, deploy, alteração de runtime ou início da Fase
+9; o PR #14 permanece draft.

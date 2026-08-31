@@ -804,3 +804,13 @@ pesquisa, chamada de modelo, publicação, criação no Payload ou alteração d
 portal, PostgreSQL, n8n, Hermes compartilhado ou produção. A Fase 8 aguarda
 credencial exclusiva para qualquer bateria real; Fases 9–12 permanecem
 pendentes e os dois gates pré-produção continuam preservados.
+
+## Compatibilidade local com DeepSeek — 31 de agosto de 2026
+
+Sem autenticação, a imagem pinada confirmou Hermes v0.20.4, OpenAI SDK 2.24.0
+e provider nativo `deepseek`: base URL `https://api.deepseek.com/v1`, variável
+`DEEPSEEK_API_KEY`, modelo `deepseek-v4-flash`, tool calls via Chat Completions,
+preservação de `reasoning_content`, usage normalizado e parâmetros de timeout e
+limite de saída. O código candidato do runner foi preparado com credencial por
+arquivo e sem fallback. Containers, perfis instalados, credenciais, n8n,
+Payload/PostgreSQL, staging e produção não foram modificados.

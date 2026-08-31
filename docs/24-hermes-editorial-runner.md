@@ -58,7 +58,7 @@ Erros: 400 (JSON inválido), 401 (assinatura/timestamp), 409 (nonce repetido),
 
 ## Testes
 
-`services/hermes-editorial-runner/tests/` (37 testes, `unittest`): HMAC, nonce,
+`services/hermes-editorial-runner/tests/` (40 testes, `unittest`): HMAC, nonce,
 schemas, dupla trava, comando sem shell e integração HTTP (401/409/413/400/422/
 503/404/200). Execução: `python3 -m unittest discover -s tests -t .`.
 
@@ -73,3 +73,9 @@ Na Fase 8 o runner também aplica política de escopo, canonicalização e hash 
 fontes, fingerprint de pauta, estado SQLite idempotente, limite de concorrência
 1, timeout, limite de saída, usage file obrigatório e validação integral do
 dossiê. A execução real continua bloqueada sem credencial exclusiva.
+
+O comando one-shot fixa `--provider deepseek --model deepseek-v4-flash
+--reasoning high`. A credencial é lida de `/run/secrets/deepseek-api-key`
+somente depois da dupla trava e enviada apenas ao ambiente do subprocesso como
+`DEEPSEEK_API_KEY`. Arquivo ausente ou vazio falha fechado antes de iniciar o
+Hermes. Não existe fallback automático para OpenAI ou outro provedor.

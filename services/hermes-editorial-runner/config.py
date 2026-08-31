@@ -29,6 +29,12 @@ HMAC_SECRET_FILE = os.environ.get("HMAC_SECRET_FILE", "/run/secrets/hmac-secret"
 TIMESTAMP_TOLERANCE_SECONDS = _env_int("TIMESTAMP_TOLERANCE_SECONDS", 300)
 BODY_MAX_BYTES = _env_int("BODY_MAX_BYTES", 1024 * 1024)
 HERMES_BIN = os.environ.get("HERMES_BIN", "hermes")
+HERMES_PROVIDER = "deepseek"
+HERMES_MODEL = "deepseek-v4-flash"
+HERMES_REASONING = "high"
+DEEPSEEK_API_KEY_FILE = os.environ.get(
+    "DEEPSEEK_API_KEY_FILE", "/run/secrets/deepseek-api-key"
+)
 SCHEMAS_DIR = os.environ.get("SCHEMAS_DIR", "/app/schemas")
 EXECUTION_ENABLE_FILE = os.environ.get(
     "EXECUTION_ENABLE_FILE", "/run/secrets/execution-enable"
@@ -56,6 +62,18 @@ def execution_enabled() -> bool:
 def load_hmac_secret() -> bytes:
     with open(HMAC_SECRET_FILE, "rb") as fh:
         return fh.read().strip()
+
+
+def load_deepseek_api_key() -> str:
+    """Lê a credencial exclusiva somente na janela de execução autorizada."""
+    try:
+        with open(DEEPSEEK_API_KEY_FILE, encoding="utf-8") as fh:
+            api_key = fh.read().strip()
+    except OSError:
+        raise RuntimeError("deepseek_credential_unavailable") from None
+    if not api_key:
+        raise RuntimeError("deepseek_credential_unavailable")
+    return api_key
 
 
 def validate_limits() -> None:

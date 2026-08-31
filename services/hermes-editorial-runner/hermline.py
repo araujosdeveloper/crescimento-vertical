@@ -53,6 +53,12 @@ def build_hermes_command(request: dict) -> list[str]:
         config.HERMES_BIN,
         "-z",
         build_prompt(request),
+        "--provider",
+        config.HERMES_PROVIDER,
+        "--model",
+        config.HERMES_MODEL,
+        "--reasoning",
+        config.HERMES_REASONING,
         "--usage-file",
         usage_path,
         "--skills",
@@ -68,13 +74,25 @@ def run_hermes(request: dict) -> dict:
 
     with _execution_lock:
         os.makedirs(config.USAGE_DIR, exist_ok=True)
-        proc = subprocess.run(
-            build_hermes_command(request),
-            capture_output=True,
-            text=True,
-            timeout=config.JOB_TIMEOUT_SECONDS,
-            shell=False,
-        )
+        child_env = os.environ.copy()
+        # A chave exclusiva existe apenas no ambiente do subprocesso one-shot.
+        # O perfil não herda nem consulta credenciais OpenAI/default.
+        child_env.pop("OPENAI_API_KEY", None)
+        child_env.pop("OPENAI_BASE_URL", None)
+        child_env["DEEPSEEK_API_KEY"] = config.load_deepseek_api_key()
+        child_env["HERMES_INFERENCE_PROVIDER"] = config.HERMES_PROVIDER
+        child_env["HERMES_INFERENCE_MODEL"] = config.HERMES_MODEL
+        try:
+            proc = subprocess.run(
+                build_hermes_command(request),
+                capture_output=True,
+                text=True,
+                timeout=config.JOB_TIMEOUT_SECONDS,
+                shell=False,
+                env=child_env,
+            )
+        except subprocess.TimeoutExpired:
+            raise TimeoutError("timeout") from None
         if proc.returncode != 0:
             raise RuntimeError("hermes_nonzero_exit")
         output = proc.stdout.strip()

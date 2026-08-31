@@ -834,3 +834,27 @@ data, status, decisão, motivo, consequências e plano de reversão.
 - Reversão: desabilitar `LEAD_NOTIFICATION_ENABLED`, restaurar a imagem anterior
   e manter lead/outbox no PostgreSQL. Rotacionar/revogar a senha na Hostinger e
   substituir somente o arquivo protegido quando necessário.
+
+## ADR-030 — DeepSeek V4 Flash como candidato de inferência editorial
+
+- Data: 2026-08-31
+- Status: aprovada para implementação local; homologação real bloqueada
+- Fase afetada: 8
+- Decisão: substituir o candidato OpenAI do perfil editorial por `deepseek`
+  com o modelo oficial `deepseek-v4-flash`, Chat Completions, thinking `high`,
+  saída máxima configurada em 32768 tokens e nenhum fallback automático. A
+  chave exclusiva será montada como arquivo somente no runner e convertida em
+  `DEEPSEEK_API_KEY` apenas no ambiente do subprocesso one-shot.
+- Compatibilidade: Hermes v0.20.4 possui provider DeepSeek nativo, preserva e
+  reenvia `reasoning_content` nas chamadas com ferramentas, normaliza usage e
+  aceita timeout/max_tokens. A documentação oficial confirma modelo, endpoint,
+  tool calls e thinking/non-thinking. A pesquisa web permanece separada.
+- Limites: nenhuma chamada autenticada, credencial, instalação, atualização do
+  Hermes, runtime, Ollama, n8n, Payload, PostgreSQL, deploy ou Fase 9 nesta
+  execução. A chave OpenAI existente permanece intocada.
+- Alternativas rejeitadas: provider genérico OpenAI-compatible, por ocultar
+  regras de thinking; fallback OpenAI/pago, por violar controle de custo e
+  isolamento; atualização do Hermes, desnecessária na versão instalada.
+- Reversão: reverter somente esta mudança de branch/configuração; como o
+  runtime não é recriado e a execução permanece desabilitada, não há migração
+  de dados nem rollback operacional.

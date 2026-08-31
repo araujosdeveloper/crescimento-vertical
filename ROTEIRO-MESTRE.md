@@ -92,6 +92,12 @@ reutilização; por isso a execução real, a bateria e qualquer pesquisa ficam
 fechadas até existir credencial exclusiva. Os gates pré-produção permanecem
 inalterados e as Fases 9–12 continuam pendentes.
 
+Em 31 de agosto de 2026, decisão expressa substituiu o candidato OpenAI por
+DeepSeek V4 Flash. A compatibilidade do Hermes v0.20.4 foi comprovada sem
+autenticação e o PR #14 passou a preparar provider/modelo, thinking, limites e
+credencial exclusiva por arquivo, sem API, pesquisa real, deploy ou runtime. A
+bateria real continua bloqueada até credencial e homologação posteriores.
+
 A Fase 6 foi iniciada e concluída em 29 de agosto de 2026 após aceite humano
 expresso. O aceite cobriu SEO técnico, metadata, canonicals, Open Graph, Twitter,
 sitemap, robots, indexação, dados estruturados, imagens, cache, performance e a

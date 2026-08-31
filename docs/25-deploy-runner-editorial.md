@@ -3,7 +3,9 @@
 ## Pré-requisitos
 
 - Perfil `crescimento-vertical-editorial` instalado (docs/23).
-- Segredos locais (fora do Git): `.env.hermes-editorial` e `.secrets/hmac-secret`.
+- Segredos locais (fora do Git): `.env.hermes-editorial`,
+  `.secrets/hmac-secret` e, somente para janela futura autorizada,
+  `.secrets/deepseek-api-key`.
 
 ## Container
 
@@ -26,6 +28,8 @@
 
 - `.env.hermes-editorial` (600): `EDITORIAL_PROFILE_PATH` real.
 - `.secrets/hmac-secret` (600, ≥32 bytes): segredo HMAC.
+- `.secrets/deepseek-api-key` (600): chave exclusiva do projeto, nunca copiada
+  do Hermes default, OpenAI ou outro projeto.
 - `.gitignore` ignora `.secrets/` e `.env.hermes-editorial`.
 
 ## Execução
@@ -57,6 +61,9 @@ usuário não-root, rootfs read-only, `cap_drop: ALL`, `no-new-privileges`, sem
 ports e sem Docker Socket. A flag e o arquivo de habilitação permanecem ausentes
 por padrão; não há cron, gateway ou workflow ativo. Sem credencial exclusiva de
 modelo, não se recria o runner nem se inicia bateria real.
+
+O arquivo DeepSeek é montado read-only. Sua ausência mantém qualquer execução
+real em falha fechada; não criar placeholder no runtime.
 
 ## Integração com o n8n (Fase 3C)
 
