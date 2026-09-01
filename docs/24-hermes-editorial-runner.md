@@ -129,3 +129,12 @@ oferece configuração independente por CLI, ambiente ou perfil. O runner usa
 efêmero de `/opt/data/logs`; `agent.log` tem rotação de 1 MiB e um backup,
 umask 0077, diretório 0700 e arquivos 0600. Nenhum log é persistido em
 `/state` ou inclui credenciais, headers, prompts ou respostas integrais.
+
+## Executor da bateria
+
+O comando versionado `scripts/phase8-controlled-battery.sh` é a única camada
+operacional autorizada para uma bateria futura. Ele abre as travas somente após
+validar o runner, executa `controlled_battery.py` uma vez via stdin em
+container UID 10000 e fecha as travas em `trap/finally`. O cliente valida a
+entrada e a resposta, registra um único POST e usa somente GET no polling de
+`queued`/`running`, sem retry ou idempotência.

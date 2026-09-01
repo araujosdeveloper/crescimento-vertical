@@ -14,6 +14,7 @@ COPY services/hermes-editorial-runner/app.py \
      services/hermes-editorial-runner/policy.py \
      services/hermes-editorial-runner/state.py \
      services/hermes-editorial-runner/hermes_wrapper.py \
+     services/hermes-editorial-runner/controlled_battery.py \
      ./
 COPY docs/schemas/ ./schemas/
 

@@ -228,3 +228,15 @@ substituto, `retry_number=1` e motivo controlado
 atômica; o job original elegível deve ser `failed/hermes_nonzero_exit` e
 permanece imutável. Os campos de retry são opcionais em requisições comuns,
 validados estritamente e nunca são enviados ao Hermes.
+
+## Executor controlado versionado — 2026-09-01
+
+O fluxo futuro usa `services/hermes-editorial-runner/controlled_battery.py`,
+invocado por `scripts/phase8-controlled-battery.sh`. A requisição é lida
+somente de stdin e validada antes de um único POST. A resposta é capturada e
+validada (HTTP, Content-Type, tamanho, JSON, jobId e estado); apenas os estados
+`queued`/`running` entram em polling GET fixo de dois segundos até o deadline
+monotônico de 300 segundos. Não existe segundo POST, retry de POST ou teste de
+idempotência. O wrapper operacional instala `trap` antes de abrir as travas e
+recria somente o runner fechado no `finally`; o cliente roda como UID 10000,
+sem fixture montado e sem persistir o corpo.

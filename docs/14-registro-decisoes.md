@@ -920,3 +920,14 @@ controlado e referência aos dois jobs. A API aceita `retryOfJobId` e
 `retryReason` apenas para o original `failed/hermes_nonzero_exit`; a transação
 cria job e linhagem juntos ou desfaz ambos. O estado histórico existente não é
 associado retrospectivamente.
+
+### Adendo operacional — executor controlado da bateria
+
+Para eliminar scripts efêmeros, o fluxo foi versionado em
+`controlled_battery.py` e `scripts/phase8-controlled-battery.sh`. O cliente
+recebe JSON estrito por stdin, faz exatamente um POST, captura e valida a
+resposta e, se necessário, executa apenas polling GET com deadline monotônico.
+Contador local impede segundo POST; códigos de saída distinguem sucesso,
+terminal sem sucesso, transporte, HTTP, entrada, estado desconhecido e
+timeout. A camada shell instala `trap` antes das travas e fecha o runner em
+qualquer saída. Esta implementação foi apenas testada offline.

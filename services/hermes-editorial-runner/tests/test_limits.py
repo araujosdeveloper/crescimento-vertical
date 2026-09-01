@@ -70,6 +70,20 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertIn('kwargs["backup_count"] = 1', wrapper_text)
         self.assertIn("os.umask(0o077)", wrapper_text)
 
+    def test_controlled_battery_is_single_post_get_only_polling(self):
+        client = Path(__file__).parents[1] / "controlled_battery.py"
+        orchestrator = Path(__file__).parents[3] / "scripts" / "phase8-controlled-battery.sh"
+        text = client.read_text(encoding="utf-8")
+        script = orchestrator.read_text(encoding="utf-8")
+        self.assertEqual(text.count('self._request("POST"'), 1)
+        self.assertIn('self.post_count != 0', text)
+        self.assertIn('self._request("GET"', text)
+        self.assertNotIn("idempot", text.lower())
+        self.assertIn("trap cleanup EXIT", script)
+        self.assertIn("--execute --confirm SINGLE_POST_AUTHORIZED", script)
+        self.assertIn("--user 10000:10000", script)
+        self.assertIn("--mount type=bind,source=/opt/crescimento-vertical/.secrets/hmac-secret", script)
+
 
 if __name__ == "__main__":
     unittest.main()
