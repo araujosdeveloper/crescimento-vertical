@@ -21,16 +21,30 @@ class ExecutionDisabledError(RuntimeError):
 
 
 def bounded_stdout(stdout: str) -> str:
-    output = stdout.strip()
+    output = normalize_json_output(stdout)
     if len(output.encode("utf-8")) > config.OUTPUT_MAX_BYTES:
         raise RuntimeError("output_too_large")
+    return output
+
+
+def normalize_json_output(stdout: str) -> str:
+    """Apply only non-semantic JSON envelope normalizations."""
+    output = stdout.replace("\r\n", "\n").replace("\r", "\n").lstrip("\ufeff").strip()
+    if output.startswith("```json") and output.endswith("```"):
+        inner = output[7:-3].strip()
+        if inner and "```" not in inner:
+            return inner
     return output
 
 
 def build_prompt(request: dict) -> str:
     """Monta o prompt a partir da requisição validada (nunca arbitrário)."""
     lines = [
-        "Pesquisa editorial estruturada. Devolva SOMENTE JSON válido conforme editorial-dossier.v1.schema.json, sem texto adicional.",
+        "Pesquisa editorial estruturada. Devolva SOMENTE um objeto JSON UTF-8 válido conforme editorial-dossier.v1.schema.json, sem markdown, code fence ou texto adicional.",
+        "Chaves obrigatórias exatamente: schemaVersion, idempotencyKey, hermesRunId, discoveredAt, contentType, primaryPillar, riskLevel, sources.",
+        "Não inclua chaves extras. sources deve ter 1 a 4 itens; cada item exige url HTTPS canonicalizada, publisher, sourceLevel A/B/C, publishedAt e accessedAt.",
+        "Limites: até 4 fontes, até 12 claims, strings de título 200 caracteres, resumo 1200, claim 500, justificativa 400; listas ausentes devem ser [] quando opcionais.",
+        "Enums e formatos devem seguir literalmente o schema; fatos, inferências, riscos e lacunas permanecem separados.",
         f"topic: {request['topic']}",
         f"primaryPillar: {request['primaryPillar']}",
         f"searchIntent: {request['searchIntent']}",

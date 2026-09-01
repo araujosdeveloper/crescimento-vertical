@@ -245,12 +245,18 @@ class Handler(BaseHTTPRequestHandler):
         store.update(job["id"], "running")
         try:
             result = hermline.run_hermes(data)
+            # Research telemetry is an acceptance gate: proxy references are
+            # never treated as a search count.
+            research = store.record_research_usage(job["id"], result["usage"])
+            result["usage"].update(research)
             cost = store.record_battery_usage(result["usage"])
             result["usage"].update(cost)
             store.update(job["id"], "succeeded", result=result["dossier"], usage=result["usage"])
+            store.release_battery_reservation()
             self._send_json(202, {"jobId": job["id"], "correlationId": cid, "state": "succeeded"})
         except TimeoutError:
             store.update(job["id"], "timed_out", error_code="timeout")
+            store.release_battery_reservation()
             self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
         except Exception as exc:  # sanitized, no exception text
             safe_codes = {
@@ -265,9 +271,13 @@ class Handler(BaseHTTPRequestHandler):
                 "tavily_credential_unavailable",
                 "battery_job_limit_reached",
                 "budget_guardrail_reached",
+                "tavily_usage_unavailable",
+                "tavily_usage_invalid",
+                "tavily_search_limit_reached",
             }
             code = str(exc) if str(exc) in safe_codes else "job_failed"
             store.update(job["id"], "failed", error_code=code)
+            store.release_battery_reservation()
             self._send_json(502, {"error": code, "jobId": job["id"]})
 
 

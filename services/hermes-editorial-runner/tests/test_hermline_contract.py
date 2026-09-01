@@ -1,0 +1,16 @@
+import os, sys, unittest
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+import hermline
+
+class TestHermlineContract(unittest.TestCase):
+    def test_only_nonsemantic_normalization(self):
+        self.assertEqual(hermline.normalize_json_output('\ufeff```json\n{"a":1}\n```'), '{"a":1}')
+        self.assertEqual(hermline.normalize_json_output('{"a":1}\nextra'), '{"a":1}\nextra')
+
+    def test_prompt_contains_exact_contract_and_limits(self):
+        prompt = hermline.build_prompt({"topic":"x", "primaryPillar":"ai-business", "searchIntent":"s", "maxSources":4})
+        self.assertIn("Chaves obrigatórias exatamente", prompt)
+        self.assertIn("Não inclua chaves extras", prompt)
+        self.assertIn("até 4 fontes", prompt)
+
+if __name__ == '__main__': unittest.main()

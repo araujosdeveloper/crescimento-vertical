@@ -240,3 +240,33 @@ monotônico de 300 segundos. Não existe segundo POST, retry de POST ou teste de
 idempotência. O wrapper operacional instala `trap` antes de abrir as travas e
 recria somente o runner fechado no `finally`; o cliente roda como UID 10000,
 sem fixture montado e sem persistir o corpo.
+
+## Post-mortem do dossier inválido — 2026-09-01
+
+O replacement terminou em `invalid_dossier_schema`. A evidência persistida não
+contém a saída bruta: `result_json` foi nullo e o log efêmero já havia sido
+recriado. Portanto não é possível atribuir, offline, um JSON Pointer específico
+ou confirmar truncamento; a fixture sanitizada `{}` reproduz a falha estrutural.
+As categorias comprovadas são H (prompt e schema divergentes) e ausência de
+telemetria de saída; B–G permanecem indeterminadas.
+
+O prompt agora é derivado deterministicamente do contrato, explicita chaves
+obrigatórias, enums, ausência de propriedades extras e limites (4 fontes, 12
+claims e limites de strings). A normalização local só remove BOM, normaliza
+linhas e um único code fence JSON sem conteúdo adicional; não há reparo
+semântico nem segunda chamada.
+
+`--reasoning none` foi enviado ao Hermes, mas a execução reportou 14.080 tokens
+de reasoning. A inspeção local do adapter só confirma que o modo DeepSeek é
+controlado por `extra_body.thinking`; sem payload persistido ou nova chamada,
+a causa não pode ser determinada. Reasoning permanece contabilizado e o modo
+não é declarado desabilitado.
+
+A contagem Tavily deixou de usar referências do proxy: a migração SQLite v3
+persiste operações `search`/`extract`, bloqueia a quarta busca antes do aceite
+e falha fechado quando o usage não traz telemetria operacional. O valor
+conservador local de US$ 0,054254576 continua debitado; US$ 0,0142314872 é
+apenas estimativa reportada pelo usage, sem fórmula verificável offline.
+`retry_number=2` continua bloqueado pelo contrato persistente.
+Reservas são liberadas em sucesso, falha ou timeout; `jobs_reserved` permanece
+como registro auditável da submissão.

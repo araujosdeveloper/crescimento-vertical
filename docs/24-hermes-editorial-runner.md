@@ -138,3 +138,10 @@ validar o runner, executa `controlled_battery.py` uma vez via stdin em
 container UID 10000 e fecha as travas em `trap/finally`. O cliente valida a
 entrada e a resposta, registra um único POST e usa somente GET no polling de
 `queued`/`running`, sem retry ou idempotência.
+
+Após o post-mortem de `invalid_dossier_schema`, a saída é normalizada apenas
+para BOM, finais de linha e um code fence JSON único sem conteúdo extra. O
+prompt explicita o contrato versionado e limites editoriais; falhas de schema
+continuam terminais. A telemetria do executor preserva contadores mesmo em
+erro. A migração SQLite v3 registra operações Tavily (`search`/`extract`) e
+rejeita usage sem contador exato ou a quarta busca.

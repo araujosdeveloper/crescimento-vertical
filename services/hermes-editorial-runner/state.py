@@ -50,8 +50,6 @@ class JobStore:
                     PRIMARY KEY (original_job_id, retry_number)
                 )"""
             )
-            db.execute("PRAGMA user_version = 2")
-            db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
             db.execute(
                 """CREATE TABLE IF NOT EXISTS battery_usage (
                     battery_id TEXT PRIMARY KEY, jobs_reserved INTEGER NOT NULL DEFAULT 0,
@@ -66,6 +64,25 @@ class JobStore:
                     updated_at REAL NOT NULL
                 )"""
             )
+            # Version 3 adds persistent, operation-level research accounting.
+            columns = {row[1] for row in db.execute("PRAGMA table_info(battery_usage)")}
+            for name in ("search_calls", "extract_calls"):
+                if name not in columns:
+                    db.execute(f"ALTER TABLE battery_usage ADD COLUMN {name} INTEGER NOT NULL DEFAULT 0")
+            db.execute(
+                """CREATE TABLE IF NOT EXISTS research_operations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    job_id TEXT NOT NULL REFERENCES jobs(id),
+                    operation TEXT NOT NULL CHECK (operation IN ('search','extract','crawl','research')),
+                    ordinal INTEGER NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('succeeded','failed')),
+                    created_at REAL NOT NULL,
+                    UNIQUE(job_id, operation, ordinal)
+                )"""
+            )
+            db.execute("CREATE INDEX IF NOT EXISTS research_operations_job_idx ON research_operations(job_id)")
+            db.execute("PRAGMA user_version = 3")
+            db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
         try:
             os.chmod(self.path, 0o600)
         except OSError:
@@ -198,6 +215,42 @@ class JobStore:
                  cache_write, reasoning, time.time(), config.BATTERY_ID),
             )
         return {"estimatedCostUsd": round(estimated, 8), "costStatus": "estimated"}
+
+    def release_battery_reservation(self) -> None:
+        """Release only the unconsumed reservation; job count remains auditable."""
+        with self._lock, self._connect() as db:
+            db.execute(
+                "UPDATE battery_usage SET reserved_usd=MAX(0, reserved_usd-?), updated_at=? WHERE battery_id=?",
+                (config.JOB_RESERVATION_USD, time.time(), config.BATTERY_ID),
+            )
+
+    def record_research_usage(self, job_id: str, usage: dict) -> dict:
+        """Persist exact Tavily operations; missing telemetry fails closed."""
+        operations = usage.get("tavily_operations")
+        if not isinstance(operations, dict):
+            raise RuntimeError("tavily_usage_unavailable")
+        rows = []
+        for operation, entries in operations.items():
+            if operation not in {"search", "extract", "crawl", "research"} or not isinstance(entries, list):
+                raise RuntimeError("tavily_usage_invalid")
+            for ordinal, entry in enumerate(entries, 1):
+                if not isinstance(entry, dict) or entry.get("status") not in {"succeeded", "failed"}:
+                    raise RuntimeError("tavily_usage_invalid")
+                rows.append((job_id, operation, ordinal, entry["status"], time.time()))
+        searches = sum(1 for row in rows if row[1] == "search")
+        if searches > config.MAX_SEARCHES_PER_JOB:
+            raise RuntimeError("tavily_search_limit_reached")
+        with self._lock, self._connect() as db:
+            db.execute("DELETE FROM research_operations WHERE job_id = ?", (job_id,))
+            db.executemany(
+                "INSERT INTO research_operations(job_id,operation,ordinal,status,created_at) VALUES (?,?,?,?,?)",
+                rows,
+            )
+            db.execute(
+                "UPDATE battery_usage SET search_calls=?, extract_calls=?, updated_at=? WHERE battery_id=?",
+                (searches, sum(1 for row in rows if row[1] == "extract"), time.time(), config.BATTERY_ID),
+            )
+        return {"searchCalls": searches, "extractCalls": sum(1 for row in rows if row[1] == "extract")}
 
     def public(self, job: dict) -> dict:
         result = {"jobId": job["id"], "correlationId": job["correlation_id"], "state": job["state"]}

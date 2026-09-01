@@ -51,6 +51,30 @@ class TestJobStore(unittest.TestCase):
             })
             self.assertEqual(result["costStatus"], "estimated")
             self.assertGreater(result["estimatedCostUsd"], 0)
+            store.release_battery_reservation()
+            with store._connect() as db:
+                self.assertEqual(db.execute("select reserved_usd from battery_usage").fetchone()[0], 0)
+
+    def test_research_operations_are_persistent_and_fourth_search_is_blocked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = JobStore(os.path.join(directory, "jobs.sqlite3"))
+            job, _ = store.create_or_get({"idempotencyKey": "research", "correlationId": "c"}, "fp")
+            store.reserve_battery_job()
+            usage = {"tavily_operations": {"search": [{"status": "succeeded"}] * 3,
+                                               "extract": [{"status": "succeeded"}]}}
+            self.assertEqual(store.record_research_usage(job["id"], usage)["searchCalls"], 3)
+            reopened = JobStore(os.path.join(directory, "jobs.sqlite3"))
+            with reopened._connect() as db:
+                self.assertEqual(db.execute("select count(*) from research_operations where job_id=?", (job["id"],)).fetchone()[0], 4)
+            with self.assertRaisesRegex(RuntimeError, "tavily_search_limit_reached"):
+                reopened.record_research_usage(job["id"], {"tavily_operations": {"search": [{"status": "succeeded"}] * 4}})
+
+    def test_research_usage_missing_fails_closed(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = JobStore(os.path.join(directory, "jobs.sqlite3"))
+            job, _ = store.create_or_get({"idempotencyKey": "research-missing", "correlationId": "c"}, "fp")
+            with self.assertRaisesRegex(RuntimeError, "tavily_usage_unavailable"):
+                store.record_research_usage(job["id"], {})
 
     def test_retry_lineage_is_atomic_persistent_and_sanitized(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -931,3 +931,16 @@ Contador local impede segundo POST; códigos de saída distinguem sucesso,
 terminal sem sucesso, transporte, HTTP, entrada, estado desconhecido e
 timeout. A camada shell instala `trap` antes das travas e fecha o runner em
 qualquer saída. Esta implementação foi apenas testada offline.
+### ADR-032 — Evidência de dossier inválido e telemetria de pesquisa (2026-09-01)
+
+O replacement `retry=1` terminou como `invalid_dossier_schema`, mas o runner
+persistiu `result_json` nulo e os logs do Hermes eram efêmeros; não existe
+evidência local para apontar um JSON Pointer ou finish_reason. A correção é
+falhar fechado, gerar o prompt a partir do schema versionado e aceitar apenas
+normalizações não semânticas.
+
+A migração interna do SQLite para `user_version=3` adiciona contagem persistente
+de operações Tavily (`research_operations`, separando `search` e `extract`).
+Usage sem telemetria operacional é rejeitado; referências do proxy não são
+fonte de verdade. O cálculo conservador local permanece o débito do guardrail;
+estimativas do provider são informativas.

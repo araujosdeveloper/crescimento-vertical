@@ -53,6 +53,8 @@ class SinglePostExecutor:
         self.opener = opener
         self.post_count = 0
         self.get_count = 0
+        self.initial_status = None
+        self.terminal_status = None
         self.started = time.monotonic()
 
     @staticmethod
@@ -118,7 +120,9 @@ class SinglePostExecutor:
 
     def execute(self, body: bytes) -> tuple[dict, int]:
         initial = self.post_once(body)
+        self.initial_status = initial.body["state"]
         terminal = self.poll(initial.body["jobId"], initial)
+        self.terminal_status = terminal.body["state"]
         summary = {
             "jobId": terminal.body["jobId"][:12],
             "initialStatus": initial.body["state"],
@@ -131,6 +135,19 @@ class SinglePostExecutor:
             "schemaValid": True,
         }
         return summary, EXIT_SUCCEEDED if terminal.body["state"] == "succeeded" else EXIT_TERMINAL_FAILURE
+
+    def error_summary(self, code: int) -> dict:
+        return {
+            "jobId": None,
+            "initialStatus": self.initial_status,
+            "terminalStatus": self.terminal_status,
+            "httpPostCount": self.post_count,
+            "httpGetCount": self.get_count,
+            "elapsedMilliseconds": int((time.monotonic() - self.started) * 1000),
+            "pollingPerformed": self.get_count > 0,
+            "transportRecoveryCount": 0,
+            "exitCode": code,
+        }
 
 
 def _read_stdin() -> bytes:
@@ -181,6 +198,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.timeout_seconds <= 0 or args.poll_interval_seconds <= 0:
         print(json.dumps({"error": "invalid_timing"}))
         return EXIT_CONFIG
+    executor = None
     try:
         body = _read_stdin()
         if args.dry_run:
@@ -192,7 +210,13 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(summary, ensure_ascii=False))
         return code
     except ExecutorError as exc:
-        print(json.dumps({"error": str(exc), "httpPostCount": 0}))
+        summary = executor.error_summary(exc.code) if executor else {
+            "jobId": None, "initialStatus": None, "terminalStatus": None,
+            "httpPostCount": 0, "httpGetCount": 0, "elapsedMilliseconds": 0,
+            "pollingPerformed": False, "transportRecoveryCount": 0,
+            "exitCode": exc.code,
+        }
+        print(json.dumps(summary))
         return exc.code
     except OSError:
         print(json.dumps({"error": "configuration_error"}))
