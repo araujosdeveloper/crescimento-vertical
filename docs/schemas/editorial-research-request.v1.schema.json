@@ -60,7 +60,7 @@
     "maxSources": {
       "type": "integer",
       "minimum": 2,
-      "maximum": 10
+      "maximum": 4
     },
     "seedSources": {
       "type": "array",

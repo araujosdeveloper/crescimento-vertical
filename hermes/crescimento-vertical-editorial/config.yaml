@@ -7,7 +7,7 @@
 model:
   provider: deepseek
   default: deepseek-v4-flash
-  max_tokens: 32768
+  max_tokens: 4096
 
 # Sem fallback automático para OpenAI ou qualquer outro provedor.
 fallback_providers: []
@@ -23,10 +23,11 @@ terminal:
   cwd: .
 
 agent:
-  max_turns: 40
-  reasoning_effort: high
+  max_turns: 8
+  api_max_retries: 1
+  reasoning_effort: none
   loop_caps:
-    max_web_searches: 10
+    max_web_searches: 3
 
 web:
   extract_char_limit: 12000

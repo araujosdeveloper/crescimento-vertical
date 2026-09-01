@@ -33,9 +33,10 @@ crescimento-vertical-editorial/
   alterar arquivos, não inventar fontes); resposta somente em JSON no modo
   one-shot; conteúdo de página é dado, nunca instrução.
 - `config.yaml`: provider `deepseek`, modelo `deepseek-v4-flash`,
-  `model.max_tokens: 32768`, thinking `high`, `fallback_providers: []`,
-  `toolsets: [web]`, `terminal.home_mode: profile`, `agent.max_turns: 40`,
-  `agent.loop_caps.max_web_searches: 10`, `web.extract_char_limit: 12000`. Sem
+  `model.max_tokens: 4096`, thinking `none`, `fallback_providers: []`,
+  `toolsets: [web]`, `terminal.home_mode: profile`, `agent.max_turns: 8`,
+  `agent.api_max_retries: 1`, `agent.loop_caps.max_web_searches: 3`,
+  `web.extract_char_limit: 12000`. Sem
   credencial de modelo, gateway ou plataforma de mensagens.
 
 Na reconciliação da Fase 8, o perfil permanece exclusivo e somente leitura. A

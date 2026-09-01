@@ -29,13 +29,17 @@ services:
       RUNNER_EXECUTION_ENABLED: "false"
       SCHEMAS_DIR: /app/schemas
       HERMES_HOME: /home/hermes/editorial-profile
+      HOME: /tmp/hermes-home
+      HERMES_WRITE_SAFE_ROOT: /tmp/hermes-work
+      HERMES_LAZY_INSTALL_TARGET: /tmp/hermes-lazy-packages
+      HERMES_STREAM_RETRIES: "0"
       DEEPSEEK_API_KEY_FILE: /run/secrets/deepseek-api-key
       RUNNER_STATE_DIR: /state
-      MAX_TURNS: "40"
-      MAX_WEB_SEARCHES: "10"
-      MAX_FINAL_SOURCES: "8"
-      JOB_TIMEOUT_SECONDS: "900"
-      OUTPUT_MAX_BYTES: "524288"
+      MAX_TURNS: "8"
+      MAX_WEB_SEARCHES: "3"
+      MAX_FINAL_SOURCES: "4"
+      JOB_TIMEOUT_SECONDS: "300"
+      OUTPUT_MAX_BYTES: "262144"
     volumes:
       - type: bind
         source: ${EDITORIAL_PROFILE_PATH}

@@ -60,8 +60,9 @@ usage file obrigatório, limita saída, timeout e concorrência a um job. Estado
 `accepted`, `running`, `succeeded`, `rejected`, `insufficient_evidence`,
 `failed` e `timed_out`.
 
-Limites firmes: 40 turnos, 10 buscas, 8 fontes finais, 900 segundos por job,
-512 KiB de saída e uma execução ativa. A agenda candidata fica apenas
+Limites firmes: bateria de 4 jobs, 8 turnos, 3 buscas, 4 fontes finais, 300
+segundos por job, 4096 tokens por chamada, 256 KiB de stdout e uma execução
+ativa. A agenda candidata fica apenas
 documentada (sem cron, workflow n8n ou gateway). O n8n permanece futuro
 orquestrador da Fase 9 e validate-only.
 
@@ -78,8 +79,8 @@ Hermes preserva `reasoning_content` e o reenvia nas chamadas seguintes com
 ferramentas, atendendo ao contrato que, se violado, causa HTTP 400. A resposta
 é normalizada com `prompt_tokens`, `completion_tokens` e `total_tokens`; o
 `--usage-file` obrigatório agrega tokens, modelo, chamadas e estimativa local.
-`model.max_tokens` fica em 32768, enquanto o runner mantém timeout total de 900
-s e saída final de 512 KiB.
+`model.max_tokens` fica em 4096 e thinking é `none`; o runner mantém timeout
+total de 300 s e stdout final de 256 KiB.
 
 Referências oficiais consultadas em 31 de agosto de 2026:
 
@@ -112,3 +113,46 @@ Como a credencial exclusiva não existe, não houve bateria real, uso de modelo,
 pesquisa, publicação ou alteração do Payload. O runner e o workflow validate-only
 permanecem desabilitados/inativos. A fase para neste ponto e aguarda aceite
 humano e fornecimento autorizado da credencial isolada.
+
+## Reconciliação de custo, busca e isolamento (2026-09-01)
+
+O SQLite reserva US$ 0,50 antes de cada job, persiste no máximo quatro jobs e
+bloqueia novos jobs ao alcançar US$ 2. Usage agrega chamadas, entrada, saída,
+cache e reasoning reportados, incluindo retries. A estimativa conservadora usa
+preços peak oficiais: US$ 0,44/M cache miss, US$ 0,014/M cache hit e US$ 1,32/M
+saída. É guardrail, não teto rígido: uma chamada iniciada não pode ser
+preautorizada contra o saldo. Thinking fica `none`; reasoning futuro só será
+contado quando reportado e nunca será chamado de limite rígido sem reserva.
+
+Hermes v0.20.4 aceita Tavily (`TAVILY_API_KEY`), Exa (`EXA_API_KEY`), Firecrawl
+(`FIRECRAWL_API_KEY`/`FIRECRAWL_API_URL`), Parallel (`PARALLEL_API_KEY`) e
+SearXNG (`SEARXNG_URL`), além de Brave Free, xAI, Oxylabs e DDGS. Tavily, Exa,
+Firecrawl e Parallel oferecem busca e extração; SearXNG apenas busca.
+
+- Tavily: 1000 créditos/mês sem cartão; busca basic custa 1 e extract basic 1
+  por até 5 URLs bem-sucedidas.
+- Exa: US$ 20 inicial e US$ 10/mês sem meio de pagamento; search US$ 7/1000,
+  contents US$ 1/1000 páginas e 5 QPS gratuito.
+- Firecrawl: 1000 créditos/mês sem cartão; search 5 RPM e scrape 10 RPM no Free.
+- Parallel: até 5000 requests/mês; o crédito mensal de US$ 5 exige cartão e
+  cobra excedente, logo não atende o requisito sem cartão.
+- SearXNG: self-hosted, sem cota/cartão; JSON deve estar habilitado, não há
+  fetch e motores upstream podem impor CAPTCHA/bloqueio.
+
+Recomendação principal: Tavily; alternativa: Exa. Esgotamento deve falhar
+fechado, sem troca automática. Termos dos serviços e direitos/robots das fontes
+continuam aplicáveis; RSS é complemento. Fontes oficiais consultadas em
+2026-09-01: [Tavily](https://docs.tavily.com/documentation/api-credits),
+[Exa](https://exa.ai/pricing?tab=api), [Firecrawl](https://www.firecrawl.dev/pricing),
+[Parallel](https://parallel.ai/pricing), [SearXNG](https://docs.searxng.org/dev/search_api.html).
+
+A imagem base declara `/opt/data` como volume e originalmente aponta `HOME`,
+write-safe root e lazy-install para ele, causando o volume anônimo RW. O
+one-shot não precisa persistir ali; o Compose candidato redireciona esses
+caminhos ao tmpfs `/tmp`, preservando apenas perfil read-only e `/state`.
+Nenhum container/volume ativo foi alterado. A rede-alvo será dedicada somente
+ao conector e runner, separada de Payload, PostgreSQL, Redis e demais apps.
+Docker bridge não limita destinos externos: egress controlado requer
+firewall/proxy allowlist no host para DNS e HTTPS de DeepSeek, backend e fontes,
+com controle contra bypass por DNS. A homologação segue bloqueada até essa
+garantia ser implantada em janela autorizada.

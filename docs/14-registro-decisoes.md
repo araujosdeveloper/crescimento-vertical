@@ -837,12 +837,12 @@ data, status, decisão, motivo, consequências e plano de reversão.
 
 ## ADR-030 — DeepSeek V4 Flash como candidato de inferência editorial
 
-- Data: 2026-08-31
+- Data: 2026-08-31; reconciliada em 2026-09-01
 - Status: aprovada para implementação local; homologação real bloqueada
 - Fase afetada: 8
 - Decisão: substituir o candidato OpenAI do perfil editorial por `deepseek`
-  com o modelo oficial `deepseek-v4-flash`, Chat Completions, thinking `high`,
-  saída máxima configurada em 32768 tokens e nenhum fallback automático. A
+  com o modelo oficial `deepseek-v4-flash`, Chat Completions, thinking
+  desabilitado (`none`), saída máxima de 4096 tokens e nenhum fallback. A
   chave exclusiva será montada como arquivo somente no runner e convertida em
   `DEEPSEEK_API_KEY` apenas no ambiente do subprocesso one-shot.
 - Compatibilidade: Hermes v0.20.4 possui provider DeepSeek nativo, preserva e
@@ -852,6 +852,10 @@ data, status, decisão, motivo, consequências e plano de reversão.
 - Limites: nenhuma chamada autenticada, credencial, instalação, atualização do
   Hermes, runtime, Ollama, n8n, Payload, PostgreSQL, deploy ou Fase 9 nesta
   execução. A chave OpenAI existente permanece intocada.
+- Reconciliação: no máximo 4 jobs, serial, 8 turnos, 3 pesquisas, 4 fontes,
+  300 s e stdout de 256 KiB por job. Há reserva persistente de US$ 0,50/job e
+  guardrail de US$ 2; não é teto rígido, pois uma chamada já iniciada pode
+  ultrapassar o saldo local.
 - Alternativas rejeitadas: provider genérico OpenAI-compatible, por ocultar
   regras de thinking; fallback OpenAI/pago, por violar controle de custo e
   isolamento; atualização do Hermes, desnecessária na versão instalada.

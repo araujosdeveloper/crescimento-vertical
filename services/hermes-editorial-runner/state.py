@@ -32,6 +32,20 @@ class JobStore:
                 )"""
             )
             db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
+            db.execute(
+                """CREATE TABLE IF NOT EXISTS battery_usage (
+                    battery_id TEXT PRIMARY KEY, jobs_reserved INTEGER NOT NULL DEFAULT 0,
+                    reserved_usd REAL NOT NULL DEFAULT 0,
+                    estimated_usd REAL NOT NULL DEFAULT 0,
+                    api_calls INTEGER NOT NULL DEFAULT 0,
+                    input_tokens INTEGER NOT NULL DEFAULT 0,
+                    output_tokens INTEGER NOT NULL DEFAULT 0,
+                    cache_read_tokens INTEGER NOT NULL DEFAULT 0,
+                    cache_write_tokens INTEGER NOT NULL DEFAULT 0,
+                    reasoning_tokens INTEGER NOT NULL DEFAULT 0,
+                    updated_at REAL NOT NULL
+                )"""
+            )
         try:
             os.chmod(self.path, 0o600)
         except OSError:
@@ -88,6 +102,56 @@ class JobStore:
                 (state, time.time(), json.dumps(result, ensure_ascii=False) if result is not None else None,
                  error_code, json.dumps(usage, ensure_ascii=False) if usage is not None else None, job_id),
             )
+
+    def reserve_battery_job(self) -> None:
+        """Reserva persistente e atomica; e guardrail, nao teto transacional."""
+        with self._lock, self._connect() as db:
+            db.execute(
+                "INSERT OR IGNORE INTO battery_usage (battery_id, updated_at) VALUES (?, ?)",
+                (config.BATTERY_ID, time.time()),
+            )
+            row = db.execute(
+                "SELECT * FROM battery_usage WHERE battery_id = ?", (config.BATTERY_ID,)
+            ).fetchone()
+            if row["jobs_reserved"] >= config.MAX_BATCH_JOBS:
+                raise RuntimeError("battery_job_limit_reached")
+            effective = max(row["reserved_usd"], row["estimated_usd"])
+            if effective + config.JOB_RESERVATION_USD > config.BATTERY_BUDGET_USD:
+                raise RuntimeError("budget_guardrail_reached")
+            db.execute(
+                "UPDATE battery_usage SET jobs_reserved=jobs_reserved+1, "
+                "reserved_usd=reserved_usd+?, updated_at=? WHERE battery_id=?",
+                (config.JOB_RESERVATION_USD, time.time(), config.BATTERY_ID),
+            )
+
+    def record_battery_usage(self, usage: dict) -> dict:
+        def count(name: str) -> int:
+            value = usage.get(name, 0)
+            return max(0, int(value or 0))
+
+        input_tokens = count("input_tokens")
+        output_tokens = count("output_tokens")
+        cache_read = count("cache_read_tokens")
+        cache_write = count("cache_write_tokens")
+        reasoning = count("reasoning_tokens")
+        # Hermes inclui reasoning em output_tokens quando o provedor o reporta.
+        output_billed = max(output_tokens, reasoning)
+        estimated = (
+            input_tokens * config.PRICE_CACHE_MISS_PER_MILLION
+            + cache_read * config.PRICE_CACHE_HIT_PER_MILLION
+            + cache_write * config.PRICE_CACHE_MISS_PER_MILLION
+            + output_billed * config.PRICE_OUTPUT_PER_MILLION
+        ) / 1_000_000
+        with self._lock, self._connect() as db:
+            db.execute(
+                "UPDATE battery_usage SET estimated_usd=estimated_usd+?, api_calls=api_calls+?, "
+                "input_tokens=input_tokens+?, output_tokens=output_tokens+?, "
+                "cache_read_tokens=cache_read_tokens+?, cache_write_tokens=cache_write_tokens+?, "
+                "reasoning_tokens=reasoning_tokens+?, updated_at=? WHERE battery_id=?",
+                (estimated, count("api_calls"), input_tokens, output_tokens, cache_read,
+                 cache_write, reasoning, time.time(), config.BATTERY_ID),
+            )
+        return {"estimatedCostUsd": round(estimated, 8), "costStatus": "estimated"}
 
     def public(self, job: dict) -> dict:
         return {"jobId": job["id"], "correlationId": job["correlation_id"], "state": job["state"]}

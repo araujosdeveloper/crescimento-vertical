@@ -226,9 +226,18 @@ class Handler(BaseHTTPRequestHandler):
         if not created:
             self._send_json(200, {**store.public(job), "idempotentReplay": True})
             return
+        try:
+            store.reserve_battery_job()
+        except RuntimeError as exc:
+            code = str(exc)
+            store.update(job["id"], "rejected", error_code=code)
+            self._send_json(429, {"error": code, "jobId": job["id"]})
+            return
         store.update(job["id"], "running")
         try:
             result = hermline.run_hermes(data)
+            cost = store.record_battery_usage(result["usage"])
+            result["usage"].update(cost)
             store.update(job["id"], "succeeded", result=result["dossier"], usage=result["usage"])
             self._send_json(202, {"jobId": job["id"], "correlationId": cid, "state": "succeeded"})
         except TimeoutError:
@@ -240,9 +249,12 @@ class Handler(BaseHTTPRequestHandler):
                 "invalid_dossier_json",
                 "invalid_dossier_schema",
                 "usage_file_missing_or_invalid",
+                "usage_provider_model_mismatch",
                 "hermes_nonzero_exit",
                 "execution_disabled",
                 "deepseek_credential_unavailable",
+                "battery_job_limit_reached",
+                "budget_guardrail_reached",
             }
             code = str(exc) if str(exc) in safe_codes else "job_failed"
             store.update(job["id"], "failed", error_code=code)

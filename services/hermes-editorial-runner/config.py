@@ -31,7 +31,7 @@ BODY_MAX_BYTES = _env_int("BODY_MAX_BYTES", 1024 * 1024)
 HERMES_BIN = os.environ.get("HERMES_BIN", "hermes")
 HERMES_PROVIDER = "deepseek"
 HERMES_MODEL = "deepseek-v4-flash"
-HERMES_REASONING = "high"
+HERMES_REASONING = "none"
 DEEPSEEK_API_KEY_FILE = os.environ.get(
     "DEEPSEEK_API_KEY_FILE", "/run/secrets/deepseek-api-key"
 )
@@ -39,12 +39,23 @@ SCHEMAS_DIR = os.environ.get("SCHEMAS_DIR", "/app/schemas")
 EXECUTION_ENABLE_FILE = os.environ.get(
     "EXECUTION_ENABLE_FILE", "/run/secrets/execution-enable"
 )
-JOB_TIMEOUT_SECONDS = _env_int("JOB_TIMEOUT_SECONDS", 900)
-MAX_TURNS = _env_int("MAX_TURNS", 40)
-MAX_WEB_SEARCHES = _env_int("MAX_WEB_SEARCHES", 10)
-MAX_FINAL_SOURCES = _env_int("MAX_FINAL_SOURCES", 8)
-OUTPUT_MAX_BYTES = _env_int("OUTPUT_MAX_BYTES", 512 * 1024)
+JOB_TIMEOUT_SECONDS = _env_int("JOB_TIMEOUT_SECONDS", 300)
+MAX_TURNS = _env_int("MAX_TURNS", 8)
+MAX_WEB_SEARCHES = _env_int("MAX_WEB_SEARCHES", 3)
+MAX_FINAL_SOURCES = _env_int("MAX_FINAL_SOURCES", 4)
+OUTPUT_MAX_BYTES = _env_int("OUTPUT_MAX_BYTES", 256 * 1024)
 MAX_CONCURRENT_JOBS = 1
+MAX_BATCH_JOBS = 4
+MODEL_MAX_TOKENS = 4096
+PROVIDER_MAX_RETRIES = 1  # Hermes: 1 tentativa, zero repeticoes ordinarias.
+STREAM_RETRIES = 0
+BATTERY_ID = "phase-8-deepseek-v4-flash-candidate-v1"
+BATTERY_BUDGET_USD = 2.0
+JOB_RESERVATION_USD = 0.50
+# Precos oficiais DeepSeek consultados em 2026-09-01; usa faixa peak.
+PRICE_CACHE_HIT_PER_MILLION = 0.014
+PRICE_CACHE_MISS_PER_MILLION = 0.44
+PRICE_OUTPUT_PER_MILLION = 1.32
 STATE_DIR = os.environ.get("RUNNER_STATE_DIR", "/tmp/hermes-runner-state")
 USAGE_DIR = os.environ.get("RUNNER_USAGE_DIR", os.path.join(STATE_DIR, "usage"))
 LISTEN_HOST = os.environ.get("RUNNER_HOST", "0.0.0.0")
@@ -77,7 +88,9 @@ def load_deepseek_api_key() -> str:
 
 
 def validate_limits() -> None:
-    if MAX_TURNS > 40 or MAX_WEB_SEARCHES > 10 or MAX_FINAL_SOURCES > 8:
+    if MAX_TURNS > 8 or MAX_WEB_SEARCHES > 3 or MAX_FINAL_SOURCES > 4:
         raise ValueError("configured_limits_exceeded")
-    if JOB_TIMEOUT_SECONDS <= 0 or OUTPUT_MAX_BYTES <= 0:
+    if not 0 < JOB_TIMEOUT_SECONDS <= 300 or not 0 < OUTPUT_MAX_BYTES <= 256 * 1024:
         raise ValueError("configured_limits_invalid")
+    if MAX_BATCH_JOBS > 4 or MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
+        raise ValueError("configured_limits_exceeded")

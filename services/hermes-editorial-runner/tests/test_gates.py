@@ -20,7 +20,7 @@ def _request():
         "searchIntent": "verificar impacto",
         "language": "pt-BR",
         "requestedAt": "2026-08-25T12:00:00Z",
-        "maxSources": 5,
+        "maxSources": 4,
     }
 
 
@@ -102,7 +102,7 @@ class TestExecutionGates(unittest.TestCase):
         try:
             with mock.patch(
                 "hermline.subprocess.run",
-                side_effect=hermline.subprocess.TimeoutExpired("hermes", 900),
+                side_effect=hermline.subprocess.TimeoutExpired("hermes", 300),
             ):
                 with self.assertRaisesRegex(TimeoutError, "timeout"):
                     hermline.run_hermes(_request())
@@ -122,7 +122,7 @@ class TestCommandBuild(unittest.TestCase):
         self.assertIn("-z", cmd)
         self.assertEqual(cmd[cmd.index("--provider") + 1], "deepseek")
         self.assertEqual(cmd[cmd.index("--model") + 1], "deepseek-v4-flash")
-        self.assertEqual(cmd[cmd.index("--reasoning") + 1], "high")
+        self.assertEqual(cmd[cmd.index("--reasoning") + 1], "none")
         prompt = cmd[cmd.index("-z") + 1]
         self.assertIn("a; rm -rf / ; echo", prompt)  # passado como dado
 

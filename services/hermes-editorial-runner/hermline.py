@@ -20,6 +20,13 @@ class ExecutionDisabledError(RuntimeError):
     pass
 
 
+def bounded_stdout(stdout: str) -> str:
+    output = stdout.strip()
+    if len(output.encode("utf-8")) > config.OUTPUT_MAX_BYTES:
+        raise RuntimeError("output_too_large")
+    return output
+
+
 def build_prompt(request: dict) -> str:
     """Monta o prompt a partir da requisição validada (nunca arbitrário)."""
     lines = [
@@ -82,6 +89,7 @@ def run_hermes(request: dict) -> dict:
         child_env["DEEPSEEK_API_KEY"] = config.load_deepseek_api_key()
         child_env["HERMES_INFERENCE_PROVIDER"] = config.HERMES_PROVIDER
         child_env["HERMES_INFERENCE_MODEL"] = config.HERMES_MODEL
+        child_env["HERMES_STREAM_RETRIES"] = str(config.STREAM_RETRIES)
         try:
             proc = subprocess.run(
                 build_hermes_command(request),
@@ -95,9 +103,7 @@ def run_hermes(request: dict) -> dict:
             raise TimeoutError("timeout") from None
         if proc.returncode != 0:
             raise RuntimeError("hermes_nonzero_exit")
-        output = proc.stdout.strip()
-        if len(output.encode("utf-8")) > config.OUTPUT_MAX_BYTES:
-            raise RuntimeError("output_too_large")
+        output = bounded_stdout(proc.stdout)
         try:
             dossier = json.loads(output)
         except (json.JSONDecodeError, UnicodeDecodeError):
@@ -112,4 +118,6 @@ def run_hermes(request: dict) -> dict:
                 usage = json.load(usage_file)
         except (OSError, json.JSONDecodeError):
             raise RuntimeError("usage_file_missing_or_invalid") from None
+        if usage.get("provider") != config.HERMES_PROVIDER or usage.get("model") != config.HERMES_MODEL:
+            raise RuntimeError("usage_provider_model_mismatch")
         return {"dossier": dossier, "usage": usage}

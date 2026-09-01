@@ -595,13 +595,15 @@ Ao concluir uma sessão de trabalho, registrar:
 
 O runner aceita somente requisição estruturada, aplica escopo fechado,
 canonicalização e deduplicação, e persiste apenas estado operacional mínimo.
-Há uma execução ativa no máximo, limite de 40 turnos, 10 buscas, 8 fontes, 900
-segundos e 512 KiB de saída. A agenda candidata é apenas declarada; cron,
+Há uma execução ativa no máximo e bateria de até 4 jobs; cada job limita 8
+turnos, 3 buscas, 4 fontes, 300 segundos, 4096 tokens por chamada e 256 KiB de
+stdout. O guardrail persistente reserva US$ 0,50/job até US$ 2. A agenda
+candidata é apenas declarada; cron,
 webhook, gateway e workflow n8n permanecem desativados. Sem credencial exclusiva
 de modelo, a execução e a bateria real permanecem bloqueadas.
 
 Em 31 de agosto de 2026, o provider candidato foi substituído localmente por
-DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo/thinking, aceita a
+DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo e thinking `none`, aceita a
 credencial exclusiva somente por arquivo e falha fechado quando ausente. Não
 houve chamada de API, pesquisa, deploy, alteração de runtime ou início da Fase
 9; o PR #14 permanece draft.
