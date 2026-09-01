@@ -253,6 +253,7 @@ class Handler(BaseHTTPRequestHandler):
                 "hermes_nonzero_exit",
                 "execution_disabled",
                 "deepseek_credential_unavailable",
+                "tavily_credential_unavailable",
                 "battery_job_limit_reached",
                 "budget_guardrail_reached",
             }

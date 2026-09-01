@@ -30,4 +30,7 @@ agent:
     max_web_searches: 3
 
 web:
+  backend: tavily
+  search_backend: tavily
+  extract_backend: tavily
   extract_char_limit: 12000

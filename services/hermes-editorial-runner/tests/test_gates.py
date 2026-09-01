@@ -29,6 +29,11 @@ class TestExecutionGates(unittest.TestCase):
         self._orig_flag = os.environ.get("RUNNER_EXECUTION_ENABLED")
         self._orig_openai_key = os.environ.get("OPENAI_API_KEY")
         self._orig_credential_file = config.DEEPSEEK_API_KEY_FILE
+        self._orig_tavily_credential_file = config.TAVILY_API_KEY_FILE
+        self._tavily_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
+        self._tavily_file.write("exclusive-test-tavily-key")
+        self._tavily_file.close()
+        config.TAVILY_API_KEY_FILE = self._tavily_file.name
         self._enable_file = tempfile.NamedTemporaryFile(delete=False)
         self._enable_file.close()
         os.environ["EXECUTION_ENABLE_FILE"] = self._enable_file.name
@@ -45,6 +50,9 @@ class TestExecutionGates(unittest.TestCase):
         if os.path.exists(self._enable_file.name):
             os.unlink(self._enable_file.name)
         config.DEEPSEEK_API_KEY_FILE = self._orig_credential_file
+        config.TAVILY_API_KEY_FILE = self._orig_tavily_credential_file
+        if os.path.exists(self._tavily_file.name):
+            os.unlink(self._tavily_file.name)
 
     def test_disabled_when_flag_false(self):
         os.environ["RUNNER_EXECUTION_ENABLED"] = "false"
@@ -72,6 +80,21 @@ class TestExecutionGates(unittest.TestCase):
                 hermline.run_hermes(_request())
         run.assert_not_called()
 
+    def test_missing_tavily_credential_fails_closed_before_subprocess(self):
+        os.environ["RUNNER_EXECUTION_ENABLED"] = "true"
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as credential:
+            credential.write("exclusive-test-key")
+            credential_path = credential.name
+        config.DEEPSEEK_API_KEY_FILE = credential_path
+        config.TAVILY_API_KEY_FILE = "/definitely/missing/tavily-api-key"
+        try:
+            with mock.patch("hermline.subprocess.run") as run:
+                with self.assertRaisesRegex(RuntimeError, "tavily_credential_unavailable"):
+                    hermline.run_hermes(_request())
+            run.assert_not_called()
+        finally:
+            os.unlink(credential_path)
+
     def test_exclusive_credential_is_scoped_to_child_process(self):
         os.environ["RUNNER_EXECUTION_ENABLED"] = "true"
         os.environ["OPENAI_API_KEY"] = "must-not-reach-child"
@@ -86,6 +109,7 @@ class TestExecutionGates(unittest.TestCase):
                     hermline.run_hermes(_request())
             child_env = run.call_args.kwargs["env"]
             self.assertEqual(child_env["DEEPSEEK_API_KEY"], "exclusive-test-key")
+            self.assertEqual(child_env["TAVILY_API_KEY"], "exclusive-test-tavily-key")
             self.assertEqual(child_env["HERMES_INFERENCE_PROVIDER"], "deepseek")
             self.assertEqual(child_env["HERMES_INFERENCE_MODEL"], "deepseek-v4-flash")
             self.assertNotIn("OPENAI_API_KEY", child_env)

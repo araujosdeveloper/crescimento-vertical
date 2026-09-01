@@ -86,7 +86,14 @@ def run_hermes(request: dict) -> dict:
         # O perfil não herda nem consulta credenciais OpenAI/default.
         child_env.pop("OPENAI_API_KEY", None)
         child_env.pop("OPENAI_BASE_URL", None)
+        for shared_name in (
+            "EXA_API_KEY", "FIRECRAWL_API_KEY", "FIRECRAWL_API_URL",
+            "PARALLEL_API_KEY", "BRAVE_SEARCH_API_KEY", "XAI_API_KEY",
+            "OXYLABS_USERNAME", "OXYLABS_PASSWORD", "SEARXNG_URL",
+        ):
+            child_env.pop(shared_name, None)
         child_env["DEEPSEEK_API_KEY"] = config.load_deepseek_api_key()
+        child_env["TAVILY_API_KEY"] = config.load_tavily_api_key()
         child_env["HERMES_INFERENCE_PROVIDER"] = config.HERMES_PROVIDER
         child_env["HERMES_INFERENCE_MODEL"] = config.HERMES_MODEL
         child_env["HERMES_STREAM_RETRIES"] = str(config.STREAM_RETRIES)

@@ -35,6 +35,9 @@ HERMES_REASONING = "none"
 DEEPSEEK_API_KEY_FILE = os.environ.get(
     "DEEPSEEK_API_KEY_FILE", "/run/secrets/deepseek-api-key"
 )
+TAVILY_API_KEY_FILE = os.environ.get(
+    "TAVILY_API_KEY_FILE", "/run/secrets/tavily-api-key"
+)
 SCHEMAS_DIR = os.environ.get("SCHEMAS_DIR", "/app/schemas")
 EXECUTION_ENABLE_FILE = os.environ.get(
     "EXECUTION_ENABLE_FILE", "/run/secrets/execution-enable"
@@ -84,6 +87,18 @@ def load_deepseek_api_key() -> str:
         raise RuntimeError("deepseek_credential_unavailable") from None
     if not api_key:
         raise RuntimeError("deepseek_credential_unavailable")
+    return api_key
+
+
+def load_tavily_api_key() -> str:
+    """Lê a credencial web exclusiva somente após a dupla trava."""
+    try:
+        with open(TAVILY_API_KEY_FILE, encoding="utf-8") as fh:
+            api_key = fh.read().strip()
+    except OSError:
+        raise RuntimeError("tavily_credential_unavailable") from None
+    if not api_key:
+        raise RuntimeError("tavily_credential_unavailable")
     return api_key
 
 
