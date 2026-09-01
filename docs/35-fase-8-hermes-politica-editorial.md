@@ -217,3 +217,14 @@ API oficial de logging com `hermes_home=/opt/data`, rotação limitada e umask
 0077. Os logs ficam somente no tmpfs efêmero de 16 MiB (`/opt/data/logs`), sem
 persistência em `/state` ou relaxamento de permissões. O job falho original foi
 preservado e não houve nova execução.
+
+## Linhagem persistente de retry — 2026-09-01
+
+A tentativa substituta foi interrompida antes de criar job; não houve consumo.
+Para a próxima autorização, o SQLite do runner passa a migrar internamente
+para a tabela `retry_lineage`, com FK para `jobs`, unicidade por original e
+substituto, `retry_number=1` e motivo controlado
+`retry_after_ephemeral_logging_fix`. A criação do substituto e do vínculo é
+atômica; o job original elegível deve ser `failed/hermes_nonzero_exit` e
+permanece imutável. Os campos de retry são opcionais em requisições comuns,
+validados estritamente e nunca são enviados ao Hermes.

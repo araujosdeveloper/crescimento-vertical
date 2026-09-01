@@ -21,7 +21,7 @@ import hmac_auth
 import hermline
 import schemas
 import policy
-from state import IdempotencyConflictError, JobStore
+from state import IdempotencyConflictError, JobStore, RetryLineageError
 from nonce_store import NonceStore
 
 # Arquivos operacionais, SQLite WAL/SHM e usage nascem privados mesmo antes
@@ -224,13 +224,13 @@ class Handler(BaseHTTPRequestHandler):
         fingerprint = policy.topic_fingerprint(data["topic"], data["primaryPillar"])
         store = _get_persistent_store()
         semantic_match = store.get_by_fingerprint(fingerprint)
-        if semantic_match and semantic_match["idempotency_key"] != data["idempotencyKey"]:
+        if semantic_match and semantic_match["idempotency_key"] != data["idempotencyKey"] and not data.get("retryOfJobId"):
             self._send_json(409, {"error": "semantic_duplicate_review", "status": "rejected", "correlationId": cid})
             return
         try:
             job, created = store.create_or_get(data, fingerprint)
-        except IdempotencyConflictError:
-            self._send_json(409, {"error": "idempotency_conflict", "correlationId": cid})
+        except (IdempotencyConflictError, RetryLineageError) as exc:
+            self._send_json(409, {"error": str(exc), "correlationId": cid})
             return
         if not created:
             self._send_json(200, {**store.public(job), "idempotentReplay": True})

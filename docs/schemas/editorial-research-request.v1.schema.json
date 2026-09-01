@@ -70,6 +70,13 @@
         "format": "uri",
         "pattern": "^https://"
       }
+    },
+    "retryOfJobId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "retryReason": {
+      "const": "retry_after_ephemeral_logging_fix"
     }
   }
 }

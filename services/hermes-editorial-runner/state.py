@@ -16,6 +16,10 @@ class IdempotencyConflictError(RuntimeError):
     pass
 
 
+class RetryLineageError(RuntimeError):
+    pass
+
+
 class JobStore:
     def __init__(self, path: str | None = None):
         self.path = path or os.path.join(config.STATE_DIR, "jobs.sqlite3")
@@ -26,6 +30,7 @@ class JobStore:
             pass
         self._lock = threading.Lock()
         with self._connect() as db:
+            db.execute("PRAGMA foreign_keys=ON")
             db.execute("PRAGMA journal_mode=WAL")
             db.execute(
                 """CREATE TABLE IF NOT EXISTS jobs (
@@ -35,6 +40,17 @@ class JobStore:
                     result_json TEXT, error_code TEXT, usage_json TEXT
                 )"""
             )
+            db.execute(
+                """CREATE TABLE IF NOT EXISTS retry_lineage (
+                    original_job_id TEXT NOT NULL REFERENCES jobs(id),
+                    replacement_job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
+                    retry_number INTEGER NOT NULL CHECK (retry_number = 1),
+                    reason TEXT NOT NULL CHECK (reason = 'retry_after_ephemeral_logging_fix'),
+                    created_at REAL NOT NULL,
+                    PRIMARY KEY (original_job_id, retry_number)
+                )"""
+            )
+            db.execute("PRAGMA user_version = 2")
             db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
             db.execute(
                 """CREATE TABLE IF NOT EXISTS battery_usage (
@@ -58,6 +74,7 @@ class JobStore:
     def _connect(self):
         db = sqlite3.connect(self.path, timeout=5, isolation_level="IMMEDIATE")
         db.row_factory = sqlite3.Row
+        db.execute("PRAGMA foreign_keys=ON")
         return db
 
     def get_by_idempotency(self, key: str) -> dict | None:
@@ -83,6 +100,24 @@ class JobStore:
                 if row["topic_fingerprint"] != fingerprint:
                     raise IdempotencyConflictError("idempotency_conflict")
                 return dict(row), False
+            retry_of = request.get("retryOfJobId")
+            retry_reason = request.get("retryReason")
+            if (retry_of is None) != (retry_reason is None):
+                raise RetryLineageError("retry_lineage_fields_required")
+            original = None
+            if retry_of is not None:
+                if retry_reason != "retry_after_ephemeral_logging_fix":
+                    raise RetryLineageError("retry_reason_not_allowed")
+                original = db.execute("SELECT * FROM jobs WHERE id = ?", (retry_of,)).fetchone()
+                if original is None:
+                    raise RetryLineageError("retry_original_not_found")
+                if original["state"] != "failed" or original["error_code"] != "hermes_nonzero_exit":
+                    raise RetryLineageError("retry_original_not_eligible")
+                if original["id"] == request.get("id"):
+                    raise RetryLineageError("retry_same_job")
+                prior = db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ?", (retry_of,)).fetchone()
+                if prior:
+                    raise RetryLineageError("retry_number_exhausted")
             job = {
                 "id": uuid.uuid4().hex,
                 "idempotency_key": request["idempotencyKey"],
@@ -99,6 +134,11 @@ class JobStore:
                 "INSERT INTO jobs (id,idempotency_key,correlation_id,topic_fingerprint,state,created_at,updated_at) VALUES (?,?,?,?,?,?,?)",
                 tuple(job[k] for k in ("id", "idempotency_key", "correlation_id", "topic_fingerprint", "state", "created_at", "updated_at")),
             )
+            if original is not None:
+                db.execute(
+                    "INSERT INTO retry_lineage (original_job_id,replacement_job_id,retry_number,reason,created_at) VALUES (?,?,?,?,?)",
+                    (original["id"], job["id"], 1, retry_reason, now),
+                )
             return job, True
 
     def update(self, job_id: str, state: str, *, result: dict | None = None, error_code: str | None = None, usage: dict | None = None) -> None:
@@ -160,4 +200,17 @@ class JobStore:
         return {"estimatedCostUsd": round(estimated, 8), "costStatus": "estimated"}
 
     def public(self, job: dict) -> dict:
-        return {"jobId": job["id"], "correlationId": job["correlation_id"], "state": job["state"]}
+        result = {"jobId": job["id"], "correlationId": job["correlation_id"], "state": job["state"]}
+        with self._connect() as db:
+            row = db.execute(
+                "SELECT original_job_id,retry_number,reason,created_at FROM retry_lineage WHERE replacement_job_id = ?",
+                (job["id"],),
+            ).fetchone()
+        if row:
+            result["retryLineage"] = {
+                "originalJobId": row["original_job_id"],
+                "retryNumber": row["retry_number"],
+                "reason": row["reason"],
+                "createdAt": row["created_at"],
+            }
+        return result

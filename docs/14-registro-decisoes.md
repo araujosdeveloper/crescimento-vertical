@@ -909,3 +909,14 @@ chama `setup_logging` com `hermes_home=/opt/data`, limite de 1 MiB e um backup
 para `agent.log`. O tmpfs de `/opt/data` é a única área gravável efêmera;
 umask 0077 e permissões 0700/0600 impedem acesso amplo. Não há logs em
 `/state`, nem fallback ou execução de Hermes nesta correção.
+
+### Adendo operacional — linhagem persistente de retry
+
+O vínculo de uma tentativa substituta não pode depender de `/tmp` ou logs.
+Foi escolhida a tabela SQLite `retry_lineage`, criada pela migração interna
+idempotente (user_version 2), com foreign keys habilitadas, chave primária
+`(original_job_id,retry_number)`, `UNIQUE(replacement_job_id)`, motivo
+controlado e referência aos dois jobs. A API aceita `retryOfJobId` e
+`retryReason` apenas para o original `failed/hermes_nonzero_exit`; a transação
+cria job e linhagem juntos ou desfaz ambos. O estado histórico existente não é
+associado retrospectivamente.
