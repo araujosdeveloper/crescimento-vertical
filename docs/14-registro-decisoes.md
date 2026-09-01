@@ -900,3 +900,12 @@ data, status, decisão, motivo, consequências e plano de reversão.
   `rw,nosuid,nodev,noexec`, modo 0700 e UID/GID 10000.
 - Persistência: somente `/state`; o volume anônimo anterior permanece órfão e
   preservado até autorização humana específica para removê-lo.
+
+### Adendo operacional — logs efêmeros do Hermes editorial
+
+O Hermes 0.20.4 fixa os handlers em `get_hermes_home()/logs`; o perfil é
+somente leitura. O runner inicia o CLI pelo wrapper `hermes_wrapper.py`, que
+chama `setup_logging` com `hermes_home=/opt/data`, limite de 1 MiB e um backup
+para `agent.log`. O tmpfs de `/opt/data` é a única área gravável efêmera;
+umask 0077 e permissões 0700/0600 impedem acesso amplo. Não há logs em
+`/state`, nem fallback ou execução de Hermes nesta correção.

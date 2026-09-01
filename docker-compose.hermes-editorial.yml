@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: services/hermes-editorial-runner/Dockerfile
-    image: cv-hermes-editorial-runner:phase8-opt-data-f362292
+    image: cv-hermes-editorial-runner:phase8-hermes-logs-f0638ac
     container_name: cv-hermes-editorial-runner
     restart: unless-stopped
     init: true
@@ -67,6 +67,7 @@ services:
       RUNNER_EXECUTION_ENABLED: "false"
       SCHEMAS_DIR: /app/schemas
       HERMES_HOME: /home/hermes/editorial-profile
+      HERMES_BIN: /app/hermes_wrapper.py
       HOME: /tmp/hermes-home
       HERMES_WRITE_SAFE_ROOT: /tmp/hermes-work
       HERMES_LAZY_INSTALL_TARGET: /tmp/hermes-lazy-packages

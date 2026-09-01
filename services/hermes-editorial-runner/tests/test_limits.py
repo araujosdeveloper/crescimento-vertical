@@ -58,6 +58,18 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertIn("install -d -o 10000 -g 10000 -m 0700 /state", text)
         self.assertIn("USER hermes", text)
 
+    def test_runner_uses_ephemeral_logging_wrapper_without_changing_profile(self):
+        compose = Path(__file__).parents[3] / "docker-compose.hermes-editorial.yml"
+        dockerfile = Path(__file__).parents[1] / "Dockerfile"
+        wrapper = Path(__file__).parents[1] / "hermes_wrapper.py"
+        self.assertIn("HERMES_BIN: /app/hermes_wrapper.py", compose.read_text(encoding="utf-8"))
+        self.assertIn("hermes_wrapper.py", dockerfile.read_text(encoding="utf-8"))
+        wrapper_text = wrapper.read_text(encoding="utf-8")
+        self.assertIn('kwargs["hermes_home"] = Path("/opt/data")', wrapper_text)
+        self.assertIn('kwargs["max_size_mb"] = 1', wrapper_text)
+        self.assertIn('kwargs["backup_count"] = 1', wrapper_text)
+        self.assertIn("os.umask(0o077)", wrapper_text)
+
 
 if __name__ == "__main__":
     unittest.main()

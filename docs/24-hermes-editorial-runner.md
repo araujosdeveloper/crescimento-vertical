@@ -119,3 +119,13 @@ volume anônimo anterior manteve simultaneamente esse mount e a intenção de
 explicitamente `rw,nosuid,nodev,noexec,size=16m,mode=0700,uid=10000,gid=10000`.
 O procedimento operacional exige criar um container realmente novo, sem
 reaproveitar volume anônimo. `/state` continua sendo a única persistência.
+
+## Destino operacional dos logs
+
+O Hermes v0.20.4 resolve `logs/agent.log` por `get_hermes_home()/logs` e não
+oferece configuração independente por CLI, ambiente ou perfil. O runner usa
+`hermes_wrapper.py`, chamando a API oficial `setup_logging` com
+`hermes_home=/opt/data`, sem alterar `HERMES_HOME`. Os logs ficam no tmpfs
+efêmero de `/opt/data/logs`; `agent.log` tem rotação de 1 MiB e um backup,
+umask 0077, diretório 0700 e arquivos 0600. Nenhum log é persistido em
+`/state` ou inclui credenciais, headers, prompts ou respostas integrais.

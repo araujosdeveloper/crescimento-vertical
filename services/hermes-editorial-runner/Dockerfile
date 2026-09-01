@@ -13,17 +13,19 @@ COPY services/hermes-editorial-runner/app.py \
      services/hermes-editorial-runner/hermline.py \
      services/hermes-editorial-runner/policy.py \
      services/hermes-editorial-runner/state.py \
+     services/hermes-editorial-runner/hermes_wrapper.py \
      ./
 COPY docs/schemas/ ./schemas/
 
 RUN chown -R hermes:hermes /app && chmod -R a+rX /app \
+    && chmod 0755 /app/hermes_wrapper.py \
     && install -d -o 10000 -g 10000 -m 0700 /state
 
 ENV SCHEMAS_DIR=/app/schemas \
     RUNNER_EXECUTION_ENABLED=false \
     RUNNER_HOST=0.0.0.0 \
     RUNNER_PORT=8100 \
-    HERMES_BIN=hermes \
+    HERMES_BIN=/app/hermes_wrapper.py \
     RUNNER_STATE_DIR=/state \
     HMAC_SECRET_FILE=/run/secrets/hmac-secret \
     EXECUTION_ENABLE_FILE=/run/secrets/execution-enable

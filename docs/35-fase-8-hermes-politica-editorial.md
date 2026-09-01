@@ -206,3 +206,14 @@ A causa foi a reutilização do volume anônimo na recriação do container. O
 Compose passou a explicitar as opções `rw,nosuid,nodev,noexec`, limite de 16 MiB,
 modo 0700 e UID/GID 10000. A implantação deve criar um container realmente
 novo e preservar o volume antigo apenas como órfão para remoção futura.
+
+## Correção isolada do destino de logs — 2026-09-01
+
+O erro `Read-only file system` apontou para
+`/home/hermes/editorial-profile/logs/agent.log`: o Hermes v0.20.4 usa
+`get_hermes_home()/logs` e não possui opção independente para esse diretório.
+Foi mantido `HERMES_HOME` no perfil read-only e adicionado um wrapper que usa a
+API oficial de logging com `hermes_home=/opt/data`, rotação limitada e umask
+0077. Os logs ficam somente no tmpfs efêmero de 16 MiB (`/opt/data/logs`), sem
+persistência em `/state` ou relaxamento de permissões. O job falho original foi
+preservado e não houve nova execução.
