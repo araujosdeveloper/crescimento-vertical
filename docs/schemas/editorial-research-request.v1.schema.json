@@ -76,7 +76,15 @@
       "pattern": "^[0-9a-f]{32}$"
     },
     "retryReason": {
-      "const": "retry_after_ephemeral_logging_fix"
+      "enum": ["retry_after_ephemeral_logging_fix", "retry_after_dossier_contract_and_observability_fix"]
+    },
+    "rootJobId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "retryNumber": {
+      "type": "integer",
+      "const": 2
     }
   }
 }

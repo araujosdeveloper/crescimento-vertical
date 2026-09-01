@@ -44,8 +44,9 @@ class JobStore:
                 """CREATE TABLE IF NOT EXISTS retry_lineage (
                     original_job_id TEXT NOT NULL REFERENCES jobs(id),
                     replacement_job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
-                    retry_number INTEGER NOT NULL CHECK (retry_number = 1),
-                    reason TEXT NOT NULL CHECK (reason = 'retry_after_ephemeral_logging_fix'),
+                    root_job_id TEXT REFERENCES jobs(id),
+                    retry_number INTEGER NOT NULL CHECK (retry_number IN (1,2)),
+                    reason TEXT NOT NULL CHECK (reason IN ('retry_after_ephemeral_logging_fix','retry_after_dossier_contract_and_observability_fix')),
                     created_at REAL NOT NULL,
                     PRIMARY KEY (original_job_id, retry_number)
                 )"""
@@ -81,6 +82,16 @@ class JobStore:
                 )"""
             )
             db.execute("CREATE INDEX IF NOT EXISTS research_operations_job_idx ON research_operations(job_id)")
+            lineage_sql = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='retry_lineage'").fetchone()[0]
+            if "retry_number IN (1,2)" not in lineage_sql:
+                db.execute("ALTER TABLE retry_lineage RENAME TO retry_lineage_v3")
+                db.execute("""CREATE TABLE retry_lineage (
+                    original_job_id TEXT NOT NULL REFERENCES jobs(id), replacement_job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
+                    root_job_id TEXT REFERENCES jobs(id), retry_number INTEGER NOT NULL CHECK (retry_number IN (1,2)),
+                    reason TEXT NOT NULL CHECK (reason IN ('retry_after_ephemeral_logging_fix','retry_after_dossier_contract_and_observability_fix')),
+                    created_at REAL NOT NULL, PRIMARY KEY (original_job_id, retry_number))""")
+                db.execute("INSERT INTO retry_lineage(original_job_id,replacement_job_id,root_job_id,retry_number,reason,created_at) SELECT original_job_id,replacement_job_id,original_job_id,retry_number,reason,created_at FROM retry_lineage_v3")
+                db.execute("DROP TABLE retry_lineage_v3")
             db.execute("PRAGMA user_version = 3")
             db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
             db.execute(
@@ -93,6 +104,9 @@ class JobStore:
             )
             # Version 4 persists the pointer-level evidence manifest only; raw
             # candidate bytes stay in the protected filesystem artifact.
+            if "root_job_id" not in {row[1] for row in db.execute("PRAGMA table_info(retry_lineage)")}:
+                db.execute("ALTER TABLE retry_lineage ADD COLUMN root_job_id TEXT REFERENCES jobs(id)")
+                db.execute("UPDATE retry_lineage SET root_job_id=original_job_id WHERE root_job_id IS NULL")
             db.execute("PRAGMA user_version = 4")
         try:
             os.chmod(self.path, 0o600)
@@ -130,20 +144,30 @@ class JobStore:
                 return dict(row), False
             retry_of = request.get("retryOfJobId")
             retry_reason = request.get("retryReason")
+            retry_number = request.get("retryNumber", 1 if retry_of else None)
+            root_job_id = request.get("rootJobId")
             if (retry_of is None) != (retry_reason is None):
                 raise RetryLineageError("retry_lineage_fields_required")
             original = None
             if retry_of is not None:
-                if retry_reason != "retry_after_ephemeral_logging_fix":
+                if retry_number not in (1, 2):
+                    raise RetryLineageError("retry_number_not_allowed")
+                expected_reason = "retry_after_ephemeral_logging_fix" if retry_number == 1 else config.RETRY2_REASON
+                if retry_reason != expected_reason:
                     raise RetryLineageError("retry_reason_not_allowed")
                 original = db.execute("SELECT * FROM jobs WHERE id = ?", (retry_of,)).fetchone()
                 if original is None:
                     raise RetryLineageError("retry_original_not_found")
-                if original["state"] != "failed" or original["error_code"] != "hermes_nonzero_exit":
+                expected_error = "hermes_nonzero_exit" if retry_number == 1 else "invalid_dossier_schema"
+                if original["state"] != "failed" or original["error_code"] != expected_error:
                     raise RetryLineageError("retry_original_not_eligible")
+                if retry_number == 2:
+                    parent = db.execute("SELECT * FROM retry_lineage WHERE replacement_job_id = ?", (retry_of,)).fetchone()
+                    if parent is None or root_job_id != (parent["root_job_id"] or parent["original_job_id"]):
+                        raise RetryLineageError("retry_root_not_eligible")
                 if original["id"] == request.get("id"):
                     raise RetryLineageError("retry_same_job")
-                prior = db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ?", (retry_of,)).fetchone()
+                prior = db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = ?", (retry_of, retry_number)).fetchone()
                 if prior:
                     raise RetryLineageError("retry_number_exhausted")
             job = {
@@ -164,8 +188,8 @@ class JobStore:
             )
             if original is not None:
                 db.execute(
-                    "INSERT INTO retry_lineage (original_job_id,replacement_job_id,retry_number,reason,created_at) VALUES (?,?,?,?,?)",
-                    (original["id"], job["id"], 1, retry_reason, now),
+                    "INSERT INTO retry_lineage (original_job_id,replacement_job_id,root_job_id,retry_number,reason,created_at) VALUES (?,?,?,?,?,?)",
+                    (original["id"], job["id"], root_job_id or original["id"], retry_number, retry_reason, now),
                 )
             return job, True
 
@@ -305,12 +329,13 @@ class JobStore:
         result = {"jobId": job["id"], "correlationId": job["correlation_id"], "state": job["state"]}
         with self._connect() as db:
             row = db.execute(
-                "SELECT original_job_id,retry_number,reason,created_at FROM retry_lineage WHERE replacement_job_id = ?",
+                "SELECT original_job_id,root_job_id,retry_number,reason,created_at FROM retry_lineage WHERE replacement_job_id = ?",
                 (job["id"],),
             ).fetchone()
         if row:
             result["retryLineage"] = {
                 "originalJobId": row["original_job_id"],
+                "rootJobId": row["root_job_id"],
                 "retryNumber": row["retry_number"],
                 "reason": row["reason"],
                 "createdAt": row["created_at"],
