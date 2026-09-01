@@ -599,11 +599,19 @@ Há uma execução ativa no máximo e bateria de até 4 jobs; cada job limita 8
 turnos, 3 buscas, 4 fontes, 300 segundos, 4096 tokens por chamada e 256 KiB de
 stdout. O guardrail persistente reserva US$ 0,50/job até US$ 2. A agenda
 candidata é apenas declarada; cron,
-webhook, gateway e workflow n8n permanecem desativados. Sem credencial exclusiva
-de modelo, a execução e a bateria real permanecem bloqueadas.
+webhook, gateway e workflow n8n permanecem desativados. Mesmo com credenciais
+exclusivas montadas, a execução e a bateria real permanecem bloqueadas pelas
+duas travas.
 
 Em 31 de agosto de 2026, o provider candidato foi substituído localmente por
 DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo e thinking `none`, aceita a
 credencial exclusiva somente por arquivo e falha fechado quando ausente. Não
 houve chamada de API, pesquisa, deploy, alteração de runtime ou início da Fase
 9; o PR #14 permanece draft.
+
+Em 1º de setembro de 2026, a janela de isolamento recriou somente o runner e o
+proxy exclusivo. A dupla trava permaneceu fechada. Verificações únicas de
+`GET /models` no DeepSeek e `GET /usage` no Tavily retornaram HTTP 200 sem
+inferência ou pesquisa. O runner ficou fora de `n8n_default`; egress direto foi
+bloqueado pela rede internal e somente o proxy deny-by-default participa da
+rede de saída. A bateria real não foi iniciada.

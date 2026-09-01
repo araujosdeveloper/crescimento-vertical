@@ -862,3 +862,23 @@ data, status, decisão, motivo, consequências e plano de reversão.
 - Reversão: reverter somente esta mudança de branch/configuração; como o
   runtime não é recriado e a execução permanece desabilitada, não há migração
   de dados nem rollback operacional.
+
+## ADR-031 — Isolamento de egress da janela pré-run editorial
+
+- Data: 2026-09-01
+- Status: implantada como candidata; bateria bloqueada
+- Fase afetada: 8
+- Decisão: manter o runner somente em rede Docker `internal` e encaminhar HTTPS
+  por proxy CONNECT mínimo, deny-by-default, que sozinho participa da rede de
+  saída. A allowlist contém somente DeepSeek e Tavily em 443; IP literal,
+  outras portas/hosts e resolução não pública são recusados. Não se denomina
+  firewall absoluto.
+- Segredos: mounts individuais read-only, UID 0/GID 10000/mode 0640, valores
+  ausentes de env, inspect, imagem, argumentos e logs. OpenAI não é montado.
+- Persistência: `/opt/data` efetivo em tmpfs limitado; somente `/state`
+  persiste. O volume anterior é preservado para rollback e não recebe escrita.
+- Evidência: egress direto bloqueado; DeepSeek `GET /models` e Tavily
+  `GET /usage` retornaram 200 uma única vez, sem inferência/pesquisa. Dupla
+  trava fechada e zero jobs.
+- Reversão: usar o bundle, state e referência de imagem do backup pré-run;
+  recriar somente o runner anterior, sem tocar nas demais aplicações.

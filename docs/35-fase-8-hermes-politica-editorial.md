@@ -156,3 +156,30 @@ Docker bridge não limita destinos externos: egress controlado requer
 firewall/proxy allowlist no host para DNS e HTTPS de DeepSeek, backend e fontes,
 com controle contra bypass por DNS. A homologação segue bloqueada até essa
 garantia ser implantada em janela autorizada.
+
+## Janela autenticada sem pesquisa — 2026-09-01
+
+Foi implantado isolamento candidato por rede Docker interna mais proxy
+allowlist, sem reconectar o runner ao n8n. O runner permaneceu com
+`RUNNER_EXECUTION_ENABLED=false`, sem arquivo de habilitação, zero jobs e zero
+processo Hermes one-shot. O proxy usa base pinada por digest, rootfs read-only,
+usuário sem privilégio, caps removidas e nenhuma porta publicada. Testes
+comprovaram ausência de rota direta funcional e recusas para host não permitido,
+IP literal, rede privada e porta diferente de 443. Não é firewall absoluto.
+
+Após backup completo e sanitizado, as credenciais exclusivas foram montadas
+read-only com UID 0, GID 10000 e modo 0640. O diretório host permanece 0700;
+nenhum valor foi colocado em env, imagem, argumento, Git, backup ou log. A
+chave OpenAI permaneceu desmontada e intocada.
+
+Foram executados exatamente dois requests autenticados, sem repetição:
+
+- DeepSeek `GET /models`: HTTP 200 e `deepseek-v4-flash` presente; nenhuma
+  chamada a `/chat/completions` e zero tokens de inferência.
+- Tavily `GET /usage`: HTTP 200 e chave válida; o endpoint não retornou plano
+  classificável. Nenhum endpoint search/extract/crawl/research foi chamado e
+  nenhum crédito de pesquisa foi consumido.
+
+Produção, staging, n8n, Payload, PostgreSQL e Hermes compartilhado não foram
+recriados ou reiniciados. A Fase 8 permanece em execução e a bateria continua
+bloqueada para nova autorização humana.

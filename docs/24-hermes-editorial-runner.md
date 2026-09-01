@@ -8,11 +8,18 @@ em fase futura, executa o Hermes em modo one-shot. Nesta fase a execução está
 **desabilitada**.
 
 ~~~text
-n8n_default
-    n8n --HMAC--> cv-hermes-editorial-runner --CLI one-shot--> crescimento-vertical-editorial
+phase8_execution (internal)
+    cliente temporário --> runner --> proxy
+                                  proxy --> phase8_egress --> allowlist HTTPS
 ~~~
 
 O executor **não** acessa Docker Socket, PostgreSQL ou Payload.
+
+Na janela pré-run da Fase 8 o runner não participa de `n8n_default`. Somente o
+proxy participa também da rede de saída; isto é isolamento por rede+proxy, não
+firewall absoluto. O proxy CONNECT deny-by-default permite exclusivamente
+`api.deepseek.com:443` e `api.tavily.com:443`, recusa IP literal, outras portas,
+outros hosts e resoluções não públicas, sem cache ou log de headers.
 
 ## Implementação
 
@@ -81,3 +88,11 @@ persistente de US$ 2. A credencial é lida de `/run/secrets/deepseek-api-key`
 somente depois da dupla trava e enviada apenas ao ambiente do subprocesso como
 `DEEPSEEK_API_KEY`. Arquivo ausente ou vazio falha fechado antes de iniciar o
 Hermes. Não existe fallback automático para OpenAI ou outro provedor.
+
+As credenciais exclusivas são binds individuais read-only, informadas apenas
+por `DEEPSEEK_API_KEY_FILE` e `TAVILY_API_KEY_FILE`. Seus valores só entram no
+processo temporário autorizado; não aparecem no env do container, inspect ou
+argumentos. `/opt/data` é sombreado por tmpfs limitado e `/state` é a única
+persistência autorizada. A declaração `VOLUME` herdada conserva como metadado
+o volume anterior, mas o mount efetivo é tmpfs; nenhum volume novo foi criado
+ou removido.
