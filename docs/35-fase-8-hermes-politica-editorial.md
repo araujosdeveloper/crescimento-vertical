@@ -183,3 +183,17 @@ Foram executados exatamente dois requests autenticados, sem repetição:
 Produção, staging, n8n, Payload, PostgreSQL e Hermes compartilhado não foram
 recriados ou reiniciados. A Fase 8 permanece em execução e a bateria continua
 bloqueada para nova autorização humana.
+
+## Remediação isolada de `/state` — 2026-09-01
+
+A bateria não foi aberta após o preflight detectar `/state` como `root:root
+0755`, não gravável pelo UID/GID 10000. Com o runner parado e as travas
+fechadas, o volume exclusivo foi arquivado por auxiliar sem rede/segredos e
+reparado para `10000:10000 0700`; o SQLite criado ficou 0600.
+
+A solução permanente cria `/state` na imagem com os metadados corretos e usa
+umask 0077 no processo Python. Volume novo temporário confirmou nascimento
+correto. SQLite/WAL, integrity, transações, guardrail, idempotência, conflito,
+concorrência 1 e persistência após recriação passaram offline. O rollback foi
+restaurado somente em volume temporário separado. Não houve DeepSeek, Tavily,
+pesquisa, inferência ou abertura das travas.

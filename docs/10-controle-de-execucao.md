@@ -615,3 +615,9 @@ proxy exclusivo. A dupla trava permaneceu fechada. Verificações únicas de
 inferência ou pesquisa. O runner ficou fora de `n8n_default`; egress direto foi
 bloqueado pela rede internal e somente o proxy deny-by-default participa da
 rede de saída. A bateria real não foi iniciada.
+
+Ainda em 1º de setembro, o preflight da bateria detectou `/state` sem permissão
+de escrita para UID/GID 10000 e interrompeu antes das travas. A remediação
+isolada ajustou o volume para `10000:10000 0700`, arquivos 0600 e incluiu
+criação correta na imagem mais umask 0077. Persistência e rollback foram
+comprovados offline; a bateria continuou bloqueada.

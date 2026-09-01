@@ -882,3 +882,12 @@ data, status, decisão, motivo, consequências e plano de reversão.
   trava fechada e zero jobs.
 - Reversão: usar o bundle, state e referência de imagem do backup pré-run;
   recriar somente o runner anterior, sem tocar nas demais aplicações.
+
+### Adendo operacional — propriedade persistente de `/state`
+
+- Causa: o volume nomeado foi criado com raiz `root:root 0755`; o runner
+  não-root (10000:10000) não conseguia inicializar SQLite/guardrail.
+- Correção: volume real `10000:10000 0700`, arquivos 0600; imagem cria `/state`
+  previamente com esses metadados e o processo aplica umask 0077.
+- Evidência: integrity/WAL/transações, guardrail, idempotência/conflito,
+  concorrência, recriação e rollback em volume temporário aprovados sem rede.

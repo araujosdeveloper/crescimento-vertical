@@ -96,3 +96,17 @@ argumentos. `/opt/data` é sombreado por tmpfs limitado e `/state` é a única
 persistência autorizada. A declaração `VOLUME` herdada conserva como metadado
 o volume anterior, mas o mount efetivo é tmpfs; nenhum volume novo foi criado
 ou removido.
+
+## Propriedade do state
+
+Em 2026-09-01 foi detectado que o volume nomeado `/state` havia nascido como
+`root:root 0755`, enquanto o serviço executa como `10000:10000`, impedindo a
+abertura do SQLite. O volume foi reparado para `10000:10000 0700`; arquivos
+SQLite permanecem `0600`. A imagem agora cria `/state` com esses metadados
+antes de mudar para o usuário não-root, e o processo fixa umask 0077. Não há
+init amplo como root no serviço principal.
+
+A correção foi validada com escrita/fsync, WAL e locking SQLite, integrity
+check, commit/rollback, guardrail e idempotência offline, concorrência serial,
+persistência após recriação e restauração do archive em volume temporário.
+Fixtures identificadas e volumes temporários foram removidos.
