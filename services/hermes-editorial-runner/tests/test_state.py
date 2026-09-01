@@ -12,6 +12,24 @@ import config
 
 
 class TestJobStore(unittest.TestCase):
+    def test_schema_v4_and_retry2_is_only_eligibility(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = JobStore(os.path.join(directory, "jobs.sqlite3"))
+            original, _ = store.create_or_get({"idempotencyKey": "root", "correlationId": "c"}, "fp")
+            store.update(original["id"], "failed", error_code="hermes_nonzero_exit")
+            retry, _ = store.create_or_get({"idempotencyKey": "retry1", "correlationId": "r", "retryOfJobId": original["id"], "retryReason": "retry_after_ephemeral_logging_fix"}, "fp")
+            store.update(retry["id"], "failed", error_code="invalid_dossier_schema")
+            with store._connect() as db:
+                self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 4)
+                self.assertIsNotNone(db.execute("SELECT 1 FROM failure_evidence WHERE 0").description)
+            denied = store.retry2_eligibility(retry["id"], accumulated_cost_usd=0.05, reserve_usd=0, human_authorized=False)
+            self.assertEqual(denied["reason"], "human_authorization_required")
+            eligible = store.retry2_eligibility(retry["id"], accumulated_cost_usd=0.05, reserve_usd=0, human_authorized=True)
+            self.assertTrue(eligible["eligible"])
+            self.assertEqual(eligible["retry_number"], 2)
+            self.assertIsNone(eligible["replacement_job_id"])
+            with store._connect() as db:
+                self.assertEqual(db.execute("SELECT count(*) FROM retry_lineage").fetchone()[0], 1)
     def test_idempotent_create_and_update(self):
         with tempfile.TemporaryDirectory() as directory:
             store = JobStore(os.path.join(directory, "jobs.sqlite3"))

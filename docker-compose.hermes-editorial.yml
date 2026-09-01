@@ -78,6 +78,7 @@ services:
       HTTPS_PROXY: http://phase8-egress-proxy:3128
       NO_PROXY: 127.0.0.1,localhost
       RUNNER_STATE_DIR: /state
+      RUNNER_FAILURE_DIR: /state/failures
       MAX_TURNS: "8"
       MAX_WEB_SEARCHES: "3"
       MAX_FINAL_SOURCES: "4"

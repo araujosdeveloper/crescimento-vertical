@@ -62,6 +62,10 @@ PRICE_CACHE_MISS_PER_MILLION = 0.44
 PRICE_OUTPUT_PER_MILLION = 1.32
 STATE_DIR = os.environ.get("RUNNER_STATE_DIR", "/tmp/hermes-runner-state")
 USAGE_DIR = os.environ.get("RUNNER_USAGE_DIR", os.path.join(STATE_DIR, "usage"))
+FAILURE_DIR = os.environ.get("RUNNER_FAILURE_DIR", os.path.join(STATE_DIR, "failures"))
+FAILURE_EVIDENCE_RETENTION = "until_phase8_close_then_explicit_decision"
+RETRY2_REASON = "retry_after_dossier_contract_and_observability_fix"
+MAX_RETRY_CHAIN = 2
 LISTEN_HOST = os.environ.get("RUNNER_HOST", "0.0.0.0")
 LISTEN_PORT = _env_int("RUNNER_PORT", 8100)
 

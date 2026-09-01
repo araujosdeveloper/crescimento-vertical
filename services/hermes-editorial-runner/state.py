@@ -83,6 +83,17 @@ class JobStore:
             db.execute("CREATE INDEX IF NOT EXISTS research_operations_job_idx ON research_operations(job_id)")
             db.execute("PRAGMA user_version = 3")
             db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
+            db.execute(
+                """CREATE TABLE IF NOT EXISTS failure_evidence (
+                    job_id TEXT PRIMARY KEY REFERENCES jobs(id), path TEXT NOT NULL,
+                    bytes INTEGER NOT NULL, finish_reason TEXT, suspected_truncation INTEGER NOT NULL,
+                    schema_valid INTEGER NOT NULL, validation_error_count INTEGER NOT NULL,
+                    created_at REAL NOT NULL
+                )"""
+            )
+            # Version 4 persists the pointer-level evidence manifest only; raw
+            # candidate bytes stay in the protected filesystem artifact.
+            db.execute("PRAGMA user_version = 4")
         try:
             os.chmod(self.path, 0o600)
         except OSError:
@@ -251,6 +262,44 @@ class JobStore:
                 (searches, sum(1 for row in rows if row[1] == "extract"), time.time(), config.BATTERY_ID),
             )
         return {"searchCalls": searches, "extractCalls": sum(1 for row in rows if row[1] == "extract")}
+
+    def record_failure_evidence(self, job_id: str, evidence: dict, metadata: dict) -> None:
+        with self._lock, self._connect() as db:
+            db.execute(
+                """INSERT OR REPLACE INTO failure_evidence
+                (job_id,path,bytes,finish_reason,suspected_truncation,schema_valid,validation_error_count,created_at)
+                VALUES (?,?,?,?,?,?,?,?)""",
+                (job_id, evidence["path"], int(evidence["bytes"]), metadata.get("finish_reason"),
+                 int(bool(metadata.get("suspected_truncation"))), 0,
+                 int(metadata.get("validation_error_count", 0)), time.time()),
+            )
+
+    def retry2_eligibility(self, retry1_job_id: str, *, accumulated_cost_usd: float, reserve_usd: float, human_authorized: bool) -> dict:
+        """Validate a possible retry=2 without creating a job or lineage row."""
+        with self._connect() as db:
+            retry1 = db.execute("SELECT * FROM jobs WHERE id = ?", (retry1_job_id,)).fetchone()
+            link = db.execute("SELECT * FROM retry_lineage WHERE replacement_job_id = ?", (retry1_job_id,)).fetchone()
+            if retry1 is None or link is None:
+                return {"eligible": False, "reason": "retry1_or_lineage_not_found"}
+            if retry1["state"] != "failed" or retry1["error_code"] != "invalid_dossier_schema":
+                return {"eligible": False, "reason": "retry1_not_invalid_dossier_schema"}
+            if link["retry_number"] != 1 or link["reason"] != "retry_after_ephemeral_logging_fix":
+                return {"eligible": False, "reason": "retry1_lineage_invalid"}
+            if db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = 2", (link["original_job_id"],)).fetchone():
+                return {"eligible": False, "reason": "retry2_already_exists"}
+            if accumulated_cost_usd + reserve_usd >= config.BATTERY_BUDGET_USD:
+                return {"eligible": False, "reason": "retry2_budget_guardrail"}
+            if not human_authorized:
+                return {"eligible": False, "reason": "human_authorization_required"}
+            return {
+                "eligible": True,
+                "retry_number": 2,
+                "original_job_id": retry1["id"],
+                "root_job_id": link["original_job_id"],
+                "replacement_job_id": None,
+                "reason": config.RETRY2_REASON,
+                "max_retry_chain": config.MAX_RETRY_CHAIN,
+            }
 
     def public(self, job: dict) -> dict:
         result = {"jobId": job["id"], "correlationId": job["correlation_id"], "state": job["state"]}

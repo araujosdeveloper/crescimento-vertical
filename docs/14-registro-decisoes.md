@@ -944,3 +944,24 @@ de operações Tavily (`research_operations`, separando `search` e `extract`).
 Usage sem telemetria operacional é rejeitado; referências do proxy não são
 fonte de verdade. O cálculo conservador local permanece o débito do guardrail;
 estimativas do provider são informativas.
+### ADR-033 — Observabilidade de falhas e preparação controlada do retry 2
+
+Em 2026-09-01, a revisão forense corrigiu a conclusão anterior: a hipótese H
+é tecnicamente forte, mas não é causa exata reproduzida. A partir desta decisão,
+falhas finais de schema persistem evidência protegida em `/state/failures/<job>`
+(diretório 0700, arquivos 0600, limite agregado de 256 KiB, escrita atômica e
+fsync), sem credenciais, headers, cookies, prompts ou PII. O banco migra de
+`user_version=3` para 4 com um manifesto sanitizado.
+
+Metadados incluem finish reason, indicadores de truncamento, parse/normalização,
+modelo/provedor e payload efetivo sanitizado. `finish_reason` ausente não é
+interpretado como `stop`; a conclusão permanece fail-closed. O adapter local
+traduz `thinking=none` para `extra_body.thinking.type=disabled`, comprovado por
+teste offline, sem chamada ao provider.
+
+O retry 2 é somente capacidade contratual: exige autorização humana posterior,
+razão exata `retry_after_dossier_contract_and_observability_fix`, cadeia válida,
+orçamento inferior a US$ 2 e ausência de retry anterior. Nenhum job/lineage de
+retry 2 é criado nesta etapa; retry 3 e ciclos são proibidos. A retenção de
+evidências permanece até o encerramento da Fase 8 e depois requer decisão
+operacional explícita. Custo histórico e telemetria Tavily são preservados.

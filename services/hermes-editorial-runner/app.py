@@ -21,6 +21,7 @@ import hmac_auth
 import hermline
 import schemas
 import policy
+import evidence
 from state import IdempotencyConflictError, JobStore, RetryLineageError
 from nonce_store import NonceStore
 
@@ -258,6 +259,17 @@ class Handler(BaseHTTPRequestHandler):
             store.update(job["id"], "timed_out", error_code="timeout")
             store.release_battery_reservation()
             self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
+        except evidence.DossierValidationError as exc:
+            try:
+                manifest = evidence.persist_failure(job["id"], exc.output, exc.errors, exc.usage, exc.metadata)
+                store.record_failure_evidence(job["id"], manifest, exc.metadata)
+                error_code = exc.error_code
+            except Exception:
+                manifest = None
+                error_code = "failure_evidence_persist_failed"
+            store.update(job["id"], "failed", error_code=error_code, usage=exc.usage)
+            store.release_battery_reservation()
+            self._send_json(502, {"error": error_code, "jobId": job["id"]})
         except Exception as exc:  # sanitized, no exception text
             safe_codes = {
                 "output_too_large",
@@ -265,6 +277,7 @@ class Handler(BaseHTTPRequestHandler):
                 "invalid_dossier_schema",
                 "usage_file_missing_or_invalid",
                 "usage_provider_model_mismatch",
+                "provider_finish_reason_missing",
                 "hermes_nonzero_exit",
                 "execution_disabled",
                 "deepseek_credential_unavailable",

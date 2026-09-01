@@ -270,3 +270,35 @@ apenas estimativa reportada pelo usage, sem fórmula verificável offline.
 `retry_number=2` continua bloqueado pelo contrato persistente.
 Reservas são liberadas em sucesso, falha ou timeout; `jobs_reserved` permanece
 como registro auditável da submissão.
+## Correção forense e observabilidade (2026-09-01)
+
+A classificação H da falha `invalid_dossier_schema` é uma hipótese técnica
+forte e uma divergência de contrato comprovada, não a causa exata reproduzida.
+Como `result_json` era nulo, a saída inválida não foi persistida, os logs eram
+efêmeros e o usage não guardava `finish_reason`, não há JSON Pointers, motivo de
+finalização, truncamento ou estrutura integral comprovados retroativamente.
+
+Falhas futuras persistem somente o resultado final inválido em
+`/state/failures/<job-id-sanitizado>/`: candidato bruto sanitizado e limitado,
+`validation-errors.json` com JSON Pointer/keyword/tipos/limites sem valores
+textuais, e `response-metadata.json` com provedor, modelo, parse, BOM, fences,
+objetos, normalização, finish reason, truncamento, tokens e versão do schema.
+O diretório é 0700, arquivos 0600, proprietário do processo, escrita atômica
+com fsync e limite agregado de 256 KiB. Nada é escrito em `/opt/data`, logs,
+Git ou backups públicos; headers, cookies, credenciais e parâmetros sensíveis
+são removidos. A retenção segue até o encerramento da Fase 8 e depois depende
+de decisão operacional explícita.
+
+O usage futuro registra `stop`, `length`, `content_filter` ou `tool_calls`; a
+ausência é marcada e não inferida como sucesso. O teste offline do adapter
+captura o payload efetivo e comprova `thinking=none` como
+`extra_body.thinking.type=disabled`, sem rede ou credencial.
+
+`user_version=4` mantém jobs, lineage, custo e telemetria Tavily da v3. O
+contrato de retry 2 está preparado, mas não cria linha nem job: somente uma
+autorização humana posterior, razão exata
+`retry_after_dossier_contract_and_observability_fix`, cadeia imediata válida,
+orçamento abaixo de US$ 2 e travas fechadas podem torná-lo elegível. O custo
+conservador acumulado permanece US$ 0,054254576 (estimativa informativa
+US$ 0,0142314872); reserva zero. Retry 3, ciclos e chamadas externas são
+proibidos nesta etapa.

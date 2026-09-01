@@ -12,6 +12,8 @@ import json
 import os
 
 import config
+import evidence
+import schemas
 
 _execution_lock = threading.Lock()  # concorrência máxima de 1 execução
 
@@ -23,7 +25,7 @@ class ExecutionDisabledError(RuntimeError):
 def bounded_stdout(stdout: str) -> str:
     output = normalize_json_output(stdout)
     if len(output.encode("utf-8")) > config.OUTPUT_MAX_BYTES:
-        raise RuntimeError("output_too_large")
+        raise evidence.OutputLimitError(stdout)
     return output
 
 
@@ -124,21 +126,37 @@ def run_hermes(request: dict) -> dict:
             raise TimeoutError("timeout") from None
         if proc.returncode != 0:
             raise RuntimeError("hermes_nonzero_exit")
-        output = bounded_stdout(proc.stdout)
+        raw_output = proc.stdout
         try:
-            dossier = json.loads(output)
-        except (json.JSONDecodeError, UnicodeDecodeError):
-            raise RuntimeError("invalid_dossier_json") from None
-        errors = __import__("schemas").validate_dossier(dossier)
-        if errors:
-            raise RuntimeError("invalid_dossier_schema")
+            output = bounded_stdout(raw_output)
+        except evidence.OutputLimitError as exc:
+            metadata = evidence.output_metadata(raw_output, None, parse_success=False, normalized=False)
+            metadata["output_limit_exceeded"] = True
+            metadata["suspected_truncation"] = False
+            raise evidence.DossierValidationError(
+                exc.output, [], metadata, None, error_code="output_too_large"
+            ) from None
         usage = None
         usage_path = os.path.join(config.USAGE_DIR, f"usage-{request['idempotencyKey'][:48]}.json")
         try:
             with open(usage_path, encoding="utf-8") as usage_file:
-                usage = json.load(usage_file)
+                usage = evidence.sanitize_usage(json.load(usage_file))
         except (OSError, json.JSONDecodeError):
-            raise RuntimeError("usage_file_missing_or_invalid") from None
+            usage = None
+        metadata = evidence.output_metadata(raw_output, usage, parse_success=False, normalized=output != raw_output.strip())
+        try:
+            dossier = json.loads(output)
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            raise evidence.DossierValidationError(raw_output, [], metadata, usage, error_code="invalid_dossier_json") from None
+        errors = schemas.validate_dossier(dossier)
+        if errors:
+            metadata = evidence.output_metadata(raw_output, usage, parse_success=True, normalized=output != raw_output.strip())
+            metadata["validation_error_count"] = len(errors)
+            raise evidence.DossierValidationError(raw_output, errors, metadata, usage) from None
+        if usage is None:
+            raise RuntimeError("usage_file_missing_or_invalid")
         if usage.get("provider") != config.HERMES_PROVIDER or usage.get("model") != config.HERMES_MODEL:
             raise RuntimeError("usage_provider_model_mismatch")
+        if evidence.finish_reason(usage) is None:
+            raise RuntimeError("provider_finish_reason_missing")
         return {"dossier": dossier, "usage": usage}
