@@ -891,3 +891,12 @@ data, status, decisão, motivo, consequências e plano de reversão.
   previamente com esses metadados e o processo aplica umask 0077.
 - Evidência: integrity/WAL/transações, guardrail, idempotência/conflito,
   concorrência, recriação e rollback em volume temporário aprovados sem rede.
+
+### Adendo operacional — neutralização do `VOLUME /opt/data`
+
+- Causa: a recriação preservou o volume anônimo herdado, mantendo-o junto da
+  entrada em `HostConfig.Tmpfs`; o mount de volume prevaleceu no container.
+- Correção: container realmente novo e tmpfs explícito com 16 MiB,
+  `rw,nosuid,nodev,noexec`, modo 0700 e UID/GID 10000.
+- Persistência: somente `/state`; o volume anônimo anterior permanece órfão e
+  preservado até autorização humana específica para removê-lo.

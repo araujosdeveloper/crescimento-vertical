@@ -814,3 +814,13 @@ preservação de `reasoning_content`, usage normalizado e parâmetros de timeout
 limite de saída. O código candidato do runner foi preparado com credencial por
 arquivo e sem fallback. Containers, perfis instalados, credenciais, n8n,
 Payload/PostgreSQL, staging e produção não foram modificados.
+
+## Remediações isoladas do runner — 1º de setembro de 2026
+
+O volume `/state` foi corrigido para UID/GID 10000, diretório 0700 e SQLite
+0600, com integridade e persistência comprovadas offline. Em seguida foi
+identificado que a recriação anterior preservara o volume anônimo herdado em
+`/opt/data`, mesmo com tmpfs configurado. A correção permanente usa container
+realmente novo e tmpfs limitado a 16 MiB com `nosuid,nodev,noexec`; somente
+`/state` pode persistir. As travas permaneceram fechadas e não houve chamada
+DeepSeek, Tavily, pesquisa ou inferência.

@@ -621,3 +621,9 @@ de escrita para UID/GID 10000 e interrompeu antes das travas. A remediação
 isolada ajustou o volume para `10000:10000 0700`, arquivos 0600 e incluiu
 criação correta na imagem mais umask 0077. Persistência e rollback foram
 comprovados offline; a bateria continuou bloqueada.
+
+O preflight posterior detectou que `/opt/data` ainda era um volume anônimo RW,
+pois a recriação havia preservado o volume herdado apesar da entrada tmpfs. A
+remediação isolada passou a exigir container realmente novo e tmpfs de 16 MiB
+com `nosuid,nodev,noexec`, modo 0700 e UID/GID 10000. A dupla trava permaneceu
+fechada e a bateria não foi executada.

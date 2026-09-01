@@ -197,3 +197,12 @@ correto. SQLite/WAL, integrity, transações, guardrail, idempotência, conflito
 concorrência 1 e persistência após recriação passaram offline. O rollback foi
 restaurado somente em volume temporário separado. Não houve DeepSeek, Tavily,
 pesquisa, inferência ou abertura das travas.
+
+## Correção isolada do mount `/opt/data` — 2026-09-01
+
+O preflight seguinte constatou que o Engine conservava o volume anônimo
+herdado em `/opt/data`, embora `HostConfig.Tmpfs` também estivesse presente.
+A causa foi a reutilização do volume anônimo na recriação do container. O
+Compose passou a explicitar as opções `rw,nosuid,nodev,noexec`, limite de 16 MiB,
+modo 0700 e UID/GID 10000. A implantação deve criar um container realmente
+novo e preservar o volume antigo apenas como órfão para remoção futura.

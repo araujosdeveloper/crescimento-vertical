@@ -110,3 +110,12 @@ A correção foi validada com escrita/fsync, WAL e locking SQLite, integrity
 check, commit/rollback, guardrail e idempotência offline, concorrência serial,
 persistência após recriação e restauração do archive em volume temporário.
 Fixtures identificadas e volumes temporários foram removidos.
+
+## Neutralização efetiva de `/opt/data`
+
+A imagem herdada declara `VOLUME /opt/data`. Uma recriação que preservou o
+volume anônimo anterior manteve simultaneamente esse mount e a intenção de
+`tmpfs`, e o volume prevaleceu no container efetivo. O Compose agora declara
+explicitamente `rw,nosuid,nodev,noexec,size=16m,mode=0700,uid=10000,gid=10000`.
+O procedimento operacional exige criar um container realmente novo, sem
+reaproveitar volume anônimo. `/state` continua sendo a única persistência.
