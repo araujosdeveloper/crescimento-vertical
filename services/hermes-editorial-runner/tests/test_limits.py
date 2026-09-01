@@ -41,6 +41,23 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertIn("max_tokens: 4096", text)
         self.assertIn("api_max_retries: 1", text)
 
+    def test_compose_declares_hardened_opt_data_tmpfs(self):
+        compose = Path(__file__).parents[3] / "docker-compose.hermes-editorial.yml"
+        text = compose.read_text(encoding="utf-8")
+        self.assertIn(
+            "/opt/data:rw,nosuid,nodev,noexec,size=16m,mode=0700,uid=10000,gid=10000",
+            text,
+        )
+        self.assertNotRegex(text, r"source:\s*[^\n]+\n\s+target:\s*/opt/data")
+        self.assertIn("RUNNER_EXECUTION_ENABLED: \"false\"", text)
+        self.assertIn("- runner-state:/state", text)
+
+    def test_runner_image_remains_non_root_and_state_is_private(self):
+        dockerfile = Path(__file__).parents[1] / "Dockerfile"
+        text = dockerfile.read_text(encoding="utf-8")
+        self.assertIn("install -d -o 10000 -g 10000 -m 0700 /state", text)
+        self.assertIn("USER hermes", text)
+
 
 if __name__ == "__main__":
     unittest.main()

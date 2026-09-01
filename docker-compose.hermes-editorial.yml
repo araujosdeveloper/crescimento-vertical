@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: services/hermes-editorial-runner/Dockerfile
-    image: cv-hermes-editorial-runner:phase8-prerun-8157454
+    image: cv-hermes-editorial-runner:phase8-opt-data-f362292
     container_name: cv-hermes-editorial-runner
     restart: unless-stopped
     init: true
@@ -62,7 +62,7 @@ services:
     read_only: true
     tmpfs:
       - /tmp:size=64m,mode=1777
-      - /opt/data:size=16m,mode=0700,uid=10000,gid=10000
+      - /opt/data:rw,nosuid,nodev,noexec,size=16m,mode=0700,uid=10000,gid=10000
     environment:
       RUNNER_EXECUTION_ENABLED: "false"
       SCHEMAS_DIR: /app/schemas
