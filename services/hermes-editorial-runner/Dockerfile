@@ -16,13 +16,15 @@ COPY services/hermes-editorial-runner/app.py \
      ./
 COPY docs/schemas/ ./schemas/
 
-RUN chown -R hermes:hermes /app && chmod -R a+rX /app
+RUN chown -R hermes:hermes /app && chmod -R a+rX /app \
+    && install -d -o 10000 -g 10000 -m 0700 /state
 
 ENV SCHEMAS_DIR=/app/schemas \
     RUNNER_EXECUTION_ENABLED=false \
     RUNNER_HOST=0.0.0.0 \
     RUNNER_PORT=8100 \
     HERMES_BIN=hermes \
+    RUNNER_STATE_DIR=/state \
     HMAC_SECRET_FILE=/run/secrets/hmac-secret \
     EXECUTION_ENABLE_FILE=/run/secrets/execution-enable
 

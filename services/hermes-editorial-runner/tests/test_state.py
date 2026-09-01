@@ -5,7 +5,7 @@ import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from state import JobStore
+from state import IdempotencyConflictError, JobStore
 import config
 
 
@@ -21,6 +21,14 @@ class TestJobStore(unittest.TestCase):
             self.assertEqual(job["id"], replay["id"])
             store.update(job["id"], "rejected", error_code="topic_out_of_scope")
             self.assertEqual(store.get_by_idempotency("idem-1")["state"], "rejected")
+
+    def test_same_idempotency_key_with_different_content_conflicts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            store = JobStore(os.path.join(directory, "jobs.sqlite3"))
+            request = {"idempotencyKey": "idem-conflict", "correlationId": "corr-1"}
+            store.create_or_get(request, "fingerprint-a")
+            with self.assertRaisesRegex(IdempotencyConflictError, "idempotency_conflict"):
+                store.create_or_get(request, "fingerprint-b")
 
     def test_battery_guardrail_persists_and_limits_jobs(self):
         with tempfile.TemporaryDirectory() as directory:

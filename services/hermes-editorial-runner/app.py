@@ -11,6 +11,7 @@ Nenhum segredo é exposto em log ou resposta; o corpo integral nunca é logado.
 
 import json
 import logging
+import os
 import queue
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -20,8 +21,12 @@ import hmac_auth
 import hermline
 import schemas
 import policy
-from state import JobStore
+from state import IdempotencyConflictError, JobStore
 from nonce_store import NonceStore
+
+# Arquivos operacionais, SQLite WAL/SHM e usage nascem privados mesmo antes
+# dos chmod explícitos de defesa em profundidade.
+os.umask(0o077)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -222,7 +227,11 @@ class Handler(BaseHTTPRequestHandler):
         if semantic_match and semantic_match["idempotency_key"] != data["idempotencyKey"]:
             self._send_json(409, {"error": "semantic_duplicate_review", "status": "rejected", "correlationId": cid})
             return
-        job, created = store.create_or_get(data, fingerprint)
+        try:
+            job, created = store.create_or_get(data, fingerprint)
+        except IdempotencyConflictError:
+            self._send_json(409, {"error": "idempotency_conflict", "correlationId": cid})
+            return
         if not created:
             self._send_json(200, {**store.public(job), "idempotentReplay": True})
             return

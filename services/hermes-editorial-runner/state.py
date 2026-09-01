@@ -12,6 +12,10 @@ import uuid
 import config
 
 
+class IdempotencyConflictError(RuntimeError):
+    pass
+
+
 class JobStore:
     def __init__(self, path: str | None = None):
         self.path = path or os.path.join(config.STATE_DIR, "jobs.sqlite3")
@@ -76,6 +80,8 @@ class JobStore:
         with self._lock, self._connect() as db:
             row = db.execute("SELECT * FROM jobs WHERE idempotency_key = ?", (request["idempotencyKey"],)).fetchone()
             if row:
+                if row["topic_fingerprint"] != fingerprint:
+                    raise IdempotencyConflictError("idempotency_conflict")
                 return dict(row), False
             job = {
                 "id": uuid.uuid4().hex,

@@ -125,6 +125,8 @@ jobs:
           grep -q 'internal: true' docker-compose.hermes-editorial.yml
           grep -q 'phase8_execution' docker-compose.hermes-editorial.yml
           grep -q 'phase8_egress' docker-compose.hermes-editorial.yml
+          grep -q 'install -d -o 10000 -g 10000 -m 0700 /state' services/hermes-editorial-runner/Dockerfile
+          grep -q 'os.umask(0o077)' services/hermes-editorial-runner/app.py
           echo "OK: execução desabilitada, sem ports/Traefik/Docker Socket"
 
       - name: Compose config (valores fictícios, secret temporário)
