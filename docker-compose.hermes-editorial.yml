@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: services/hermes-editorial-runner/Dockerfile
-    image: cv-hermes-editorial-runner:phase8-sqlite-v5-3888ea5
+    image: cv-hermes-editorial-runner:phase8-instrumentation-f37f99c
     container_name: cv-hermes-editorial-runner
     restart: unless-stopped
     init: true

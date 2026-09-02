@@ -59,9 +59,13 @@ de verdade.
 
 Aplicação determinística do patch: `apply-instrumentation.py` verifica o build
 SHA e a versão do Hermes (0.20.4/`649c2062…`), confere os hashes SHA-256 dos
-cinco arquivos-alvo antes e depois, aplica com `patch -p1 --fuzz=0` (falha se
+quatro arquivos-alvo antes e depois, aplica com `patch -p1 --fuzz=0` (falha se
 já parcialmente aplicado) e grava `manifest.json` não secreto. Divergência de
-versão ou hash falha o build fechado.
+versão ou hash falha o build fechado. A imagem candidata recebe tag imutável
+vinculada ao commit (`phase8-instrumentation-<sha>`); o Compose referencia essa
+tag. O `provider_finish_reason` é capturado na fronteira do stream
+(`chat_completion_helpers`) e exportado também em turnos não limpos
+(`oneshot._run_agent`).
 
 Na janela pré-run da Fase 8 o runner não participa de `n8n_default`. Somente o
 proxy participa também da rede de saída; isto é isolamento por rede+proxy, não

@@ -342,11 +342,14 @@ real do HTTP, com a invariante `succeeded + failed == attempted` e limite sobre
 `attempted`.
 
 O patch foi aplicado deterministicamente na imagem candidata
-`cv-hermes-editorial-runner:phase8-instrumentation-candidate` (Image ID
-`sha256:421357522953f8d1e9755f1763bb42b31e0f33254436aed6b0c1e4051090f257`):
-build SHA `649c2062…` e versão 0.20.4 verificados, hashes dos cinco
+`cv-hermes-editorial-runner:phase8-instrumentation-f37f99c` (Image ID
+`sha256:699995d15ba29c8c32bdbd2c82b1c9d16d642757e72aea4cea3410adb7cafc43`):
+build SHA `649c2062…` e versão 0.20.4 verificados, hashes dos quatro
 arquivos-alvo conferidos antes/depois, aplicação com `patch -p1 --fuzz=0` e
-manifesto não secreto gravado. O Hermes realmente patchado foi testado dentro
-da imagem com `--network none` e sem credenciais reais (20 testes: separação
-finish_reason, contadores Tavily, invariante, ausência de segredo, manifesto).
-O runtime ativo não foi alterado.
+manifesto não secreto gravado. O `provider_finish_reason` é capturado na
+fronteira do stream (antes do fallback `stop` e dos early-returns) e exportado
+também em turnos não limpos. O Hermes realmente patchado foi testado dentro da
+imagem com `--network none` e sem credenciais reais (14 testes black-box:
+finish_reason stop/length/content_filter/ausente/sem chunk final, tool_calls →
+resposta final, contadores Tavily success/http500/transporte/invalid,
+invariante, ausência de segredo, manifesto). O runtime ativo não foi alterado.
