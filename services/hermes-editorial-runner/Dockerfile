@@ -20,6 +20,13 @@ COPY services/hermes-editorial-runner/app.py \
      ./
 COPY docs/schemas/ ./schemas/
 
+# Instrumentação determinística do Hermes 0.20.4 (observabilidade v1).
+# Aplica o patch com zero fuzz após verificar build SHA, versão e hashes antes/
+# depois; grava manifesto não secreto. Falha fechado em qualquer divergência.
+COPY services/hermes-editorial-runner/hermes-instrumentation/ ./instrumentation/
+RUN /opt/hermes/.venv/bin/python3 /app/instrumentation/apply-instrumentation.py \
+    && chmod 0644 /app/instrumentation/manifest.json
+
 RUN chown -R hermes:hermes /app && chmod -R a+rX /app \
     && chmod 0755 /app/hermes_wrapper.py \
     && install -d -o 10000 -g 10000 -m 0700 /state
