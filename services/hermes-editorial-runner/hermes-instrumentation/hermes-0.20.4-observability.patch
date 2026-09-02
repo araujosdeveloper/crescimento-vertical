@@ -1,0 +1,68 @@
+diff --git a/hermes_cli/oneshot.py b/hermes_cli/oneshot.py
+--- a/hermes_cli/oneshot.py
++++ b/hermes_cli/oneshot.py
+@@ -127,6 +127,22 @@
+-def _write_usage_file(path: Optional[str], result: dict, failure: Optional[str] = None) -> None:
++import re
++
++_TURN_EXIT_FINISH_RE = re.compile(r"finish_reason=([a-z_]+)")
++_VALID_FINISH_REASONS = frozenset({"stop", "length", "content_filter", "tool_calls"})
++
++
++def _extract_finish_reason(turn_exit_reason) -> Optional[str]:
++    """Recupera o finish_reason real embutido em ``turn_exit_reason``."""
++    if not isinstance(turn_exit_reason, str):
++        return None
++    match = _TURN_EXIT_FINISH_RE.search(turn_exit_reason)
++    if not match:
++        return None
++    value = match.group(1)
++    return value if value in _VALID_FINISH_REASONS else None
++
++
++def _write_usage_file(path: Optional[str], result: dict, failure: Optional[str] = None) -> None:
+@@ -155,6 +171,14 @@
+         report = {
+@@ -161,6 +177,12 @@
+             "failed": bool(result.get("failed")) or failure is not None,
+             "service_tier": result.get("service_tier"),
++            # Contrato de observabilidade v1 (ADR-034): finish_reason real e
++            # contadores Tavily. Nunca prompts/respostas/headers/cookies/segredos.
++            "finish_reason": _extract_finish_reason(result.get("turn_exit_reason")),
+         }
++        try:
++            from plugins.web.tavily.provider import get_operation_counts
++
++            report["tavily_operations"] = get_operation_counts()
++        except Exception:
++            report["tavily_operations"] = {}
+         if failure is not None:
+             report["failure"] = failure
+diff --git a/plugins/web/tavily/provider.py b/plugins/web/tavily/provider.py
+--- a/plugins/web/tavily/provider.py
++++ b/plugins/web/tavily/provider.py
+@@ -30,6 +30,17 @@
+ logger = logging.getLogger(__name__)
+ 
++_OPERATION_COUNTS = {"search": 0, "extract": 0}
++
++
++def _record_operation(endpoint: str) -> None:
++    """Contabiliza search/extract no ponto real do HTTP."""
++    if endpoint in _OPERATION_COUNTS:
++        _OPERATION_COUNTS[endpoint] += 1
++
++
++def get_operation_counts() -> Dict[str, int]:
++    """Devolve contadores exatos ``{search, extract}`` para o relatório de usage."""
++    return dict(_OPERATION_COUNTS)
++
+ 
+ def _tavily_request(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+@@ -59,6 +70,7 @@
+     logger.info("Tavily %s request to %s", endpoint, url)
+ 
++    _record_operation(endpoint)
+     response = httpx.post(url, json=payload, timeout=60)
+     response.raise_for_status()
+     return response.json()
