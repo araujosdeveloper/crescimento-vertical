@@ -64,6 +64,7 @@ def sanitize_usage(raw: dict | None) -> dict | None:
         "provider", "model", "api_calls", "input_tokens", "output_tokens",
         "completion_tokens", "prompt_tokens", "total_tokens", "cache_read_tokens",
         "cache_write_tokens", "reasoning_tokens", "max_output_tokens", "max_tokens",
+        "provider_finish_reason", "hermes_turn_exit_reason",
         "finish_reason", "finishReason", "final_finish_reason", "tavily_operations",
     }
     result = {key: raw[key] for key in allowed if key in raw}
@@ -89,8 +90,15 @@ def sanitize_usage(raw: dict | None) -> dict | None:
             if op not in {"search", "extract", "crawl", "research"}:
                 continue
             if isinstance(value, int) and value >= 0:
-                # Contrato de observabilidade v1: contadores exatos.
+                # Forma legada: contador.
                 sanitized_ops[op] = value
+            elif isinstance(value, dict):
+                # Contrato v1: attempted/succeeded/failed.
+                sanitized_ops[op] = {
+                    key: value[key]
+                    for key in ("attempted", "succeeded", "failed")
+                    if isinstance(value.get(key), int) and value.get(key) >= 0
+                }
             elif isinstance(value, list):
                 # Forma legada: lista de operações com status.
                 sanitized_ops[op] = [
@@ -102,8 +110,19 @@ def sanitize_usage(raw: dict | None) -> dict | None:
 
 
 def finish_reason(usage: dict | None) -> str | None:
+    """finish_reason do provider (SDK). Nunca lê hermes_turn_exit_reason.
+
+    ``provider_finish_reason`` é a fonte primária; ``finish_reason`` é mantido
+    apenas como campo deprecated que reflete o provider (ADR-034 v2). Ausência
+    permanece None (fail-closed), nunca inferida como stop.
+    """
     usage = usage or {}
-    value = usage.get("finish_reason") or usage.get("finishReason") or usage.get("final_finish_reason")
+    value = (
+        usage.get("provider_finish_reason")
+        or usage.get("finish_reason")
+        or usage.get("finishReason")
+        or usage.get("final_finish_reason")
+    )
     calls = usage.get("calls")
     if not value and isinstance(calls, list) and calls and isinstance(calls[-1], dict):
         value = calls[-1].get("finish_reason") or calls[-1].get("finishReason")

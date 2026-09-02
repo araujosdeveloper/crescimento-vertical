@@ -1,68 +1,146 @@
-diff --git a/hermes_cli/oneshot.py b/hermes_cli/oneshot.py
---- a/hermes_cli/oneshot.py
-+++ b/hermes_cli/oneshot.py
-@@ -127,6 +127,22 @@
--def _write_usage_file(path: Optional[str], result: dict, failure: Optional[str] = None) -> None:
-+import re
+diff -u -r a/agent/chat_completion_helpers.py b/agent/chat_completion_helpers.py
+--- a/agent/chat_completion_helpers.py	2026-09-02 19:14:06.435118956 +0000
++++ b/agent/chat_completion_helpers.py	2026-09-02 19:14:06.443118965 +0000
+@@ -4459,6 +4459,7 @@
+             model=model_name,
+             choices=[mock_choice],
+             usage=usage_obj,
++            raw_finish_reason=finish_reason,
+         )
+ 
+     def _call_anthropic(request_client):
+diff -u -r a/agent/conversation_loop.py b/agent/conversation_loop.py
+--- a/agent/conversation_loop.py	2026-09-02 19:14:06.436118957 +0000
++++ b/agent/conversation_loop.py	2026-09-02 19:14:06.445118967 +0000
+@@ -3422,6 +3422,11 @@
+                     _finish_result = _cc_fr.normalize_response(response)
+                     finish_reason = _finish_result.finish_reason
+                     assistant_message = _finish_result
++                    _raw_fr = getattr(response, "raw_finish_reason", None)
++                    if _raw_fr is None and getattr(response, "choices", None):
++                        _raw_fr = getattr(response.choices[0], "finish_reason", None)
++                    if _raw_fr in ("stop", "length", "content_filter", "tool_calls"):
++                        agent._last_provider_finish_reason = _raw_fr
+                     if agent._should_treat_stop_as_truncated(
+                         finish_reason,
+                         assistant_message,
+diff -u -r a/agent/turn_finalizer.py b/agent/turn_finalizer.py
+--- a/agent/turn_finalizer.py	2026-09-02 19:14:06.437118958 +0000
++++ b/agent/turn_finalizer.py	2026-09-02 19:14:06.445118967 +0000
+@@ -698,6 +698,7 @@
+         "api_calls": api_call_count,
+         "completed": completed,
+         "turn_exit_reason": _turn_exit_reason,
++        "provider_finish_reason": getattr(agent, "_last_provider_finish_reason", None),
+         "failed": failed,
+         "partial": False,  # True only when stopped due to invalid tool calls
+         "interrupted": interrupted,
+diff -u -r a/hermes_cli/oneshot.py b/hermes_cli/oneshot.py
+--- a/hermes_cli/oneshot.py	2026-09-02 19:14:06.432118953 +0000
++++ b/hermes_cli/oneshot.py	2026-09-02 19:14:06.441118963 +0000
+@@ -124,6 +124,25 @@
+     return valid, None
+ 
+ 
++_TURN_EXIT_REASON_CATEGORIES = frozenset({
++    "text_response", "max_iterations_reached", "budget_exhausted",
++    "interrupted_by_user", "interrupted_during_api_call",
++    "all_retries_exhausted_no_response", "empty_response_exhausted",
++    "compaction_handoff_not_actionable", "session_persistence_failed",
++    "guardrail_halt", "partial_stream_recovery", "fallback_prior_turn_content",
++    "local_processing_error", "error_near_max_iterations",
++    "ollama_runtime_context_too_small", "unknown",
++})
 +
-+_TURN_EXIT_FINISH_RE = re.compile(r"finish_reason=([a-z_]+)")
-+_VALID_FINISH_REASONS = frozenset({"stop", "length", "content_filter", "tool_calls"})
 +
-+
-+def _extract_finish_reason(turn_exit_reason) -> Optional[str]:
-+    """Recupera o finish_reason real embutido em ``turn_exit_reason``."""
-+    if not isinstance(turn_exit_reason, str):
++def _sanitize_turn_exit_reason(turn_exit_reason):
++    """Enumera e sanitiza a decisão interna do loop (nunca finish_reason do SDK)."""
++    if not isinstance(turn_exit_reason, str) or not turn_exit_reason.strip():
 +        return None
-+    match = _TURN_EXIT_FINISH_RE.search(turn_exit_reason)
-+    if not match:
-+        return None
-+    value = match.group(1)
-+    return value if value in _VALID_FINISH_REASONS else None
++    prefix = turn_exit_reason.strip().split("(", 1)[0].strip()
++    return prefix if prefix in _TURN_EXIT_REASON_CATEGORIES else "unknown"
 +
 +
-+def _write_usage_file(path: Optional[str], result: dict, failure: Optional[str] = None) -> None:
-@@ -155,6 +171,14 @@
-         report = {
-@@ -161,6 +177,12 @@
-             "failed": bool(result.get("failed")) or failure is not None,
+ def _write_usage_file(path: Optional[str], result: dict, failure: Optional[str] = None) -> None:
+     """Best-effort JSON usage report for pipelines (``-z --usage-file``).
+ 
+@@ -157,6 +176,12 @@
+             # paying for actually went out on the wire (July 2026 incident:
+             # a config-matching bug silently dropped flex -> 2.3x billing).
              "service_tier": result.get("service_tier"),
-+            # Contrato de observabilidade v1 (ADR-034): finish_reason real e
-+            # contadores Tavily. Nunca prompts/respostas/headers/cookies/segredos.
-+            "finish_reason": _extract_finish_reason(result.get("turn_exit_reason")),
++            # Contrato de observabilidade v1 (ADR-034): finish_reason do SDK
++            # separado da decisão interna do loop; nunca prompts, respostas
++            # integrais, headers, cookies ou segredos.
++            "provider_finish_reason": result.get("provider_finish_reason"),
++            "hermes_turn_exit_reason": _sanitize_turn_exit_reason(result.get("turn_exit_reason")),
++            "tavily_operations": _tavily_operation_counts(),
          }
-+        try:
-+            from plugins.web.tavily.provider import get_operation_counts
-+
-+            report["tavily_operations"] = get_operation_counts()
-+        except Exception:
-+            report["tavily_operations"] = {}
          if failure is not None:
              report["failure"] = failure
-diff --git a/plugins/web/tavily/provider.py b/plugins/web/tavily/provider.py
---- a/plugins/web/tavily/provider.py
-+++ b/plugins/web/tavily/provider.py
-@@ -30,6 +30,17 @@
+@@ -167,6 +192,16 @@
+         pass
+ 
+ 
++def _tavily_operation_counts() -> dict:
++    """Contadores Tavily (attempted/succeeded/failed) no ponto real do HTTP."""
++    try:
++        from plugins.web.tavily.provider import get_operation_counts
++
++        return get_operation_counts()
++    except Exception:
++        return {}
++
++
+ def run_oneshot(
+     prompt: str,
+     model: Optional[str] = None,
+diff -u -r a/plugins/web/tavily/provider.py b/plugins/web/tavily/provider.py
+--- a/plugins/web/tavily/provider.py	2026-09-02 19:14:06.434118955 +0000
++++ b/plugins/web/tavily/provider.py	2026-09-02 19:14:06.442118964 +0000
+@@ -31,6 +31,26 @@
+ 
  logger = logging.getLogger(__name__)
  
-+_OPERATION_COUNTS = {"search": 0, "extract": 0}
++_OPERATION_COUNTS = {
++    "search": {"attempted": 0, "succeeded": 0, "failed": 0},
++    "extract": {"attempted": 0, "succeeded": 0, "failed": 0},
++}
 +
 +
-+def _record_operation(endpoint: str) -> None:
-+    """Contabiliza search/extract no ponto real do HTTP."""
++def _record_attempt(endpoint: str) -> None:
 +    if endpoint in _OPERATION_COUNTS:
-+        _OPERATION_COUNTS[endpoint] += 1
++        _OPERATION_COUNTS[endpoint]["attempted"] += 1
 +
 +
-+def get_operation_counts() -> Dict[str, int]:
-+    """Devolve contadores exatos ``{search, extract}`` para o relatório de usage."""
-+    return dict(_OPERATION_COUNTS)
++def _record_result(endpoint: str, ok: bool) -> None:
++    if endpoint in _OPERATION_COUNTS:
++        _OPERATION_COUNTS[endpoint]["succeeded" if ok else "failed"] += 1
++
++
++def get_operation_counts() -> Dict[str, Dict[str, int]]:
++    """Devolve contadores exatos ``{search/extract: {attempted, succeeded, failed}}``."""
++    return {op: dict(_OPERATION_COUNTS[op]) for op in _OPERATION_COUNTS}
 +
  
  def _tavily_request(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-@@ -59,6 +70,7 @@
+     """POST to the Tavily API and return the parsed JSON response.
+@@ -56,9 +76,16 @@
+     url = f"{base_url}/{endpoint.lstrip('/')}"
      logger.info("Tavily %s request to %s", endpoint, url)
  
-+    _record_operation(endpoint)
-     response = httpx.post(url, json=payload, timeout=60)
-     response.raise_for_status()
-     return response.json()
+-    response = httpx.post(url, json=payload, timeout=60)
+-    response.raise_for_status()
+-    return response.json()
++    _record_attempt(endpoint)
++    try:
++        response = httpx.post(url, json=payload, timeout=60)
++        response.raise_for_status()
++        data = response.json()
++    except Exception:
++        _record_result(endpoint, False)
++        raise
++    _record_result(endpoint, True)
++    return data
+ 
+ 
+ def _normalize_tavily_search_results(response: Dict[str, Any]) -> Dict[str, Any]:

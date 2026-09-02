@@ -9,7 +9,8 @@
     "contractVersion",
     "provider",
     "model",
-    "finish_reason",
+    "provider_finish_reason",
+    "hermes_turn_exit_reason",
     "api_calls",
     "input_tokens",
     "output_tokens",
@@ -31,10 +32,28 @@
       "const": "deepseek-v4-flash",
       "description": "Modelo fixado do Hermes."
     },
+    "provider_finish_reason": {
+      "type": ["string", "null"],
+      "enum": ["stop", "length", "content_filter", "tool_calls", null],
+      "description": "finish_reason real vindo diretamente da resposta/chunk final do SDK. null indica ausência real e é tratado como fail-closed pelo runner; nunca é inferido como stop e nunca é derivado de hermes_turn_exit_reason."
+    },
+    "hermes_turn_exit_reason": {
+      "type": ["string", "null"],
+      "enum": [
+        "text_response", "max_iterations_reached", "budget_exhausted",
+        "interrupted_by_user", "interrupted_during_api_call",
+        "all_retries_exhausted_no_response", "empty_response_exhausted",
+        "compaction_handoff_not_actionable", "session_persistence_failed",
+        "guardrail_halt", "partial_stream_recovery", "fallback_prior_turn_content",
+        "local_processing_error", "error_near_max_iterations",
+        "ollama_runtime_context_too_small", "unknown", null
+      ],
+      "description": "Decisão interna do loop do Hermes, sanitizada e enumerada. Não substitui provider_finish_reason."
+    },
     "finish_reason": {
       "type": ["string", "null"],
       "enum": ["stop", "length", "content_filter", "tool_calls", null],
-      "description": "finish_reason real do provider. null indica ausência real e é tratado como fail-closed pelo runner; nunca é inferido como stop."
+      "description": "DEPRECATED. Reflete somente provider_finish_reason por compatibilidade; nunca é preenchido a partir de hermes_turn_exit_reason."
     },
     "api_calls": {
       "type": "integer",
@@ -67,19 +86,32 @@
     "tavily": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["search_calls", "extract_calls"],
+      "required": ["search", "extract"],
       "properties": {
-        "search_calls": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Contagem exata de operações search do Tavily, instrumentada no ponto real do HTTP."
+        "search": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attempted", "succeeded", "failed"],
+          "properties": {
+            "attempted": {"type": "integer", "minimum": 0, "description": "Incrementa imediatamente antes da tentativa HTTP real."},
+            "succeeded": {"type": "integer", "minimum": 0, "description": "Incrementa somente após resposta válida."},
+            "failed": {"type": "integer", "minimum": 0, "description": "Incrementa em erro HTTP, transporte, timeout ou resposta inválida."}
+          },
+          "description": "Telemetria da operação search. Invariante: succeeded + failed == attempted."
         },
-        "extract_calls": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Contagem exata de operações extract do Tavily, instrumentada no ponto real do HTTP."
+        "extract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attempted", "succeeded", "failed"],
+          "properties": {
+            "attempted": {"type": "integer", "minimum": 0},
+            "succeeded": {"type": "integer", "minimum": 0},
+            "failed": {"type": "integer", "minimum": 0}
+          },
+          "description": "Telemetria da operação extract. Invariante: succeeded + failed == attempted."
         }
-      }
+      },
+      "description": "Telemetria Tavily instrumentada no ponto real do HTTP. Não contabiliza GET /usage, não infere por logs CONNECT e não registra consulta, URL, headers, corpo, chave ou resposta."
     },
     "runner": {
       "type": "object",
