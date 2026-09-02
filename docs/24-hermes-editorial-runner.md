@@ -145,3 +145,25 @@ prompt explicita o contrato versionado e limites editoriais; falhas de schema
 continuam terminais. A telemetria do executor preserva contadores mesmo em
 erro. A migração SQLite v3 registra operações Tavily (`search`/`extract`) e
 rejeita usage sem contador exato ou a quarta busca.
+
+### Resolução imutável da imagem
+
+O orquestrador não contém tag de imagem. Antes de criar o arquivo de
+habilitação, `scripts/phase8_orchestrator_image.py` lê o `docker compose config
+--format json`, seleciona exclusivamente o serviço
+`cv-hermes-editorial-runner` e exige referência fixa, imagem local, container
+ativo healthy e igualdade exata entre referência e Image ID do Compose,
+container e armazenamento local.
+
+O helper obtém o RepoDigest correspondente ao Image ID e executa por ele um
+probe offline (`--network none`) dentro da imagem. O probe comprova SQLite v5,
+executor controlado, observabilidade, contrato `retryNumber`/`rootJobId`, cadeia
+máxima 2 e adapter DeepSeek com thinking disabled. A resolução existe somente
+em diretório temporário 0700 e arquivo 0600.
+
+A tag é reconfirmada antes da abertura. O cliente executa pelo RepoDigest
+inicial, sem build, pull, latest, fallback ou nova resolução. O `finally`
+remove a trava e recria somente o runner com `--no-deps --no-build --pull
+never`; se a tag mudar durante a janela, usa exclusivamente o RepoDigest já
+aprovado para fechar com segurança. O override mínimo é 0600 e removido pelo
+trap.

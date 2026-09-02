@@ -65,6 +65,21 @@ modelo, não se recria o runner nem se inicia bateria real.
 O arquivo DeepSeek é montado read-only. Sua ausência mantém qualquer execução
 real em falha fechada; não criar placeholder no runtime.
 
+### Imagem usada por uma janela controlada
+
+`scripts/phase8-controlled-battery.sh` deriva a imagem somente da configuração
+normalizada do serviço runner no Compose efetivo. Antes de abrir as travas, ele
+exige que a mesma referência e o mesmo Image ID estejam no container healthy e
+na imagem local, e valida as capacidades v5 dentro da imagem sem rede. O
+RepoDigest resultante fica fixo durante toda a janela.
+
+Uma bateria nunca executa `build` ou `pull`, não usa `latest`, fallback ou
+seleção por substring e não escolhe o primeiro serviço de uma lista. A
+recriação é restrita a `cv-hermes-editorial-runner`, com `--no-deps`,
+`--no-build`, `--pull never` e sem `down` ou remoção de órfãos. Divergência de
+Compose, container, Image ID, health ou contrato falha antes da trava, reserva
+e POST.
+
 ## Integração com o n8n (Fase 3C)
 
 O n8n acessa o runner via node privado e credencial HMAC; ver docs/26 e
