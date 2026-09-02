@@ -854,3 +854,21 @@ original do blog:
 Nenhum código removeu o Hermes do caminho editorial; DeepSeek e Tavily
 continuam subordinados ao Hermes; publicação automática permanece desabilitada;
 retry 3 permanece bloqueado; e as travas continuam fechadas.
+
+## Instrumentação auditável do Hermes editor-chefe — 2 de setembro de 2026
+
+Validação offline da instrumentação do Hermes 0.20.4, preservando-o como
+editor-chefe. Preflight confirmou branch, PR #14 draft, quatro checks verdes,
+runner/proxy healthy, travas fechadas, `RUNNER_EXECUTION_ENABLED=false`,
+execution-enable ausente, zero processos Hermes one-shot, SQLite v5 íntegro,
+jobs=3, retry_lineage=2, retry3 inexistente e reserved_usd=0.
+
+Correções: `provider_finish_reason` (direto do SDK) separado de
+`hermes_turn_exit_reason` (decisão interna do loop, enumerada); telemetria
+Tavily `attempted`/`succeeded`/`failed` no ponto real do HTTP com invariante
+`succeeded + failed == attempted`. O patch foi aplicado deterministicamente na
+imagem candidata (build SHA e hashes conferidos, zero fuzz, manifesto não
+secreto) e o Hermes realmente patchado foi testado dentro da imagem com
+`--network none` e sem credenciais (20 testes aprovados). O runtime ativo não
+foi alterado; runner e proxy mantiveram os mesmos IDs; nenhuma chamada
+DeepSeek/Tavily, nenhum custo, nenhuma publicação e a Fase 9 não foi iniciada.

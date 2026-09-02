@@ -40,7 +40,28 @@ O runner consome o contrato versionado
 campo que o Hermes não exporte sem o patch de instrumentação correspondente
 (`services/hermes-editorial-runner/hermes-instrumentation/`). Enquanto o patch
 não estiver aplicado à imagem, o runner permanece fail-closed quando a
-telemetria obrigatória (`finish_reason`, `tavily_operations`) estiver ausente.
+telemetria obrigatória (`provider_finish_reason`, `tavily_operations`) estiver
+ausente.
+
+Correção do finish_reason (ADR-034 v2): `provider_finish_reason` (vindo
+diretamente da resposta/chunk final do SDK; valores `stop`, `length`,
+`content_filter`, `tool_calls` ou `null`) é SEPARADO de `hermes_turn_exit_reason`
+(decisão interna do loop, sanitizada e enumerada). `turn_exit_reason` nunca é
+tratado como finish_reason do provedor; ausência permanece `null` e nunca é
+inferida como `stop`. O campo `finish_reason` é deprecated e reflete somente
+`provider_finish_reason`.
+
+Telemetria Tavily: o plugin é instrumentado no ponto real do HTTP e registra,
+separadamente, `attempted`/`succeeded`/`failed` para `search` e `extract`. A
+invariante `succeeded + failed == attempted` é obrigatória; o limite de busca
+usa `attempted`; `GET /usage` não é contabilizado e logs CONNECT não são fonte
+de verdade.
+
+Aplicação determinística do patch: `apply-instrumentation.py` verifica o build
+SHA e a versão do Hermes (0.20.4/`649c2062…`), confere os hashes SHA-256 dos
+cinco arquivos-alvo antes e depois, aplica com `patch -p1 --fuzz=0` (falha se
+já parcialmente aplicado) e grava `manifest.json` não secreto. Divergência de
+versão ou hash falha o build fechado.
 
 Na janela pré-run da Fase 8 o runner não participa de `n8n_default`. Somente o
 proxy participa também da rede de saída; isto é isolamento por rede+proxy, não

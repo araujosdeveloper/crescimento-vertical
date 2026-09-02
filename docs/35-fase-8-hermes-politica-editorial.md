@@ -326,8 +326,27 @@ A auditoria read-only detectou que o runner exigia `finish_reason` e
 `tavily_operations` no `--usage-file`, campos que o Hermes 0.20.4 não exporta. A
 reconciliação adiciona o contrato versionado
 `docs/schemas/hermes-observability.v1.schema.json` e a instrumentação mínima
-versionada em `services/hermes-editorial-runner/hermes-instrumentation/`, que
-exporta `finish_reason` (derivado de `turn_exit_reason`) e contadores
-`tavily_operations` (search/extract) sem prompts, respostas integrais, headers,
-cookies ou segredos. Enquanto o patch não estiver aplicado, o runner permanece
-fail-closed para telemetria obrigatória ausente.
+versionada em `services/hermes-editorial-runner/hermes-instrumentation/`, sem
+prompts, respostas integrais, headers, cookies ou segredos. Enquanto o patch não
+estiver aplicado, o runner permanece fail-closed para telemetria obrigatória
+ausente.
+
+## Correção do finish_reason e validação da instrumentação (2026-09-02)
+
+Correção de contrato (ADR-034 v2): `provider_finish_reason` (direto do
+chunk/resposta final do SDK) é SEPARADO de `hermes_turn_exit_reason` (decisão
+interna do loop, sanitizada e enumerada). O valor nunca é derivado de
+`turn_exit_reason` e a ausência permanece `null`, sem inferir `stop`. A
+telemetria Tavily passou a registrar `attempted`/`succeeded`/`failed` no ponto
+real do HTTP, com a invariante `succeeded + failed == attempted` e limite sobre
+`attempted`.
+
+O patch foi aplicado deterministicamente na imagem candidata
+`cv-hermes-editorial-runner:phase8-instrumentation-candidate` (Image ID
+`sha256:421357522953f8d1e9755f1763bb42b31e0f33254436aed6b0c1e4051090f257`):
+build SHA `649c2062…` e versão 0.20.4 verificados, hashes dos cinco
+arquivos-alvo conferidos antes/depois, aplicação com `patch -p1 --fuzz=0` e
+manifesto não secreto gravado. O Hermes realmente patchado foi testado dentro
+da imagem com `--network none` e sem credenciais reais (20 testes: separação
+finish_reason, contadores Tavily, invariante, ausência de segredo, manifesto).
+O runtime ativo não foi alterado.
