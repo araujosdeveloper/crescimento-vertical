@@ -26,14 +26,28 @@ _SECRET_RE = re.compile(
 _JSON_SECRET_RE = re.compile(r'(?i)((?:api[_-]?key|token|password|secret)\s*["\']?\s*:\s*["\'])[^"\']*(["\'])')
 
 
-class DossierValidationError(RuntimeError):
-    def __init__(self, output: str, errors: list[dict], metadata: dict, usage: dict | None, error_code: str = "invalid_dossier_schema"):
+class HermesRunError(RuntimeError):
+    """Falha terminal da execução do Hermes com contexto sanitizado.
+
+    Carrega o que estiver disponível para que o runner persista usage,
+    evidência e contabilização em qualquer estado terminal, sem revelar
+    prompts, respostas integrais, headers, cookies ou segredos.
+    """
+
+    def __init__(self, error_code: str, *, output: str | None = None,
+                 errors: list | None = None, metadata: dict | None = None,
+                 usage: dict | None = None):
         super().__init__(error_code)
         self.error_code = error_code
         self.output = output
-        self.errors = errors
-        self.metadata = metadata
+        self.errors = errors or []
+        self.metadata = metadata or {}
         self.usage = usage
+
+
+class DossierValidationError(HermesRunError):
+    def __init__(self, output: str, errors: list[dict], metadata: dict, usage: dict | None, error_code: str = "invalid_dossier_schema"):
+        super().__init__(error_code, output=output, errors=errors, metadata=metadata, usage=usage)
 
 
 class OutputLimitError(RuntimeError):
@@ -70,13 +84,20 @@ def sanitize_usage(raw: dict | None) -> dict | None:
         }
     operations = result.get("tavily_operations")
     if isinstance(operations, dict):
-        result["tavily_operations"] = {
-            op: [
-                {"status": item.get("status")}
-                for item in entries if isinstance(item, dict) and item.get("status") in {"succeeded", "failed"}
-            ]
-            for op, entries in operations.items() if isinstance(entries, list) and op in {"search", "extract", "crawl", "research"}
-        }
+        sanitized_ops = {}
+        for op, value in operations.items():
+            if op not in {"search", "extract", "crawl", "research"}:
+                continue
+            if isinstance(value, int) and value >= 0:
+                # Contrato de observabilidade v1: contadores exatos.
+                sanitized_ops[op] = value
+            elif isinstance(value, list):
+                # Forma legada: lista de operações com status.
+                sanitized_ops[op] = [
+                    {"status": item.get("status")}
+                    for item in value if isinstance(item, dict) and item.get("status") in {"succeeded", "failed"}
+                ]
+        result["tavily_operations"] = sanitized_ops
     return result
 
 
@@ -208,15 +229,23 @@ def _atomic_write(path: Path, content: bytes) -> None:
             os.unlink(temp_name)
 
 
-def persist_failure(job_id: str, output: str, errors: list, usage: dict | None, metadata: dict) -> dict:
+def persist_failure(job_id: str, output: str, errors: list, usage: dict | None, metadata: dict, *, state: str = "failed", error_code: str | None = None) -> dict:
+    """Persiste evidência sanitizada do estado terminal, mesmo sem candidato.
+
+    Aceita ``output`` vazio (falhas sem dossiê válido, como timeout ou saída
+    não-zero) e registra ``terminal_state``/``error_code`` no metadata. Nunca
+    grava prompts, respostas integrais, headers, cookies ou segredos.
+    """
     if not _JOB_RE.fullmatch(job_id):
         raise ValueError("invalid_job_id")
     root = Path(config.FAILURE_DIR) / job_id
     root.mkdir(mode=0o700, parents=True, exist_ok=True)
     os.chmod(root, 0o700)
-    candidate, scrubbed, evidence_truncated = _sanitize_candidate(output)
+    candidate, scrubbed, evidence_truncated = _sanitize_candidate(output or "")
     metadata = dict(metadata)
     metadata["job_id"] = job_id
+    metadata["terminal_state"] = state
+    metadata["error_code"] = error_code
     metadata["sanitized_technical_content"] = scrubbed
     metadata["truncated_evidence"] = evidence_truncated
     metadata["evidence_max_bytes"] = EVIDENCE_MAX_BYTES

@@ -61,6 +61,43 @@ def _safe_job_state(job_id: str) -> dict | None:
     return _get_persistent_store().public(job) if job else None
 
 
+def _finalize_terminal(store, job_id: str, state: str, error_code: str, *,
+                       usage: dict | None = None, output: str | None = None,
+                       errors: list | None = None, metadata: dict | None = None) -> None:
+    """Persiste usage, contabilização e evidência em bloco seguro.
+
+    Contabilização de custo/busca é best-effort (nunca mascara o estado
+    terminal); a evidência é gravada para qualquer estado terminal não sucedido,
+    inclusive falha genérica e timeout. O gate fail-closed de telemetria
+    obrigatória permanece exclusivo do caminho de sucesso.
+    """
+    if isinstance(usage, dict):
+        try:
+            research = store.record_research_usage(job_id, usage)
+            usage.update(research)
+        except RuntimeError:
+            pass
+        try:
+            cost = store.record_battery_usage(usage)
+            usage.update(cost)
+        except RuntimeError:
+            pass
+    manifest = None
+    try:
+        manifest = evidence.persist_failure(
+            job_id, output or "", errors or [], usage, metadata or {},
+            state=state, error_code=error_code,
+        )
+    except Exception:
+        manifest = None
+    if manifest is not None:
+        try:
+            store.record_failure_evidence(job_id, manifest, metadata or {})
+        except Exception:
+            pass
+    store.update(job_id, state, error_code=error_code, usage=usage)
+
+
 class Handler(BaseHTTPRequestHandler):
     server_version = "hermes-editorial-runner"
     protocol_version = "HTTP/1.1"
@@ -253,23 +290,16 @@ class Handler(BaseHTTPRequestHandler):
             cost = store.record_battery_usage(result["usage"])
             result["usage"].update(cost)
             store.update(job["id"], "succeeded", result=result["dossier"], usage=result["usage"])
-            store.release_battery_reservation()
             self._send_json(202, {"jobId": job["id"], "correlationId": cid, "state": "succeeded"})
         except TimeoutError:
-            store.update(job["id"], "timed_out", error_code="timeout")
-            store.release_battery_reservation()
+            _finalize_terminal(store, job["id"], "timed_out", "timeout")
             self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
-        except evidence.DossierValidationError as exc:
-            try:
-                manifest = evidence.persist_failure(job["id"], exc.output, exc.errors, exc.usage, exc.metadata)
-                store.record_failure_evidence(job["id"], manifest, exc.metadata)
-                error_code = exc.error_code
-            except Exception:
-                manifest = None
-                error_code = "failure_evidence_persist_failed"
-            store.update(job["id"], "failed", error_code=error_code, usage=exc.usage)
-            store.release_battery_reservation()
-            self._send_json(502, {"error": error_code, "jobId": job["id"]})
+        except evidence.HermesRunError as exc:
+            _finalize_terminal(
+                store, job["id"], "failed", exc.error_code,
+                usage=exc.usage, output=exc.output, errors=exc.errors, metadata=exc.metadata,
+            )
+            self._send_json(502, {"error": exc.error_code, "jobId": job["id"]})
         except Exception as exc:  # sanitized, no exception text
             safe_codes = {
                 "output_too_large",
@@ -289,9 +319,10 @@ class Handler(BaseHTTPRequestHandler):
                 "tavily_search_limit_reached",
             }
             code = str(exc) if str(exc) in safe_codes else "job_failed"
-            store.update(job["id"], "failed", error_code=code)
-            store.release_battery_reservation()
+            _finalize_terminal(store, job["id"], "failed", code)
             self._send_json(502, {"error": code, "jobId": job["id"]})
+        finally:
+            store.release_battery_reservation()
 
 
 def main() -> None:

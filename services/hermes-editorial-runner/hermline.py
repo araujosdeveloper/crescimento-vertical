@@ -40,7 +40,14 @@ def normalize_json_output(stdout: str) -> str:
 
 
 def build_prompt(request: dict) -> str:
-    """Monta o prompt a partir da requisição validada (nunca arbitrário)."""
+    """Monta o envelope de governança a partir da requisição validada.
+
+    O runner NÃO produz pauta nem texto editorial (ADR-034). Aqui ele apenas
+    repassa a requisição validada (topic/pillar/searchIntent) e o contrato de
+    saída versionado. A pauta, a estratégia de pesquisa, as fontes, a estrutura
+    e o conteúdo são decididos pelo Hermes (editor-chefe) via skill
+    ``editorial-research``.
+    """
     lines = [
         "Pesquisa editorial estruturada. Devolva SOMENTE um objeto JSON UTF-8 válido conforme editorial-dossier.v1.schema.json, sem markdown, code fence ou texto adicional.",
         "Chaves obrigatórias exatamente: schemaVersion, idempotencyKey, hermesRunId, discoveredAt, contentType, primaryPillar, riskLevel, sources.",
@@ -125,7 +132,7 @@ def run_hermes(request: dict) -> dict:
         except subprocess.TimeoutExpired:
             raise TimeoutError("timeout") from None
         if proc.returncode != 0:
-            raise RuntimeError("hermes_nonzero_exit")
+            raise evidence.HermesRunError("hermes_nonzero_exit")
         raw_output = proc.stdout
         try:
             output = bounded_stdout(raw_output)
@@ -154,9 +161,12 @@ def run_hermes(request: dict) -> dict:
             metadata["validation_error_count"] = len(errors)
             raise evidence.DossierValidationError(raw_output, errors, metadata, usage) from None
         if usage is None:
-            raise RuntimeError("usage_file_missing_or_invalid")
+            raise evidence.HermesRunError("usage_file_missing_or_invalid")
         if usage.get("provider") != config.HERMES_PROVIDER or usage.get("model") != config.HERMES_MODEL:
-            raise RuntimeError("usage_provider_model_mismatch")
+            raise evidence.HermesRunError("usage_provider_model_mismatch", usage=usage)
+        # Gate do contrato de observabilidade v1 (ADR-034): finish_reason real
+        # é obrigatório. Enquanto o patch de instrumentação do Hermes não estiver
+        # aplicado, este campo vem ausente e o job falha fechado.
         if evidence.finish_reason(usage) is None:
-            raise RuntimeError("provider_finish_reason_missing")
+            raise evidence.HermesRunError("provider_finish_reason_missing", usage=usage)
         return {"dossier": dossier, "usage": usage}

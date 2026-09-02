@@ -1,4 +1,12 @@
-"""Adapter mínimo testável para o payload DeepSeek, sem rede."""
+"""Adapter mínimo testável para o payload DeepSeek, sem rede.
+
+ATENÇÃO (ADR-034): este módulo NÃO participa do caminho editorial. O Hermes é o
+editor-chefe e o único responsável por chamar DeepSeek/Tavily. Este adapter
+existe exclusivamente para a prova de contrato de capacidades do orquestrador
+(``phase8_orchestrator_image.py``) e para testes offline do wire format
+(``extra_body.thinking``). Nunca é usado para produzir pauta, texto ou inferência
+em substituição ao Hermes.
+"""
 
 from __future__ import annotations
 
