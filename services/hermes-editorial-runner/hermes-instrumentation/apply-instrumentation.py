@@ -32,7 +32,7 @@ TARGETS = [
     {
         "path": "hermes_cli/oneshot.py",
         "before": "1938cf480986a0742a568c6419c3e1a12c3bdebaae3f55161c5d02b62f87c76b",
-        "after": "7a375faa481b6bcf64fbcf73974bd439ad7e4d7274ff43f6c3064b204549284e",
+        "after": "38790d4afe37242fe3123e6ef0ab96efe872b4f16ff78e5172c94d30c031752c",
     },
     {
         "path": "plugins/web/tavily/provider.py",
@@ -42,12 +42,7 @@ TARGETS = [
     {
         "path": "agent/chat_completion_helpers.py",
         "before": "d9a5a7b6733ef50525df4861568c2b92e08ee879e17f6a2113e1037b5b7fdd7b",
-        "after": "89d4da0f9ce4283859c35ea971246396571d22922847d25d860c5d8ed0553edb",
-    },
-    {
-        "path": "agent/conversation_loop.py",
-        "before": "538e7c9f3355a98d1daaca84b464120f532128d1f900d70a0a3892f1f05bd949",
-        "after": "c37b59085a4f12451719c0006a6e4a4f8cc6dfd2df140a9c62d72b8b37758619",
+        "after": "7ed8fe9551d644b3eb564e69a49fada83a365865786a015572420c21b0c5ff08",
     },
     {
         "path": "agent/turn_finalizer.py",

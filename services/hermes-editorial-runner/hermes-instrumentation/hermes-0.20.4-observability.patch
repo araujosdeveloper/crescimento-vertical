@@ -1,32 +1,24 @@
 diff -u -r a/agent/chat_completion_helpers.py b/agent/chat_completion_helpers.py
---- a/agent/chat_completion_helpers.py	2026-09-02 19:14:06.435118956 +0000
-+++ b/agent/chat_completion_helpers.py	2026-09-02 19:14:06.443118965 +0000
-@@ -4459,6 +4459,7 @@
-             model=model_name,
-             choices=[mock_choice],
-             usage=usage_obj,
-+            raw_finish_reason=finish_reason,
-         )
+--- a/agent/chat_completion_helpers.py	2026-09-02 20:47:35.491773085 +0000
++++ b/agent/chat_completion_helpers.py	2026-09-02 20:47:35.527773105 +0000
+@@ -4266,6 +4266,14 @@
  
-     def _call_anthropic(request_client):
-diff -u -r a/agent/conversation_loop.py b/agent/conversation_loop.py
---- a/agent/conversation_loop.py	2026-09-02 19:14:06.436118957 +0000
-+++ b/agent/conversation_loop.py	2026-09-02 19:14:06.445118967 +0000
-@@ -3422,6 +3422,11 @@
-                     _finish_result = _cc_fr.normalize_response(response)
-                     finish_reason = _finish_result.finish_reason
-                     assistant_message = _finish_result
-+                    _raw_fr = getattr(response, "raw_finish_reason", None)
-+                    if _raw_fr is None and getattr(response, "choices", None):
-+                        _raw_fr = getattr(response.choices[0], "finish_reason", None)
-+                    if _raw_fr in ("stop", "length", "content_filter", "tool_calls"):
-+                        agent._last_provider_finish_reason = _raw_fr
-                     if agent._should_treat_stop_as_truncated(
-                         finish_reason,
-                         assistant_message,
+         _close_managed_stream()
+ 
++        # Observabilidade v1 (ADR-034): finish_reason cru do SDK, capturado
++        # antes do fallback "stop" e dos early-returns (empty stream, tool-args
++        # drop, text-only drop, stream error). Ausência permanece None.
++        if finish_reason in ("stop", "length", "content_filter", "tool_calls"):
++            agent._last_provider_finish_reason = finish_reason
++        else:
++            agent._last_provider_finish_reason = None
++
+         if _stream_attempt_was_cancelled(stream_attempt_id):
+             raise _httpx.RemoteProtocolError(
+                 f"stream attempt {stream_attempt_id} was superseded"
 diff -u -r a/agent/turn_finalizer.py b/agent/turn_finalizer.py
---- a/agent/turn_finalizer.py	2026-09-02 19:14:06.437118958 +0000
-+++ b/agent/turn_finalizer.py	2026-09-02 19:14:06.445118967 +0000
+--- a/agent/turn_finalizer.py	2026-09-02 20:47:35.495773087 +0000
++++ b/agent/turn_finalizer.py	2026-09-02 20:47:35.534773110 +0000
 @@ -698,6 +698,7 @@
          "api_calls": api_call_count,
          "completed": completed,
@@ -36,8 +28,8 @@ diff -u -r a/agent/turn_finalizer.py b/agent/turn_finalizer.py
          "partial": False,  # True only when stopped due to invalid tool calls
          "interrupted": interrupted,
 diff -u -r a/hermes_cli/oneshot.py b/hermes_cli/oneshot.py
---- a/hermes_cli/oneshot.py	2026-09-02 19:14:06.432118953 +0000
-+++ b/hermes_cli/oneshot.py	2026-09-02 19:14:06.441118963 +0000
+--- a/hermes_cli/oneshot.py	2026-09-02 20:47:35.486773082 +0000
++++ b/hermes_cli/oneshot.py	2026-09-02 20:47:35.523773103 +0000
 @@ -124,6 +124,25 @@
      return valid, None
  
@@ -94,9 +86,20 @@ diff -u -r a/hermes_cli/oneshot.py b/hermes_cli/oneshot.py
  def run_oneshot(
      prompt: str,
      model: Optional[str] = None,
+@@ -469,6 +504,10 @@
+         agent.tool_gen_callback = None
+ 
+         result = agent.run_conversation(prompt)
++        result = dict(result) if isinstance(result, dict) else {}
++        # Observabilidade v1: finish_reason do SDK, mesmo em turnos não limpos
++        # (truncamento/refusal), lido diretamente do agente.
++        result["provider_finish_reason"] = getattr(agent, "_last_provider_finish_reason", None)
+         return (result.get("final_response") or "", result)
+     finally:
+         # Ordering deliberately mirrors gateway/run.py:_cleanup_agent_resources,
 diff -u -r a/plugins/web/tavily/provider.py b/plugins/web/tavily/provider.py
---- a/plugins/web/tavily/provider.py	2026-09-02 19:14:06.434118955 +0000
-+++ b/plugins/web/tavily/provider.py	2026-09-02 19:14:06.442118964 +0000
+--- a/plugins/web/tavily/provider.py	2026-09-02 20:47:35.486773082 +0000
++++ b/plugins/web/tavily/provider.py	2026-09-02 20:47:35.527773105 +0000
 @@ -31,6 +31,26 @@
  
  logger = logging.getLogger(__name__)
