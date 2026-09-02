@@ -21,7 +21,14 @@ class RetryLineageError(RuntimeError):
 
 
 class JobStore:
-    def __init__(self, path: str | None = None):
+    SCHEMA_VERSION = 5
+    _INITIALIZATION_LOCK = threading.Lock()
+    RETRY_REASONS = {
+        1: "retry_after_ephemeral_logging_fix",
+        2: "retry_after_dossier_contract_and_observability_fix",
+    }
+
+    def __init__(self, path: str | None = None, *, _migration_fault: str | None = None):
         self.path = path or os.path.join(config.STATE_DIR, "jobs.sqlite3")
         os.makedirs(os.path.dirname(self.path), exist_ok=True)
         try:
@@ -29,30 +36,27 @@ class JobStore:
         except OSError:
             pass
         self._lock = threading.Lock()
-        with self._connect() as db:
-            db.execute("PRAGMA foreign_keys=ON")
-            db.execute("PRAGMA journal_mode=WAL")
-            db.execute(
-                """CREATE TABLE IF NOT EXISTS jobs (
+        with self._INITIALIZATION_LOCK:
+            self._migrate(_migration_fault)
+            with self._connect() as db:
+                db.execute("PRAGMA journal_mode=WAL")
+        try:
+            os.chmod(self.path, 0o600)
+        except OSError:
+            pass
+
+    @staticmethod
+    def _create_base_schema(db: sqlite3.Connection) -> None:
+        db.execute(
+            """CREATE TABLE jobs (
                     id TEXT PRIMARY KEY, idempotency_key TEXT UNIQUE NOT NULL,
                     correlation_id TEXT NOT NULL, topic_fingerprint TEXT NOT NULL,
                     state TEXT NOT NULL, created_at REAL NOT NULL, updated_at REAL NOT NULL,
                     result_json TEXT, error_code TEXT, usage_json TEXT
                 )"""
-            )
-            db.execute(
-                """CREATE TABLE IF NOT EXISTS retry_lineage (
-                    original_job_id TEXT NOT NULL REFERENCES jobs(id),
-                    replacement_job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
-                    root_job_id TEXT REFERENCES jobs(id),
-                    retry_number INTEGER NOT NULL CHECK (retry_number IN (1,2)),
-                    reason TEXT NOT NULL CHECK (reason IN ('retry_after_ephemeral_logging_fix','retry_after_dossier_contract_and_observability_fix')),
-                    created_at REAL NOT NULL,
-                    PRIMARY KEY (original_job_id, retry_number)
-                )"""
-            )
-            db.execute(
-                """CREATE TABLE IF NOT EXISTS battery_usage (
+        )
+        db.execute(
+            """CREATE TABLE battery_usage (
                     battery_id TEXT PRIMARY KEY, jobs_reserved INTEGER NOT NULL DEFAULT 0,
                     reserved_usd REAL NOT NULL DEFAULT 0,
                     estimated_usd REAL NOT NULL DEFAULT 0,
@@ -62,16 +66,13 @@ class JobStore:
                     cache_read_tokens INTEGER NOT NULL DEFAULT 0,
                     cache_write_tokens INTEGER NOT NULL DEFAULT 0,
                     reasoning_tokens INTEGER NOT NULL DEFAULT 0,
+                    search_calls INTEGER NOT NULL DEFAULT 0,
+                    extract_calls INTEGER NOT NULL DEFAULT 0,
                     updated_at REAL NOT NULL
                 )"""
-            )
-            # Version 3 adds persistent, operation-level research accounting.
-            columns = {row[1] for row in db.execute("PRAGMA table_info(battery_usage)")}
-            for name in ("search_calls", "extract_calls"):
-                if name not in columns:
-                    db.execute(f"ALTER TABLE battery_usage ADD COLUMN {name} INTEGER NOT NULL DEFAULT 0")
-            db.execute(
-                """CREATE TABLE IF NOT EXISTS research_operations (
+        )
+        db.execute(
+            """CREATE TABLE research_operations (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     job_id TEXT NOT NULL REFERENCES jobs(id),
                     operation TEXT NOT NULL CHECK (operation IN ('search','extract','crawl','research')),
@@ -80,38 +81,251 @@ class JobStore:
                     created_at REAL NOT NULL,
                     UNIQUE(job_id, operation, ordinal)
                 )"""
-            )
-            db.execute("CREATE INDEX IF NOT EXISTS research_operations_job_idx ON research_operations(job_id)")
-            lineage_sql = db.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='retry_lineage'").fetchone()[0]
-            if "retry_number IN (1,2)" not in lineage_sql:
-                db.execute("ALTER TABLE retry_lineage RENAME TO retry_lineage_v3")
-                db.execute("""CREATE TABLE retry_lineage (
-                    original_job_id TEXT NOT NULL REFERENCES jobs(id), replacement_job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
-                    root_job_id TEXT REFERENCES jobs(id), retry_number INTEGER NOT NULL CHECK (retry_number IN (1,2)),
-                    reason TEXT NOT NULL CHECK (reason IN ('retry_after_ephemeral_logging_fix','retry_after_dossier_contract_and_observability_fix')),
-                    created_at REAL NOT NULL, PRIMARY KEY (original_job_id, retry_number))""")
-                db.execute("INSERT INTO retry_lineage(original_job_id,replacement_job_id,root_job_id,retry_number,reason,created_at) SELECT original_job_id,replacement_job_id,original_job_id,retry_number,reason,created_at FROM retry_lineage_v3")
-                db.execute("DROP TABLE retry_lineage_v3")
-            db.execute("PRAGMA user_version = 3")
-            db.execute("CREATE INDEX IF NOT EXISTS jobs_topic_idx ON jobs(topic_fingerprint)")
-            db.execute(
-                """CREATE TABLE IF NOT EXISTS failure_evidence (
+        )
+        db.execute(
+            """CREATE TABLE failure_evidence (
                     job_id TEXT PRIMARY KEY REFERENCES jobs(id), path TEXT NOT NULL,
                     bytes INTEGER NOT NULL, finish_reason TEXT, suspected_truncation INTEGER NOT NULL,
                     schema_valid INTEGER NOT NULL, validation_error_count INTEGER NOT NULL,
                     created_at REAL NOT NULL
                 )"""
+        )
+        db.execute("CREATE INDEX jobs_topic_idx ON jobs(topic_fingerprint)")
+        db.execute("CREATE INDEX research_operations_job_idx ON research_operations(job_id)")
+
+    @classmethod
+    def _create_lineage_v5(cls, db: sqlite3.Connection, table: str = "retry_lineage") -> None:
+        db.execute(
+            f"""CREATE TABLE {table} (
+                original_job_id TEXT NOT NULL REFERENCES jobs(id),
+                replacement_job_id TEXT NOT NULL UNIQUE REFERENCES jobs(id),
+                root_job_id TEXT NOT NULL REFERENCES jobs(id),
+                retry_number INTEGER NOT NULL CHECK (retry_number IN (1,2)),
+                reason TEXT NOT NULL CHECK (
+                    (retry_number = 1 AND reason = '{cls.RETRY_REASONS[1]}') OR
+                    (retry_number = 2 AND reason = '{cls.RETRY_REASONS[2]}')
+                ),
+                created_at REAL NOT NULL,
+                PRIMARY KEY (original_job_id, retry_number),
+                CHECK (original_job_id <> replacement_job_id),
+                CHECK (root_job_id <> replacement_job_id)
+            )"""
+        )
+
+    @classmethod
+    def _create_lineage_triggers(cls, db: sqlite3.Connection) -> None:
+        db.execute(
+            """CREATE TRIGGER retry_lineage_v5_insert
+            BEFORE INSERT ON retry_lineage
+            BEGIN
+                SELECT CASE
+                    WHEN NEW.retry_number = 1 AND NEW.root_job_id <> NEW.original_job_id
+                        THEN RAISE(ABORT, 'retry_root_inconsistent')
+                    WHEN NEW.retry_number = 1 AND EXISTS (
+                        SELECT 1 FROM retry_lineage WHERE replacement_job_id = NEW.original_job_id
+                    ) THEN RAISE(ABORT, 'retry_chain_too_long')
+                    WHEN NEW.retry_number = 2 AND NOT EXISTS (
+                        SELECT 1 FROM retry_lineage parent
+                        WHERE parent.replacement_job_id = NEW.original_job_id
+                          AND parent.retry_number = 1
+                          AND parent.root_job_id = NEW.root_job_id
+                    ) THEN RAISE(ABORT, 'retry_root_inconsistent')
+                    WHEN NEW.retry_number = 2 AND EXISTS (
+                        SELECT 1 FROM retry_lineage parent
+                        JOIN retry_lineage grandparent
+                          ON grandparent.replacement_job_id = parent.original_job_id
+                        WHERE parent.replacement_job_id = NEW.original_job_id
+                    ) THEN RAISE(ABORT, 'retry_chain_too_long')
+                    WHEN EXISTS (
+                        WITH RECURSIVE descendants(id) AS (
+                            SELECT NEW.replacement_job_id
+                            UNION ALL
+                            SELECT r.replacement_job_id
+                            FROM retry_lineage r JOIN descendants d ON r.original_job_id = d.id
+                        ) SELECT 1 FROM descendants WHERE id = NEW.original_job_id
+                    ) THEN RAISE(ABORT, 'retry_cycle')
+                END;
+            END"""
+        )
+        db.execute(
+            """CREATE TRIGGER retry_lineage_v5_immutable_update
+            BEFORE UPDATE ON retry_lineage BEGIN
+                SELECT RAISE(ABORT, 'retry_lineage_immutable');
+            END"""
+        )
+
+    @classmethod
+    def _lineage_rows_with_roots(cls, db: sqlite3.Connection) -> list[tuple]:
+        columns = {row[1] for row in db.execute("PRAGMA table_info(retry_lineage)")}
+        if not columns:
+            raise RuntimeError("retry_lineage_missing")
+        has_root = "root_job_id" in columns
+        selected = "original_job_id,replacement_job_id,retry_number,reason,created_at"
+        if has_root:
+            selected += ",root_job_id"
+        rows = [dict(row) for row in db.execute(f"SELECT {selected} FROM retry_lineage")]
+        job_ids = {row[0] for row in db.execute("SELECT id FROM jobs")}
+        replacements: dict[str, dict] = {}
+        pairs: set[tuple[str, int]] = set()
+        for row in rows:
+            original = row["original_job_id"]
+            replacement = row["replacement_job_id"]
+            retry_number = row["retry_number"]
+            if original not in job_ids or replacement not in job_ids:
+                raise RuntimeError("retry_foreign_key_invalid")
+            if original == replacement or replacement in replacements:
+                raise RuntimeError("retry_cycle_or_duplicate_replacement")
+            if retry_number not in cls.RETRY_REASONS or row["reason"] != cls.RETRY_REASONS[retry_number]:
+                raise RuntimeError("retry_reason_incompatible")
+            if (original, retry_number) in pairs:
+                raise RuntimeError("retry_lineage_duplicate")
+            pairs.add((original, retry_number))
+            replacements[replacement] = row
+
+        resolved: dict[str, str] = {}
+        visiting: set[str] = set()
+
+        def resolve(row: dict) -> str:
+            replacement = row["replacement_job_id"]
+            if replacement in resolved:
+                return resolved[replacement]
+            if replacement in visiting:
+                raise RuntimeError("retry_cycle")
+            visiting.add(replacement)
+            if row["retry_number"] == 1:
+                if row["original_job_id"] in replacements:
+                    raise RuntimeError("retry_chain_invalid")
+                root = row["original_job_id"]
+            else:
+                parent = replacements.get(row["original_job_id"])
+                if parent is None or parent["retry_number"] != 1:
+                    raise RuntimeError("retry_chain_invalid")
+                root = resolve(parent)
+            visiting.remove(replacement)
+            existing = row.get("root_job_id") if has_root else None
+            if existing is not None and existing != root:
+                raise RuntimeError("retry_root_inconsistent")
+            if root not in job_ids:
+                raise RuntimeError("retry_root_foreign_key_invalid")
+            resolved[replacement] = root
+            return root
+
+        result = []
+        for row in rows:
+            root = resolve(row)
+            result.append((row["original_job_id"], row["replacement_job_id"], root,
+                           row["retry_number"], row["reason"], row["created_at"]))
+        return result
+
+    @classmethod
+    def _validate_v5(cls, db: sqlite3.Connection) -> None:
+        table_sql_row = db.execute(
+            "SELECT sql FROM sqlite_master WHERE type='table' AND name='retry_lineage'"
+        ).fetchone()
+        if table_sql_row is None:
+            raise RuntimeError("retry_lineage_missing")
+        table_sql = " ".join(table_sql_row[0].lower().split())
+        required_sql = (
+            "original_job_id text not null references jobs(id)",
+            "replacement_job_id text not null unique references jobs(id)",
+            "root_job_id text not null references jobs(id)",
+            "retry_number integer not null check (retry_number in (1,2))",
+            f"retry_number = 1 and reason = '{cls.RETRY_REASONS[1]}'",
+            f"retry_number = 2 and reason = '{cls.RETRY_REASONS[2]}'",
+            "check (original_job_id <> replacement_job_id)",
+            "check (root_job_id <> replacement_job_id)",
+        )
+        if any(fragment not in table_sql for fragment in required_sql):
+            raise RuntimeError("retry_lineage_v5_schema_invalid")
+        columns = [
+            (row[1], row[2].upper(), row[3], row[5])
+            for row in db.execute("PRAGMA table_info(retry_lineage)")
+        ]
+        expected_columns = [
+            ("original_job_id", "TEXT", 1, 1),
+            ("replacement_job_id", "TEXT", 1, 0),
+            ("root_job_id", "TEXT", 1, 0),
+            ("retry_number", "INTEGER", 1, 2),
+            ("reason", "TEXT", 1, 0),
+            ("created_at", "REAL", 1, 0),
+        ]
+        if columns != expected_columns:
+            raise RuntimeError("retry_lineage_v5_layout_invalid")
+        foreign_keys = {
+            (row[3], row[2], row[4], row[5], row[6])
+            for row in db.execute("PRAGMA foreign_key_list(retry_lineage)")
+        }
+        expected_foreign_keys = {
+            ("original_job_id", "jobs", "id", "NO ACTION", "NO ACTION"),
+            ("replacement_job_id", "jobs", "id", "NO ACTION", "NO ACTION"),
+            ("root_job_id", "jobs", "id", "NO ACTION", "NO ACTION"),
+        }
+        if foreign_keys != expected_foreign_keys:
+            raise RuntimeError("retry_lineage_v5_foreign_keys_invalid")
+        trigger_names = {
+            row[0] for row in db.execute(
+                "SELECT name FROM sqlite_master WHERE type='trigger' AND tbl_name='retry_lineage'"
             )
-            # Version 4 persists the pointer-level evidence manifest only; raw
-            # candidate bytes stay in the protected filesystem artifact.
-            if "root_job_id" not in {row[1] for row in db.execute("PRAGMA table_info(retry_lineage)")}:
-                db.execute("ALTER TABLE retry_lineage ADD COLUMN root_job_id TEXT REFERENCES jobs(id)")
-                db.execute("UPDATE retry_lineage SET root_job_id=original_job_id WHERE root_job_id IS NULL")
-            db.execute("PRAGMA user_version = 4")
+        }
+        if not {"retry_lineage_v5_insert", "retry_lineage_v5_immutable_update"} <= trigger_names:
+            raise RuntimeError("retry_lineage_v5_triggers_missing")
+        cls._lineage_rows_with_roots(db)
+        if db.execute("PRAGMA foreign_key_check").fetchall():
+            raise RuntimeError("foreign_key_check_failed")
+        if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
+            raise RuntimeError("integrity_check_failed")
+
+    def _migrate(self, fault: str | None) -> None:
+        db = sqlite3.connect(self.path, timeout=5, isolation_level=None)
+        db.row_factory = sqlite3.Row
         try:
-            os.chmod(self.path, 0o600)
-        except OSError:
-            pass
+            db.execute("PRAGMA foreign_keys=ON")
+            db.execute("BEGIN IMMEDIATE")
+            version = db.execute("PRAGMA user_version").fetchone()[0]
+            tables = {
+                row[0] for row in db.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"
+                )
+            }
+            if version == 0 and not tables:
+                self._create_base_schema(db)
+                self._create_lineage_v5(db)
+                self._create_lineage_triggers(db)
+            elif version == 4:
+                rows = self._lineage_rows_with_roots(db)
+                self._create_lineage_v5(db, "retry_lineage_v5_new")
+                db.executemany(
+                    "INSERT INTO retry_lineage_v5_new "
+                    "(original_job_id,replacement_job_id,root_job_id,retry_number,reason,created_at) "
+                    "VALUES (?,?,?,?,?,?)",
+                    rows,
+                )
+                if fault == "after_copy":
+                    raise RuntimeError("injected_migration_failure")
+                if db.execute("SELECT count(*) FROM retry_lineage_v5_new").fetchone()[0] != len(rows):
+                    raise RuntimeError("retry_lineage_copy_count_mismatch")
+                db.execute("DROP TABLE retry_lineage")
+                db.execute("ALTER TABLE retry_lineage_v5_new RENAME TO retry_lineage")
+                self._create_lineage_triggers(db)
+            elif version == self.SCHEMA_VERSION:
+                self._validate_v5(db)
+                db.execute("COMMIT")
+                return
+            else:
+                raise RuntimeError(f"unsupported_schema_version:{version}")
+            if fault == "before_validation":
+                raise RuntimeError("injected_migration_failure")
+            self._validate_v5(db)
+            db.execute(f"PRAGMA user_version = {self.SCHEMA_VERSION}")
+            if db.execute("PRAGMA user_version").fetchone()[0] != self.SCHEMA_VERSION:
+                raise RuntimeError("user_version_not_persisted")
+            db.execute("COMMIT")
+        except Exception:
+            if db.in_transaction:
+                db.execute("ROLLBACK")
+            raise
+        finally:
+            db.close()
 
     def _connect(self):
         db = sqlite3.connect(self.path, timeout=5, isolation_level="IMMEDIATE")
@@ -167,7 +381,10 @@ class JobStore:
                         raise RetryLineageError("retry_root_not_eligible")
                 if original["id"] == request.get("id"):
                     raise RetryLineageError("retry_same_job")
-                prior = db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = ?", (retry_of, retry_number)).fetchone()
+                prior = db.execute(
+                    "SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = ?",
+                    (retry_of, retry_number),
+                ).fetchone()
                 if prior:
                     raise RetryLineageError("retry_number_exhausted")
             job = {
@@ -309,7 +526,7 @@ class JobStore:
                 return {"eligible": False, "reason": "retry1_not_invalid_dossier_schema"}
             if link["retry_number"] != 1 or link["reason"] != "retry_after_ephemeral_logging_fix":
                 return {"eligible": False, "reason": "retry1_lineage_invalid"}
-            if db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = 2", (link["original_job_id"],)).fetchone():
+            if db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = 2", (retry1_job_id,)).fetchone():
                 return {"eligible": False, "reason": "retry2_already_exists"}
             if accumulated_cost_usd + reserve_usd >= config.BATTERY_BUDGET_USD:
                 return {"eligible": False, "reason": "retry2_budget_guardrail"}
