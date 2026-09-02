@@ -15,6 +15,33 @@ phase8_execution (internal)
 
 O executor **não** acessa Docker Socket, PostgreSQL ou Payload.
 
+## Matriz de papéis (ADR-034)
+
+O runner é **governança**, nunca editor. Papéis imutáveis:
+
+| Papel | Componente | Responsabilidade |
+| --- | --- | --- |
+| `HERMES_ROLE=EDITOR_CHEFE` | perfil `crescimento-vertical-editorial` | decide pauta, estratégia de pesquisa, fontes, estrutura e conteúdo; produz o dossiê |
+| `RUNNER_ROLE=GOVERNANCA` | `cv-hermes-editorial-runner` | autentica, limita, contabiliza, valida e persiste |
+| `DEEPSEEK_ROLE=MODELO_DO_HERMES` | provider `deepseek` | inferência subordinada ao Hermes |
+| `TAVILY_ROLE=PESQUISA_DO_HERMES` | toolset `web` (Tavily) | busca/extração subordinadas ao Hermes |
+| `PAYLOAD_ROLE=CMS_E_REVISAO` | Payload/PostgreSQL | recebe somente conteúdo validado e aprovado |
+| `N8N_ROLE=ORQUESTRACAO_OPERACIONAL` | n8n (futuro) | orquestra sem decidir editorialmente |
+
+`PUBLICACAO_AUTOMATICA=false`; `RETRY3=PROIBIDO` (`MAX_RETRY_CHAIN=2`). O runner
+não produz pauta ou texto editorial e não chama DeepSeek/Tavily em substituição
+ao Hermes. O `provider_adapter.py` existe somente para a prova de contrato de
+capacidades do orquestrador, nunca para o caminho editorial.
+
+## Contrato de observabilidade
+
+O runner consome o contrato versionado
+`docs/schemas/hermes-observability.v1.schema.json` (ADR-034). O runner não exige
+campo que o Hermes não exporte sem o patch de instrumentação correspondente
+(`services/hermes-editorial-runner/hermes-instrumentation/`). Enquanto o patch
+não estiver aplicado à imagem, o runner permanece fail-closed quando a
+telemetria obrigatória (`finish_reason`, `tavily_operations`) estiver ausente.
+
 Na janela pré-run da Fase 8 o runner não participa de `n8n_default`. Somente o
 proxy participa também da rede de saída; isto é isolamento por rede+proxy, não
 firewall absoluto. O proxy CONNECT deny-by-default permite exclusivamente

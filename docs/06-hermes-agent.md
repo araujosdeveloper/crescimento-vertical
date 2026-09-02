@@ -2,9 +2,11 @@
 
 ## Papel
 
-O Hermes é o núcleo de inteligência editorial. Ele pesquisa, extrai, compara,
-classifica, deduplica e prepara o dossiê. Não é CMS, não é banco e não possui
-autoridade de publicação.
+O Hermes é o **editor-chefe** e motor editorial do blog. Ele decide pauta,
+estratégia de pesquisa, fontes, estrutura e conteúdo; pesquisa, extrai, compara,
+classifica, deduplica e produz o dossiê autoral. Não é CMS, não é banco e não
+possui autoridade de publicação: a publicação é decisão humana posterior
+(ADR-034).
 
 ~~~text
 Fontes → Hermes → dossiê assinado → n8n → draft no CMS

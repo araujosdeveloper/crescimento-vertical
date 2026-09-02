@@ -627,3 +627,15 @@ pois a recriação havia preservado o volume herdado apesar da entrada tmpfs. A
 remediação isolada passou a exigir container realmente novo e tmpfs de 16 MiB
 com `nosuid,nodev,noexec`, modo 0700 e UID/GID 10000. A dupla trava permaneceu
 fechada e a bateria não foi executada.
+
+## Registro da sessão 2026-09-02 — reconciliação da Fase 8 com a arquitetura original
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | `feat/phase-8-hermes-editorial-policy` (PR #14 draft preservado) |
+| Fase | 8 — reconciliação de papéis e observabilidade, sem bateria nem Fase 9 |
+| Objetivo | Reaproximar código/docs/ADR da arquitetura original: Hermes editor-chefe, runner governança, DeepSeek/Tavily subordinados |
+| Alterações | ADR-034 (matriz de papéis + contrato de observabilidade), `docs/schemas/hermes-observability.v1.schema.json`, instrumentação mínima do Hermes (`hermes-instrumentation/`), correções do runner (persistência de usage/evidência/contabilização em todos os estados terminais), SOUL/SKILL e docs/06/23/24/35/10/15/ROTEIRO-MESTRE |
+| Validações | testes offline do runner (finish_reason stop/length/content_filter/tool_calls/ausente, usage presente/ausente, Tavily search/extract, limite de pesquisa, schema válido/inválido, timeout, falha do provider, evidência, sem segredo, retry 3 bloqueado); lint/typecheck/build; Compose config; diff-check; Gitleaks |
+| Riscos | patch de instrumentação ainda não aplicado à imagem em execução; runner permanece fail-closed até a aplicação; nenhuma chamada externa realizada |
+| Próxima ação | Aguardar os quatro checks verdes; não fazer merge, deploy, bateria ou Fase 9 sem autorização humana |

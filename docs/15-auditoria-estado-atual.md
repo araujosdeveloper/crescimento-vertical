@@ -824,3 +824,33 @@ identificado que a recriação anterior preservara o volume anônimo herdado em
 realmente novo e tmpfs limitado a 16 MiB com `nosuid,nodev,noexec`; somente
 `/state` pode persistir. As travas permaneceram fechadas e não houve chamada
 DeepSeek, Tavily, pesquisa ou inferência.
+
+## Reconciliação de papéis da Fase 8 — 2 de setembro de 2026
+
+Auditoria read-only confirmou branch `feat/phase-8-hermes-editorial-policy` no
+HEAD `34ff3e2`, working tree limpa e PR #14 em draft, preservado sem merge. A
+auditoria localizou e corrigiu divergências entre o código e a arquitetura
+original do blog:
+
+- O Hermes estava descrito como "pesquisador editorial técnico" que "não toma
+  decisão editorial" (SOUL.md/SKILL.md/docs/06), divergindo do papel de
+  **editor-chefe** que decide pauta, estratégia de pesquisa, fontes, estrutura e
+  conteúdo. Reconciliação: SOUL/SKILL/docs/06 passaram a declarar o Hermes como
+  editor-chefe (ADR-034).
+- `services/hermes-editorial-runner/provider_adapter.py` monta payload DeepSeek
+  dentro do runner (risco de chamada direta em substituição ao Hermes). A
+  auditoria confirmou que ele é usado somente na prova de contrato de
+  capacidades do orquestrador e em testes, nunca no caminho editorial; o papel
+  foi declarado explicitamente.
+- O runner exigia `finish_reason` e `tavily_operations` no `--usage-file`, campos
+  que o Hermes 0.20.4 não exporta. Criados o contrato versionado
+  `hermes-observability.v1` e a instrumentação mínima versionada; o runner
+  permanece fail-closed enquanto o patch não for aplicado.
+- O runner não persistia usage/evidência/contabilização em todos os estados
+  terminais (falha genérica e timeout descartavam usage e não gravavam
+  evidência). Corrigido com contabilização em bloco seguro e evidência em todos
+  os estados terminais.
+
+Nenhum código removeu o Hermes do caminho editorial; DeepSeek e Tavily
+continuam subordinados ao Hermes; publicação automática permanece desabilitada;
+retry 3 permanece bloqueado; e as travas continuam fechadas.

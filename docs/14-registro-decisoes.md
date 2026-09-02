@@ -965,3 +965,71 @@ orçamento inferior a US$ 2 e ausência de retry anterior. Nenhum job/lineage de
 retry 2 é criado nesta etapa; retry 3 e ciclos são proibidos. A retenção de
 evidências permanece até o encerramento da Fase 8 e depois requer decisão
 operacional explícita. Custo histórico e telemetria Tavily são preservados.
+
+## ADR-034 — Hermes como editor-chefe permanente e matriz de papéis da operação editorial
+
+- Data: 2026-09-02
+- Status: aprovada (reconciliação da Fase 8)
+- Fase afetada: 8 (e contrato transversal às fases seguintes)
+
+### Contexto
+
+A reconciliação da Fase 8 reaproxima código, documentação e contratos da
+arquitetura original do blog: o Hermes é o **editor-chefe** e motor editorial;
+o runner é somente **governança**; DeepSeek e Tavily são recursos subordinados
+ao Hermes; Payload é CMS e ambiente de revisão; n8n é orquestração operacional
+futura, sem decisões editoriais.
+
+A auditoria read-only identificou dois riscos de inversão de papéis:
+
+1. `services/hermes-editorial-runner/provider_adapter.py` monta um payload
+   DeepSeek (`build_deepseek_payload`/`call_chat_completion`) dentro do runner,
+   o que poderia ser lido como chamada direta ao modelo em substituição ao
+   Hermes. No código vigente ele é usado somente na prova de contrato de
+   capacidades do orquestrador e em testes, nunca no caminho editorial.
+2. O runner exige `finish_reason` e `tavily_operations` no `--usage-file`, mas o
+   Hermes 0.20.4 não exporta esses campos (`_write_usage_file` grava um conjunto
+   fixo; o `finish_reason` real só existe embutido em `turn_exit_reason`, no
+   formato `text_response(finish_reason=...)`, e o plugin Tavily não contabiliza
+   operações). Sem o patch de instrumentação, a exigência é insatisfazível.
+
+### Decisão
+
+1. Matriz de papéis imutável:
+
+| Papel | Componente | Responsabilidade | Proibido |
+| --- | --- | --- | --- |
+| `HERMES_ROLE=EDITOR_CHEFE` | perfil `crescimento-vertical-editorial` | decidir pauta, estratégia de pesquisa, fontes, estrutura e conteúdo; produzir o dossiê | publicar; escrever no Payload; executar comandos |
+| `RUNNER_ROLE=GOVERNANCA` | `cv-hermes-editorial-runner` | autenticar (HMAC), limitar, contabilizar, validar e persistir | produzir pauta/texto editorial; chamar DeepSeek/Tavily em substituição ao Hermes |
+| `DEEPSEEK_ROLE=MODELO_DO_HERMES` | provider `deepseek` | inferência subordinada ao Hermes | ser chamado diretamente pelo runner como editor |
+| `TAVILY_ROLE=PESQUISA_DO_HERMES` | toolset `web` (plugin Tavily) | busca/extração subordinadas ao Hermes | ser chamado diretamente pelo runner como editor |
+| `PAYLOAD_ROLE=CMS_E_REVISAO` | Payload/PostgreSQL | receber somente conteúdo validado e posteriormente aprovado | receber saída não validada |
+| `N8N_ROLE=ORQUESTRACAO_OPERACIONAL` | n8n (futuro) | orquestrar com idempotência, sem decidir editorialmente | assumir decisões editoriais |
+
+2. `PUBLICACAO_AUTOMATICA=false` e aceite humano obrigatório (reforça ADR-005);
+   Hermes nunca publica.
+3. `RETRY3=PROIBIDO` permanente: `MAX_RETRY_CHAIN=2`, `retry_number IN (1,2)` e
+   `retry2_eligibility` exigem autorização humana; não há caminho para retry 3.
+4. `provider_adapter.py` é declarado exclusivo da prova de contrato de
+   capacidades, nunca do caminho editorial.
+5. Contrato versionado de observabilidade `hermes-observability.v1`
+   (`docs/schemas/hermes-observability.v1.schema.json`) define os campos que o
+   runner consome; o runner não pode exigir campo que o Hermes não exporta sem o
+   patch de instrumentação correspondente.
+6. Instrumentação mínima versionada do Hermes 0.20.4
+   (`services/hermes-editorial-runner/hermes-instrumentation/`) exporta
+   `finish_reason` e `tavily_operations` (search/extract) sem prompts,
+   respostas integrais, headers, cookies ou segredos.
+
+### Consequências
+
+- Positivas: papéis auditáveis e sem ambiguidade; observabilidade fail-closed
+  regida por contrato versionado; retry 3 permanentemente bloqueado.
+- Negativas e riscos: o patch de instrumentação ainda não está aplicado à imagem
+  em execução; até aplicá-lo, o runner permanece fail-closed quando a telemetria
+  obrigatória está ausente (comportamento atual preservado, sem nova bateria).
+
+### Reversão
+
+Reverter por commit (código e documentação) sem migração de dados; qualquer
+mudança futura de papel exige ADR próprio e aceite humano.

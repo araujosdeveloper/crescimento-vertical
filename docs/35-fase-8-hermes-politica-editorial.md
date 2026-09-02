@@ -302,3 +302,32 @@ orçamento abaixo de US$ 2 e travas fechadas podem torná-lo elegível. O custo
 conservador acumulado permanece US$ 0,054254576 (estimativa informativa
 US$ 0,0142314872); reserva zero. Retry 3, ciclos e chamadas externas são
 proibidos nesta etapa.
+
+## Reconciliação de papéis — editor-chefe permanente (2026-09-02)
+
+O ADR-034 consolida a arquitetura original do blog contra os riscos de inversão
+de papéis observados na auditoria: o Hermes é o **editor-chefe** e motor
+editorial; o runner é **governança**; DeepSeek e Tavily são subordinados ao
+Hermes; Payload é CMS/revisão; n8n é orquestração operacional futura.
+
+Matriz registrada formalmente:
+
+- `HERMES_ROLE=EDITOR_CHEFE` — decide pauta, estratégia de pesquisa, fontes,
+  estrutura e conteúdo; produz o dossiê.
+- `RUNNER_ROLE=GOVERNANCA` — autentica, limita, contabiliza, valida e persiste.
+- `DEEPSEEK_ROLE=MODELO_DO_HERMES` — inferência subordinada ao Hermes.
+- `TAVILY_ROLE=PESQUISA_DO_HERMES` — busca/extração subordinadas ao Hermes.
+- `PAYLOAD_ROLE=CMS_E_REVISAO` — recebe somente conteúdo validado e aprovado.
+- `N8N_ROLE=ORQUESTRACAO_OPERACIONAL` — orquestra sem decidir editorialmente.
+
+`PUBLICACAO_AUTOMATICA=false`; aceite humano obrigatório; `RETRY3=PROIBIDO`.
+
+A auditoria read-only detectou que o runner exigia `finish_reason` e
+`tavily_operations` no `--usage-file`, campos que o Hermes 0.20.4 não exporta. A
+reconciliação adiciona o contrato versionado
+`docs/schemas/hermes-observability.v1.schema.json` e a instrumentação mínima
+versionada em `services/hermes-editorial-runner/hermes-instrumentation/`, que
+exporta `finish_reason` (derivado de `turn_exit_reason`) e contadores
+`tavily_operations` (search/extract) sem prompts, respostas integrais, headers,
+cookies ou segredos. Enquanto o patch não estiver aplicado, o runner permanece
+fail-closed para telemetria obrigatória ausente.

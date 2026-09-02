@@ -447,6 +447,15 @@ e [ADR-020](docs/14-registro-decisoes.md). Nenhum runtime da VPS é alterado.
 - Hermes gera dossiês rastreáveis, sem publicar, rejeita conteúdo fora do nicho e
   interrompe o fluxo quando não há evidência suficiente.
 
+### Papéis imutáveis (ADR-034)
+
+O Hermes é o **editor-chefe** e motor editorial; o runner é **governança**
+(autentica, limita, contabiliza, valida e persiste); DeepSeek e Tavily são
+subordinados ao Hermes; Payload é CMS/revisão; n8n é orquestração operacional
+futura. Publicação automática permanece desabilitada e retry 3 é proibido. A
+observabilidade segue o contrato versionado
+`docs/schemas/hermes-observability.v1.schema.json`.
+
 ## Fase 9 — n8n, Telegram, aprovação e publicação
 
 ### Atividades
