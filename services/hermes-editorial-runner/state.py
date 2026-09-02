@@ -479,35 +479,68 @@ class JobStore:
     def record_research_usage(self, job_id: str, usage: dict) -> dict:
         """Persist exact Tavily operations; missing telemetry fails closed.
 
-        Aceita o contrato de observabilidade v1 (contadores ``{search, extract}``
-        como inteiros) e a forma legada (lista de operações com ``status``).
+        Consome o contrato v1 (``attempted``/``succeeded``/``failed``) e as
+        formas legadas (contador inteiro ou lista de ``{status}``). O limite de
+        busca usa ``attempted``. A invariante ``succeeded + failed == attempted``
+        é obrigatória e falha fechado quando violada.
         """
         operations = usage.get("tavily_operations")
         if not isinstance(operations, dict):
             raise RuntimeError("tavily_usage_unavailable")
-        rows = []
-        counts = {"search": 0, "extract": 0}
-        for operation, entries in operations.items():
-            if operation not in {"search", "extract", "crawl", "research"}:
+        normalized = {op: {"attempted": 0, "succeeded": 0, "failed": 0} for op in ("search", "extract")}
+        extra_rows = []  # operações legadas crawl/research (op, status)
+        for op, value in operations.items():
+            if op not in {"search", "extract", "crawl", "research"}:
                 raise RuntimeError("tavily_usage_invalid")
-            if isinstance(entries, int):
-                if entries < 0:
+            if isinstance(value, dict):
+                for key in ("attempted", "succeeded", "failed"):
+                    v = value.get(key, 0)
+                    if not isinstance(v, int) or v < 0:
+                        raise RuntimeError("tavily_usage_invalid")
+                if op in normalized:
+                    for key in ("attempted", "succeeded", "failed"):
+                        normalized[op][key] += value.get(key, 0)
+                else:
+                    extra_rows.extend([(op, "succeeded")] * value.get("succeeded", 0))
+                    extra_rows.extend([(op, "failed")] * value.get("failed", 0))
+            elif isinstance(value, int):
+                if value < 0:
                     raise RuntimeError("tavily_usage_invalid")
-                for ordinal in range(1, entries + 1):
-                    rows.append((job_id, operation, ordinal, "succeeded", time.time()))
-                if operation in counts:
-                    counts[operation] += entries
-            elif isinstance(entries, list):
-                for ordinal, entry in enumerate(entries, 1):
+                if op in normalized:
+                    normalized[op]["attempted"] += value
+                    normalized[op]["succeeded"] += value
+                else:
+                    extra_rows.extend([(op, "succeeded")] * value)
+            elif isinstance(value, list):
+                for entry in value:
                     if not isinstance(entry, dict) or entry.get("status") not in {"succeeded", "failed"}:
                         raise RuntimeError("tavily_usage_invalid")
-                    rows.append((job_id, operation, ordinal, entry["status"], time.time()))
-                if operation in counts:
-                    counts[operation] += len(entries)
+                    if op in normalized:
+                        normalized[op]["attempted"] += 1
+                        normalized[op][entry["status"]] += 1
+                    else:
+                        extra_rows.append((op, entry["status"]))
             else:
                 raise RuntimeError("tavily_usage_invalid")
-        if counts["search"] > config.MAX_SEARCHES_PER_JOB:
+        for op in ("search", "extract"):
+            n = normalized[op]
+            if n["succeeded"] + n["failed"] != n["attempted"]:
+                raise RuntimeError("tavily_usage_invalid")
+        if normalized["search"]["attempted"] > config.MAX_SEARCHES_PER_JOB:
             raise RuntimeError("tavily_search_limit_reached")
+        rows = []
+        for op in ("search", "extract"):
+            n = normalized[op]
+            ordinal = 1
+            for _ in range(n["succeeded"]):
+                rows.append((job_id, op, ordinal, "succeeded", time.time()))
+                ordinal += 1
+            for _ in range(n["failed"]):
+                rows.append((job_id, op, ordinal, "failed", time.time()))
+                ordinal += 1
+        for op, status in extra_rows:
+            ordinal = sum(1 for r in rows if r[1] == op) + 1
+            rows.append((job_id, op, ordinal, status, time.time()))
         with self._lock, self._connect() as db:
             db.execute("DELETE FROM research_operations WHERE job_id = ?", (job_id,))
             db.executemany(
@@ -516,9 +549,9 @@ class JobStore:
             )
             db.execute(
                 "UPDATE battery_usage SET search_calls=?, extract_calls=?, updated_at=? WHERE battery_id=?",
-                (counts["search"], counts["extract"], time.time(), config.BATTERY_ID),
+                (normalized["search"]["attempted"], normalized["extract"]["attempted"], time.time(), config.BATTERY_ID),
             )
-        return {"searchCalls": counts["search"], "extractCalls": counts["extract"]}
+        return {"searchCalls": normalized["search"]["attempted"], "extractCalls": normalized["extract"]["attempted"]}
 
     def record_failure_evidence(self, job_id: str, evidence: dict, metadata: dict) -> None:
         with self._lock, self._connect() as db:
