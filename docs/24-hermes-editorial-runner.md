@@ -218,8 +218,17 @@ O orquestrador não contém tag de imagem. Antes de criar o arquivo de
 habilitação, `scripts/phase8_orchestrator_image.py` lê o `docker compose config
 --format json`, seleciona exclusivamente o serviço
 `cv-hermes-editorial-runner` e exige referência fixa, imagem local, container
-ativo healthy e igualdade exata entre referência e Image ID do Compose,
-container e armazenamento local.
+ativo healthy.
+
+A validação distingue **referência textual** de **identidade real** da imagem.
+Aceita somente quando todas as condições valem: o serviço exato do runner é
+resolvido pelo Compose; a referência do Compose resolve localmente para um
+Image ID completo; o `Config.Image` do container ativo (tag, digest ou Image ID)
+resolve localmente para um Image ID completo; o `.Image` do inspect coincide
+com esse Image ID; e o Image ID do Compose, o Image ID de `Config.Image` e o
+`.Image` são exatamente iguais. Não há exigência de igualdade textual entre tag
+e RepoDigest quando a identidade comprovada é a mesma. Prefixo curto nunca é
+usado para decisão, apenas para exibição sanitizada.
 
 O helper obtém o RepoDigest correspondente ao Image ID e executa por ele um
 probe offline (`--network none`) dentro da imagem. O probe comprova SQLite v5,

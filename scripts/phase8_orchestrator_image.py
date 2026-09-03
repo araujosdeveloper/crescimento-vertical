@@ -92,12 +92,17 @@ def _container_state(runner=subprocess.run) -> dict:
         value = values[0]
     except (json.JSONDecodeError, IndexError, KeyError, TypeError) as exc:
         raise ResolutionError("runner_container_inspect_invalid") from exc
-    health = value.get("State", {}).get("Health", {}).get("Status")
+    reference = value.get("Config", {}).get("Image")
+    image_id = value.get("Image")
+    if not isinstance(reference, str) or not reference.strip():
+        raise ResolutionError("runner_container_image_reference_missing")
+    if not isinstance(image_id, str) or not ID_RE.fullmatch(image_id):
+        raise ResolutionError("runner_container_image_id_invalid")
     return {
-        "reference": value.get("Config", {}).get("Image"),
-        "image_id": value.get("Image"),
+        "reference": reference.strip(),
+        "image_id": image_id,
         "running": value.get("State", {}).get("Running"),
-        "health": health,
+        "health": value.get("State", {}).get("Health", {}).get("Status"),
     }
 
 
@@ -124,22 +129,35 @@ def _probe_contract(pinned_reference: str, runner=subprocess.run) -> None:
 def resolve(compose_command: list[str], output: Path, runner=subprocess.run) -> tuple[str, str, str]:
     raw = _run(compose_command + ["config", "--format", "json"], runner)
     reference = parse_compose_image(raw)
-    image_id = _image_id(reference, runner)
-    pinned = _repo_digest(reference, image_id, runner)
+    compose_image_id = _image_id(reference, runner)
     state = _container_state(runner)
-    if state != {"reference": reference, "image_id": image_id, "running": True, "health": "healthy"}:
+    container_image_id = _image_id(state["reference"], runner)
+    if (
+        compose_image_id != container_image_id
+        or compose_image_id != state["image_id"]
+        or container_image_id != state["image_id"]
+        or not state["running"]
+        or state["health"] != "healthy"
+    ):
         raise ResolutionError("compose_container_image_mismatch")
+    pinned = _repo_digest(reference, compose_image_id, runner)
     _probe_contract(pinned, runner)
-    output.write_text(reference + "\n" + image_id + "\n" + pinned + "\n", encoding="utf-8")
+    output.write_text(reference + "\n" + compose_image_id + "\n" + pinned + "\n", encoding="utf-8")
     os.chmod(output, 0o600)
-    return reference, image_id, pinned
+    return reference, compose_image_id, pinned
 
 
 def recheck(reference: str, image_id: str, runner=subprocess.run) -> None:
     if _image_id(reference, runner) != image_id:
         raise ResolutionError("image_id_changed")
     state = _container_state(runner)
-    if state["image_id"] != image_id or not state["running"] or state["health"] != "healthy":
+    container_image_id = _image_id(state["reference"], runner)
+    if (
+        container_image_id != image_id
+        or state["image_id"] != image_id
+        or not state["running"]
+        or state["health"] != "healthy"
+    ):
         raise ResolutionError("runner_state_changed")
 
 

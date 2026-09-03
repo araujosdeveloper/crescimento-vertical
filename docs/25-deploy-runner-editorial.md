@@ -69,9 +69,13 @@ real em falha fechada; não criar placeholder no runtime.
 
 `scripts/phase8-controlled-battery.sh` deriva a imagem somente da configuração
 normalizada do serviço runner no Compose efetivo. Antes de abrir as travas, ele
-exige que a mesma referência e o mesmo Image ID estejam no container healthy e
-na imagem local, e valida as capacidades v5 dentro da imagem sem rede. O
-RepoDigest resultante fica fixo durante toda a janela.
+resolve a referência do Compose e o `Config.Image` do container ativo para seus
+Image IDs locais completos e exige que o Image ID do Compose, o Image ID de
+`Config.Image` e o `.Image` do inspect coincidam, com o container healthy, e
+valida as capacidades v5 dentro da imagem sem rede. Referências textuais
+diferentes (tag ↔ RepoDigest ↔ Image ID) são aceitas quando resolvem para o
+mesmo Image ID imutável. O RepoDigest resultante fica fixo durante toda a
+janela.
 
 Uma bateria nunca executa `build` ou `pull`, não usa `latest`, fallback ou
 seleção por substring e não escolhe o primeiro serviço de uma lista. A
