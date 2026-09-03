@@ -9,8 +9,10 @@ do gate foi comprovada na imagem imutável
 O black-box versionado e embutido executou o Hermes 0.20.4 instalado e patchado,
 com `--network none`, credenciais fictícias e 36 cenários aprovados, incluindo
 `tool_calls → Tavily`, falhas HTTP/transporte/timeout, limites e sanitização.
-O Compose resolve essa tag sem `latest`; nenhum `compose up` ou deploy foi
-executado e o runtime ativo permanece deliberadamente na imagem anterior.
+O Compose resolve essa tag sem `latest`. O deploy fechado foi executado por seu
+RepoDigest local, exclusivamente no runner, que ficou healthy como container
+`bc89e74680e9…`; o proxy preservou o ID `cd0d152c05ee…`. As travas e o state
+permaneceram fechados e íntegros, sem chamada editorial ou job.
 
 ## Papel
 

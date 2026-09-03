@@ -5,13 +5,24 @@
 A Fase 8 permanece em execução e aguarda aceite humano. A candidata corrigida
 `cv-hermes-editorial-runner:phase8-instrumentation-e154bf4` (Image ID
 `sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`)
-foi construída sem pull e está pinada no Compose. O black-box embutido coincide
-com o Git e aprovou 36 cenários executando o Hermes instalado e patchado com
-`--network none` e credenciais fictícias.
+foi construída sem pull, está pinada no Compose e foi implantada de forma
+fechada exclusivamente no runner pelo RepoDigest local. O black-box embutido
+coincide com o Git e aprovou 36 cenários executando o Hermes instalado e
+patchado com `--network none` e credenciais fictícias.
 
 As seções históricas que registram as candidatas anteriores continuam
-**SUPERADAS — NÃO VÁLIDAS PARA ACEITE**. Nenhum deploy, `compose up`, job,
-retry 3, consumo externo, publicação ou Fase 9 foi autorizado ou executado.
+**SUPERADAS — NÃO VÁLIDAS PARA ACEITE**. O deploy fechado não abriu execução:
+nenhum job, retry 3, consumo externo, publicação ou Fase 9 foi autorizado ou
+executado. A Fase 8 continua aberta para validação controlada e aceite humano.
+
+### Deploy fechado da candidata corrigida — 3 de setembro de 2026
+
+Backup consistente validado:
+`phase8-instrumentation-predeploy-8c881ea-20260903T162645Z`. O runner anterior
+`bc7bcc220763…` usava `sha256:9fcd05ff…`; o final `bc89e74680e9…` usa
+`sha256:cad0e4f…` e ficou healthy. O proxy manteve `cd0d152c05ee…` e healthy.
+SQLite permaneceu v5 íntegro, com três jobs, duas linhagens, zero retry 3 e
+reserva zero. Baselines do proxy, usage e custos não mudaram.
 
 O Hermes continua sendo o editor-chefe e motor central do blog. DeepSeek e
 Tavily são subordinados; o runner é governança; o n8n será a única ponte para o

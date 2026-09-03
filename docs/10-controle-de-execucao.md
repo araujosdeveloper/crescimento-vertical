@@ -8,13 +8,23 @@
 | Fase ativa | Fase 8 — em execução; não encerrada |
 | PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
 | Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-e154bf4`, Image ID `sha256:cad0e4f…`, black-box real com 36 cenários aprovados em `network none` |
-| Runtime ativo | Preservado; não alinhado por design porque deploy continua proibido |
-| Restrições | Sem deploy, chamada externa, job, retry 3, publicação, dados ou Fase 9 |
+| Runtime ativo | Deploy fechado aprovado: runner `bc89e74680e9…` healthy na imagem/digest `sha256:cad0e4f…`; proxy `cd0d152c05ee…` preservado |
+| Restrições | Sem chamada externa, job, retry 3, publicação, alteração de dados ou Fase 9 |
 
-Próxima ação única: submeter o resultado corrigido ao aceite humano da Fase 8;
-qualquer implantação exige autorização futura separada. O Hermes permanece
+Próxima ação única: solicitar autorização humana para a validação controlada
+final da Fase 8. O Hermes permanece
 editor-chefe; runner é governança; DeepSeek/Tavily são subordinados; n8n é a
 única ponte autorizada para o Payload.
+
+### Deploy fechado da instrumentação — 3 de setembro de 2026
+
+O runner foi recriado sozinho, com `--no-deps --no-build --pull never`, pelo
+RepoDigest local `cv-hermes-editorial-runner@sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`.
+O backup consistente e validado está em
+`/opt/backups/crescimento-vertical/phase8-instrumentation-predeploy-8c881ea-20260903T162645Z`.
+O state preservou SQLite v5, `jobs=3`, `lineage=2`, `retry3=0` e reserva zero.
+As duas travas permaneceram fechadas; não houve API editorial, pesquisa,
+inferência, token/custo adicional, job, publicação ou Fase 9.
 
 Os registros abaixo são históricos e devem ser lidos segundo a data de cada
 sessão; não substituem este quadro vigente.

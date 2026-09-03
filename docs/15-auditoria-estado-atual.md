@@ -7,7 +7,8 @@ Correção técnica iniciada no snapshot Git
 `feat/phase-8-hermes-editorial-policy`, com PR #14 aberto/draft. A única
 modificação local preexistente foi auditada, preservada e adotada por pertencer
 exclusivamente à instrumentação autorizada; sua autoria técnica inicial é
-indeterminada. O runtime e os dados persistentes não foram alterados.
+indeterminada. O deploy fechado posterior recriou exclusivamente o runner na
+imagem aprovada; o proxy e os dados persistentes foram preservados.
 
 | Fases | Estado oficial |
 | --- | --- |
@@ -25,7 +26,14 @@ indeterminada. O runtime e os dados persistentes não foram alterados.
 - 36 cenários passaram com `--network none`, inclusive `tool_calls → Tavily`;
 - manifesto, hashes, limites, respostas inválidas, falhas e sanitização foram
   verificados;
-- não houve deploy, merge, job, retry 3 nem consumo editorial externo.
+- na prova offline anterior não houve deploy, merge, job, retry 3 nem consumo
+  editorial externo.
+
+Após essa prova, o deploy fechado autorizado implantou somente o runner por
+RepoDigest. O container mudou de `bc7bcc220763…` para `bc89e74680e9…`; o proxy
+permaneceu `cd0d152c05ee…`. As travas continuaram fechadas e SQLite permaneceu
+v5 íntegro, `jobs=3`, `lineage=2`, `retry3=0`, sem custo adicional. Não houve
+merge nem início da Fase 9.
 
 O histórico cronológico abaixo é preservado como evidência datada e não
 substitui este estado vigente.
