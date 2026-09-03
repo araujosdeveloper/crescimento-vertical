@@ -2,12 +2,15 @@
 
 ## Estado vigente do gate
 
-O runner é a camada de **governança** do Hermes editor-chefe. O gate da imagem
-instrumentada auditada está inválido: runtime/imagem não estavam alinhados, o
-black-box embutido divergia do Git, tinha menos casos e falhou em
-`tool_calls → Tavily` com `search.attempted=0`. Relatos anteriores de sucesso
-dessa candidata estão **SUPERADOS — NÃO VÁLIDOS PARA ACEITE**. Nenhuma correção
-funcional é declarada neste documento; ela exige execução técnica separada.
+O runner é a camada de **governança** do Hermes editor-chefe. A correção offline
+do gate foi comprovada na imagem imutável
+`cv-hermes-editorial-runner:phase8-instrumentation-e154bf4` (Image ID
+`sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`).
+O black-box versionado e embutido executou o Hermes 0.20.4 instalado e patchado,
+com `--network none`, credenciais fictícias e 36 cenários aprovados, incluindo
+`tool_calls → Tavily`, falhas HTTP/transporte/timeout, limites e sanitização.
+O Compose resolve essa tag sem `latest`; nenhum `compose up` ou deploy foi
+executado e o runtime ativo permanece deliberadamente na imagem anterior.
 
 ## Papel
 

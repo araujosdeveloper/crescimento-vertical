@@ -4,15 +4,15 @@
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD inicial | `feat/phase-8-hermes-editorial-policy` / `207392b2e3dd574e26992e17efcad428f2f356ee` |
-| Fase ativa | Fase 8 — em execução e divergente |
-| PR | #14 aberto e draft; quatro checks do HEAD inicial aprovados |
-| Gate atual | **INVÁLIDO** — imagem/runtime sem alinhamento comprovado; black-box embutido diferente do Git, com menos casos e falha em `tool_calls → Tavily` (`search.attempted=0`) |
-| Relatórios anteriores | **SUPERADOS — NÃO VÁLIDOS PARA ACEITE** da candidata auditada |
-| Restrições | Sem correção funcional, deploy, chamada externa, job, retry 3, publicação, dados ou Fase 9 nesta consolidação |
+| Branch/HEAD inicial | `feat/phase-8-hermes-editorial-policy` / `7ca990f62a0e848086dff524fec7f0e21c362065` |
+| Fase ativa | Fase 8 — em execução; não encerrada |
+| PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
+| Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-e154bf4`, Image ID `sha256:cad0e4f…`, black-box real com 36 cenários aprovados em `network none` |
+| Runtime ativo | Preservado; não alinhado por design porque deploy continua proibido |
+| Restrições | Sem deploy, chamada externa, job, retry 3, publicação, dados ou Fase 9 |
 
-Próxima ação única: abrir execução técnica separada para corrigir e comprovar o
-black-box da instrumentação, mantendo as travas fechadas. O Hermes permanece
+Próxima ação única: submeter o resultado corrigido ao aceite humano da Fase 8;
+qualquer implantação exige autorização futura separada. O Hermes permanece
 editor-chefe; runner é governança; DeepSeek/Tavily são subordinados; n8n é a
 única ponte autorizada para o Payload.
 

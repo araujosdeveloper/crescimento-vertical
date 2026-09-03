@@ -51,7 +51,7 @@ services:
     build:
       context: .
       dockerfile: services/hermes-editorial-runner/Dockerfile
-    image: cv-hermes-editorial-runner:phase8-instrumentation-f37f99c
+    image: cv-hermes-editorial-runner:phase8-instrumentation-e154bf4
     container_name: cv-hermes-editorial-runner
     restart: unless-stopped
     init: true

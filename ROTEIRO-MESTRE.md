@@ -37,12 +37,12 @@ registrada.
 
 ## Situação vigente — 3 de setembro de 2026
 
-A única fase ativa é a Fase 8. Seu gate final está inválido: a imagem candidata
-e o runtime ativo não estavam comprovadamente alinhados; o black-box embutido
-divergia do Git, possuía menos casos e falhou no caminho `tool_calls → Tavily`,
-com `search.attempted=0`. As declarações anteriores de fechamento desse gate
-são históricas e foram superadas; não houve correção funcional nesta
-consolidação.
+A única fase ativa é a Fase 8. O gate offline da imagem instrumentada foi
+corrigido e comprovado na referência imutável
+`phase8-instrumentation-e154bf4`: o black-box embutido executou o Hermes 0.20.4
+instalado e patchado, sem rede externa, e aprovou 36 cenários. O runtime ativo
+foi preservado e não houve deploy. A Fase 8 continua aberta para aceite humano;
+as declarações da candidata anterior permanecem históricas e superadas.
 
 O Hermes permanece editor-chefe e motor central do blog; DeepSeek e Tavily são
 subordinados, o runner exerce governança e o n8n permanece a única ponte futura

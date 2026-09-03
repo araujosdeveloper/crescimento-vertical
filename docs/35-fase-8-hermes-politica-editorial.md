@@ -1,18 +1,17 @@
 # Fase 8 — Hermes Agent e política editorial automatizada
 
-## Estado vigente — gate final inválido
+## Estado vigente — gate offline corrigido
 
-A Fase 8 permanece em execução e divergente. A auditoria posterior invalidou o
-fechamento da candidata: runtime ativo e imagem candidata não estavam
-comprovadamente alinhados; o black-box embutido divergia do Git, continha menos
-casos e falhou dentro da imagem no fluxo `tool_calls → Tavily`, mantendo
-`search.attempted=0`.
+A Fase 8 permanece em execução e aguarda aceite humano. A candidata corrigida
+`cv-hermes-editorial-runner:phase8-instrumentation-e154bf4` (Image ID
+`sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`)
+foi construída sem pull e está pinada no Compose. O black-box embutido coincide
+com o Git e aprovou 36 cenários executando o Hermes instalado e patchado com
+`--network none` e credenciais fictícias.
 
-As seções históricas que registram aplicação determinística e aprovação de 14
-ou 20 testes na candidata são **SUPERADAS — NÃO VÁLIDAS PARA ACEITE**. Elas são
-preservadas para rastreabilidade e não comprovam o gate atual. Esta consolidação
-não corrige a causa, não reconstrói imagem, não altera runtime e não autoriza
-job, retry 3, consumo externo, publicação ou Fase 9.
+As seções históricas que registram as candidatas anteriores continuam
+**SUPERADAS — NÃO VÁLIDAS PARA ACEITE**. Nenhum deploy, `compose up`, job,
+retry 3, consumo externo, publicação ou Fase 9 foi autorizado ou executado.
 
 O Hermes continua sendo o editor-chefe e motor central do blog. DeepSeek e
 Tavily são subordinados; o runner é governança; o n8n será a única ponte para o

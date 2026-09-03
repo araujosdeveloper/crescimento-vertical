@@ -2,35 +2,33 @@
 
 ## Fotografia vigente — 3 de setembro de 2026
 
-Auditoria documental sobre o snapshot Git
-`207392b2e3dd574e26992e17efcad428f2f356ee`, na branch
-`feat/phase-8-hermes-editorial-policy`, com árvore inicialmente limpa e PR #14
-aberto/draft. Os quatro checks desse HEAD estavam aprovados. Nenhum banco,
-segredo, PII, container, rede, volume ou serviço foi consultado ou alterado
-nesta consolidação.
+Correção técnica iniciada no snapshot Git
+`7ca990f62a0e848086dff524fec7f0e21c362065`, na branch
+`feat/phase-8-hermes-editorial-policy`, com PR #14 aberto/draft. A única
+modificação local preexistente foi auditada, preservada e adotada por pertencer
+exclusivamente à instrumentação autorizada; sua autoria técnica inicial é
+indeterminada. O runtime e os dados persistentes não foram alterados.
 
 | Fases | Estado oficial |
 | --- | --- |
 | 0–3 | Concluídas |
 | 4 | Concluída com ressalva de copy comercial |
 | 5–7 | Concluídas e aceitas |
-| 8 | Em execução e divergente; gate final inválido |
+| 8 | Em execução; gate offline corrigido, aceite humano pendente |
 | 9–12 | Pendentes |
 
-### Divergência factual aberta da Fase 8
+### Correção comprovada do gate offline da Fase 8
 
-- runtime ativo e imagem candidata não estavam comprovadamente alinhados;
-- black-box embutido na candidata divergia do arquivo versionado;
-- a execução real dentro da imagem falhou em `tool_calls → Tavily`, com
-  `search.attempted=0`;
-- a imagem continha menos casos de teste que o Git;
-- os relatórios anteriores de fechamento dos gates dessa candidata estão
-  **SUPERADOS — NÃO VÁLIDOS PARA ACEITE**;
-- a auditoria que constatou a divergência não realizou deploy, merge, job,
-  retry 3 nem consumo editorial externo.
+- a candidata corrigida é `phase8-instrumentation-e154bf4`, Image ID
+  `sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`;
+- o teste embutido coincide com o Git e executa o caminho real do Hermes;
+- 36 cenários passaram com `--network none`, inclusive `tool_calls → Tavily`;
+- manifesto, hashes, limites, respostas inválidas, falhas e sanitização foram
+  verificados;
+- não houve deploy, merge, job, retry 3 nem consumo editorial externo.
 
-Esta fotografia não afirma causa corrigida. O histórico cronológico abaixo é
-preservado como evidência datada e não substitui este estado vigente.
+O histórico cronológico abaixo é preservado como evidência datada e não
+substitui este estado vigente.
 
 ## Candidato da Fase 6 em staging — 29 de agosto de 2026
 
