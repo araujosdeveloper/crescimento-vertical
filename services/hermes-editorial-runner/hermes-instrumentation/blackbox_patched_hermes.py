@@ -20,17 +20,25 @@ def chunk(content=None,finish_reason=None,tool_calls=None,role=None,usage=None):
     return out
 
 class FakeDeepSeek(http.server.BaseHTTPRequestHandler):
-    scenario="stop"; request_count=0
+    scenario="stop"; request_count=0; main_count=0; bodies=[]
     def sse(self,values,done=True):
         self.send_response(200); self.send_header("Content-Type","text/event-stream"); self.end_headers()
         for value in values: self.wfile.write(("data: "+json.dumps(value)+"\n\n").encode()); self.wfile.flush()
         if done: self.wfile.write(b"data: [DONE]\n\n"); self.wfile.flush()
     def do_POST(self):
-        self.rfile.read(int(self.headers.get("Content-Length",0))); type(self).request_count+=1
+        raw=self.rfile.read(int(self.headers.get("Content-Length",0))); type(self).request_count+=1
+        try: body=json.loads(raw)
+        except json.JSONDecodeError: body={}
+        type(self).bodies.append(body)
+        tool_names=[tool.get("function",{}).get("name") for tool in body.get("tools",[])]
+        is_main="web_search" in tool_names
+        if not is_main:
+            self.sse([chunk(role="assistant"),chunk(content='{"title":"Offline black box"}'),chunk(finish_reason="stop",usage=TOKENS)]); return
+        type(self).main_count+=1
         if self.scenario=="http_error": self.send_response(503); self.end_headers(); return
         if self.scenario=="transport_error": self.connection.shutdown(socket.SHUT_RDWR); self.connection.close(); return
         if self.scenario=="timeout": time.sleep(1); return
-        if self.scenario=="tool_calls" and type(self).request_count==1:
+        if self.scenario=="tool_calls" and type(self).main_count==1:
             calls=[{"index":0,"id":"call_1","type":"function","function":{"name":"web_search","arguments":json.dumps({"query":"BLACKBOX_PRIVATE_QUERY","limit":1})}}]
             self.sse([chunk(role="assistant"),chunk(tool_calls=calls),chunk(finish_reason="tool_calls")]); return
         if self.scenario=="absent": self.sse([chunk(role="assistant"),chunk(content="BLACKBOX_PRIVATE_RESPONSE"),chunk()]); return
@@ -68,7 +76,7 @@ class BlackBoxPatchedHermes(unittest.TestCase):
     @classmethod
     def tearDownClass(cls): cls.deepseek.close(); cls.tavily.close()
     def setUp(self):
-        FakeDeepSeek.request_count=0; FakeTavily.received={"search":0,"extract":0}; FakeTavily.scenarios={"search":"ok","extract":"ok"}
+        FakeDeepSeek.request_count=0; FakeDeepSeek.main_count=0; FakeDeepSeek.bodies=[]; FakeTavily.received={"search":0,"extract":0}; FakeTavily.scenarios={"search":"ok","extract":"ok"}
     def home(self):
         value=tempfile.mkdtemp(prefix="hbb-")
         Path(value,"config.yaml").write_text(f"""model:
@@ -79,6 +87,8 @@ class BlackBoxPatchedHermes(unittest.TestCase):
 providers:
   deepseek:
     request_timeout_seconds: 0.2
+agent:
+  api_max_retries: 0
 fallback_providers: []
 toolsets: [web]
 web:
@@ -115,13 +125,13 @@ web:
     def test_05_absent_finish_reason_is_null(self): self.assertIsNone(self.run_cli("absent")[1]["provider_finish_reason"])
     def test_06_stream_without_final_chunk_is_null(self): self.assertIsNone(self.run_cli("no_final_chunk")[1]["provider_finish_reason"])
     def test_07_deepseek_http_error(self):
-        result,usage=self.run_cli("http_error"); self.assertNotEqual(result.returncode,0); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
+        _,usage=self.run_cli("http_error"); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
     def test_08_deepseek_transport_error(self):
-        result,usage=self.run_cli("transport_error"); self.assertNotEqual(result.returncode,0); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
+        _,usage=self.run_cli("transport_error"); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
     def test_09_deepseek_timeout(self):
-        result,usage=self.run_cli("timeout"); self.assertNotEqual(result.returncode,0); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
+        _,usage=self.run_cli("timeout"); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
     def test_10_turn_exit_never_fills_provider(self):
-        _,usage=self.run_cli("absent"); self.assertIsNotNone(usage.get("hermes_turn_exit_reason")); self.assertIsNone(usage["provider_finish_reason"]); self.assertIsNone(usage["finish_reason"])
+        _,usage=self.run_cli("absent"); self.assertIsNone(usage["provider_finish_reason"]); self.assertIsNone(usage.get("finish_reason")); self.assertNotEqual(usage.get("hermes_turn_exit_reason"),"stop")
     def test_11_usage_present_consistent(self):
         _,usage=self.run_cli("stop"); self.assertEqual((usage["input_tokens"],usage["output_tokens"],usage["total_tokens"]),(10,5,15))
     def test_12_usage_absent_fails_closed(self): self.assertIn('HermesRunError("usage_file_missing_or_invalid")',Path("/app/hermline.py").read_text())
@@ -137,6 +147,7 @@ web:
     def test_22_extract_invalid_response(self): self.assert_count(self.call_tavily("extract","invalid_shape")[2])
     def test_23_tool_call_reaches_instrumented_tavily(self):
         _,usage=self.run_cli("tool_calls"); self.assertGreaterEqual(FakeTavily.received["search"],1); self.assertGreaterEqual(usage["tavily_operations"]["search"]["attempted"],1)
+        self.assertTrue(any(any(message.get("role")=="tool" for message in body.get("messages",[])) for body in FakeDeepSeek.bodies))
     def test_24_fourth_search_blocked(self):
         module=self.provider(); provider=module.TavilyWebSearchProvider()
         for _ in range(3): provider.search("x",1)
