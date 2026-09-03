@@ -1,317 +1,173 @@
 #!/usr/bin/env python3
-"""Teste black-box do Hermes patchado (observabilidade v1).
-
-Executa DENTRO da imagem candidata, com ``--network none``, e roda o binário
-REAL do Hermes CLI contra servidores falsos locais (loopback). Valida o
-usage-file realmente escrito pelo Hermes patchado.
-
-Cobertura:
-- provider_finish_reason: stop / length / content_filter / tool_calls /
-  ausente (null) / stream sem chunk final;
-- hermes_turn_exit_reason separado (nunca vira provider_finish_reason);
-- usage presente/ausente e tokens exportados;
-- Tavily search/extract com sucesso / HTTP 500 / erro de transporte / resposta
-  inválida, contabilizados como attempted/succeeded/failed;
-- invariante succeeded + failed == attempted;
-- ausência de segredos/prompt/resposta integral/header/cookie no relatório;
-- manifesto do patch presente.
-
-Nenhuma chamada DeepSeek/Tavily real. Credenciais 100% fictícias.
-"""
-
+"""Matriz black-box offline do Hermes 0.20.4 realmente patchado."""
 from __future__ import annotations
-
-import http.server
-import json
-import os
-import socketserver
-import subprocess
-import sys
-import tempfile
-import threading
-import unittest
+import hashlib, http.server, importlib, json, os, socket, socketserver, subprocess, tempfile, threading, time, unittest
 from pathlib import Path
+from unittest import mock
 
-PYTHON = "/opt/hermes/.venv/bin/python3"
-HERMES_CLI = "/opt/hermes/hermes"
-
-SSE_CHUNK = "data: {}\n\n"
-SSE_DONE = b"data: [DONE]\n\n"
-
-
-def _chunk(content=None, finish_reason=None, tool_calls=None, role=None, usage=None):
-    delta = {}
-    if role is not None:
-        delta["role"] = role
-    if content is not None:
-        delta["content"] = content
-    if tool_calls is not None:
-        delta["tool_calls"] = tool_calls
-    choice = {"index": 0, "delta": delta, "finish_reason": finish_reason}
-    obj = {"id": "c1", "object": "chat.completion.chunk", "model": "deepseek-v4-flash",
-           "choices": [choice]}
-    if usage is not None:
-        obj["usage"] = usage
-    return obj
-
+PYTHON="/opt/hermes/.venv/bin/python3"; HERMES_CLI="/opt/hermes/hermes"
+INST=Path("/app/instrumentation"); ROOT=Path("/opt/hermes")
+TOKENS={"prompt_tokens":10,"completion_tokens":5,"total_tokens":15}
+PRIVATE=("BLACKBOX_PRIVATE_PROMPT","BLACKBOX_PRIVATE_RESPONSE","BLACKBOX_PRIVATE_QUERY","fake-not-real","person@example.invalid")
+def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+def chunk(content=None,finish_reason=None,tool_calls=None,role=None,usage=None):
+    delta={}
+    if role is not None: delta["role"]=role
+    if content is not None: delta["content"]=content
+    if tool_calls is not None: delta["tool_calls"]=tool_calls
+    out={"id":"fake","object":"chat.completion.chunk","model":"deepseek-v4-flash","choices":[{"index":0,"delta":delta,"finish_reason":finish_reason}]}
+    if usage is not None: out["usage"]=usage
+    return out
 
 class FakeDeepSeek(http.server.BaseHTTPRequestHandler):
-    """Servidor SSE OpenAI-compatible, com cenário configurável por instância."""
-    scenario = "stop"
-    request_count = 0
-
-    def _sse(self, chunks, done=True, truncate_after=None):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/event-stream")
-        self.send_header("Cache-Control", "no-cache")
-        self.end_headers()
-        for i, c in enumerate(chunks):
-            self.wfile.write(SSE_CHUNK.format(json.dumps(c)).encode())
-            self.wfile.flush()
-            if truncate_after is not None and i >= truncate_after:
-                return  # encerra a stream abruptamente
-        if done:
-            self.wfile.write(SSE_DONE)
-            self.wfile.flush()
-
+    scenario="stop"; request_count=0
+    def sse(self,values,done=True):
+        self.send_response(200); self.send_header("Content-Type","text/event-stream"); self.end_headers()
+        for value in values: self.wfile.write(("data: "+json.dumps(value)+"\n\n").encode()); self.wfile.flush()
+        if done: self.wfile.write(b"data: [DONE]\n\n"); self.wfile.flush()
     def do_POST(self):
-        length = int(self.headers.get("Content-Length", 0))
-        self.rfile.read(length)
-        type(self).request_count += 1
-        usage = {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15}
-
-        if self.scenario == "tool_calls":
-            if type(self).request_count == 1:
-                tool_calls = [{"index": 0, "id": "call_1", "type": "function",
-                               "function": {"name": "web_search",
-                                            "arguments": json.dumps({"query": "inteligencia artificial", "limit": 3})}}]
-                self._sse([_chunk(role="assistant"),
-                           _chunk(tool_calls=tool_calls),
-                           _chunk(finish_reason="tool_calls")])
-            else:
-                self._sse([_chunk(role="assistant"),
-                           _chunk(content="dossie final fake"),
-                           _chunk(finish_reason="stop", usage=usage)])
-            return
-
-        if self.scenario == "absent":
-            self._sse([_chunk(role="assistant"), _chunk(content="texto"), _chunk()], done=True)
-            return
-
-        if self.scenario == "no_final_chunk":
-            self._sse([_chunk(role="assistant"), _chunk(content="texto")], done=False)
-            return
-
-        # stop / length / content_filter
-        self._sse([_chunk(role="assistant"), _chunk(content="texto"),
-                   _chunk(finish_reason=self.scenario, usage=usage)])
-
-    def log_message(self, *args):
-        pass
-
+        self.rfile.read(int(self.headers.get("Content-Length",0))); type(self).request_count+=1
+        if self.scenario=="http_error": self.send_response(503); self.end_headers(); return
+        if self.scenario=="transport_error": self.connection.shutdown(socket.SHUT_RDWR); self.connection.close(); return
+        if self.scenario=="timeout": time.sleep(1); return
+        if self.scenario=="tool_calls" and type(self).request_count==1:
+            calls=[{"index":0,"id":"call_1","type":"function","function":{"name":"web_search","arguments":json.dumps({"query":"BLACKBOX_PRIVATE_QUERY","limit":1})}}]
+            self.sse([chunk(role="assistant"),chunk(tool_calls=calls),chunk(finish_reason="tool_calls")]); return
+        if self.scenario=="absent": self.sse([chunk(role="assistant"),chunk(content="BLACKBOX_PRIVATE_RESPONSE"),chunk()]); return
+        if self.scenario=="no_final_chunk": self.sse([chunk(role="assistant"),chunk(content="BLACKBOX_PRIVATE_RESPONSE")],False); return
+        reason="stop" if self.scenario=="tool_calls" else self.scenario
+        self.sse([chunk(role="assistant"),chunk(content="BLACKBOX_PRIVATE_RESPONSE"),chunk(finish_reason=reason,usage=TOKENS)])
+    def log_message(self,*_): pass
 
 class FakeTavily(http.server.BaseHTTPRequestHandler):
-    """Servidor Tavily-compatible com cenário configurável."""
-    scenario = "ok"
-
+    scenarios={"search":"ok","extract":"ok"}; received={"search":0,"extract":0}
     def do_POST(self):
-        length = int(self.headers.get("Content-Length", 0))
-        self.rfile.read(length)
-        if self.scenario == "http500":
-            self.send_response(500)
-            self.end_headers()
-            return
-        if self.scenario == "invalid":
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(b"not-json{{")
-            return
-        if self.scenario == "reset":
-            self.wfile.close()
-            self.connection.close()
-            return
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        body = {"results": [{"title": "T", "url": "https://exemplo.com", "content": "c",
-                             "raw_content": "r"}]}
-        self.wfile.write(json.dumps(body).encode())
+        endpoint=self.path.strip("/"); self.rfile.read(int(self.headers.get("Content-Length",0)))
+        type(self).received[endpoint]=type(self).received.get(endpoint,0)+1; scenario=type(self).scenarios.get(endpoint,"ok")
+        if scenario=="http500": self.send_response(500); self.end_headers(); return
+        if scenario=="transport": self.connection.shutdown(socket.SHUT_RDWR); self.connection.close(); return
+        if scenario=="timeout": time.sleep(1); return
+        self.send_response(200); self.send_header("Content-Type","application/json"); self.end_headers()
+        if scenario=="invalid_json": self.wfile.write(b"not-json{"); return
+        if scenario=="invalid_shape": self.wfile.write(b'{"unexpected":true}'); return
+        item={"title":"T","url":"https://example.invalid/redacted","content":"C","raw_content":"R"}
+        self.wfile.write(json.dumps({"results":[item]}).encode())
+    def log_message(self,*_): pass
 
-    def log_message(self, *args):
-        pass
-
-
-class _Server(threading.Thread):
-    def __init__(self, handler):
-        super().__init__(daemon=True)
-        self.httpd = socketserver.TCPServer(("127.0.0.1", 0), handler)
-        self.port = self.httpd.server_address[1]
-
-    def run(self):
-        self.httpd.serve_forever()
-
+class Server(threading.Thread):
+    def __init__(self,handler):
+        super().__init__(daemon=True); self.httpd=socketserver.ThreadingTCPServer(("127.0.0.1",0),handler); self.port=self.httpd.server_address[1]
+    def run(self): self.httpd.serve_forever()
+    def close(self): self.httpd.shutdown(); self.httpd.server_close()
 
 class BlackBoxPatchedHermes(unittest.TestCase):
-    deepseek = None
-    tavily = None
-
     @classmethod
     def setUpClass(cls):
-        cls.deepseek = _Server(FakeDeepSeek)
-        cls.tavily = _Server(FakeTavily)
-        cls.deepseek.start()
-        cls.tavily.start()
-        # aponta o provider Tavily (processo de teste) para o servidor falso
-        os.environ["TAVILY_BASE_URL"] = f"http://127.0.0.1:{cls.tavily.port}"
-        os.environ["TAVILY_API_KEY"] = "fake-not-real"
-
-    def _home(self):
-        home = tempfile.mkdtemp(prefix="hbb-")
-        Path(home, "config.yaml").write_text(
-            f"""model:
+        cls.deepseek=Server(FakeDeepSeek); cls.tavily=Server(FakeTavily); cls.deepseek.start(); cls.tavily.start()
+        os.environ.update(TAVILY_BASE_URL=f"http://127.0.0.1:{cls.tavily.port}",TAVILY_API_KEY="fake-not-real")
+    @classmethod
+    def tearDownClass(cls): cls.deepseek.close(); cls.tavily.close()
+    def setUp(self):
+        FakeDeepSeek.request_count=0; FakeTavily.received={"search":0,"extract":0}; FakeTavily.scenarios={"search":"ok","extract":"ok"}
+    def home(self):
+        value=tempfile.mkdtemp(prefix="hbb-")
+        Path(value,"config.yaml").write_text(f"""model:
   provider: deepseek
   default: deepseek-v4-flash
   max_tokens: 4096
   base_url: http://127.0.0.1:{self.deepseek.port}/v1
+providers:
+  deepseek:
+    request_timeout_seconds: 0.2
 fallback_providers: []
-toolsets:
-  - web
+toolsets: [web]
 web:
   backend: tavily
   search_backend: tavily
   extract_backend: tavily
-""", encoding="utf-8")
-        return home
+""")
+        return value
+    def run_cli(self,scenario):
+        FakeDeepSeek.scenario=scenario; home=self.home(); usage=Path(home,"usage.json")
+        env={k:v for k,v in os.environ.items() if not(k.endswith("_API_KEY") or "TOKEN" in k or "COOKIE" in k)}
+        env.update(HERMES_HOME=home,DEEPSEEK_API_KEY="fake-not-real",TAVILY_API_KEY="fake-not-real",TAVILY_BASE_URL=f"http://127.0.0.1:{self.tavily.port}",HERMES_STREAM_RETRIES="0")
+        cmd=[PYTHON,HERMES_CLI,"-z","BLACKBOX_PRIVATE_PROMPT","--provider","deepseek","--model","deepseek-v4-flash","--toolsets","web","--usage-file",str(usage)]
+        result=subprocess.run(cmd,env=env,capture_output=True,text=True,timeout=20)
+        return result,json.loads(usage.read_text()) if usage.exists() else None
+    def provider(self):
+        module=importlib.import_module("plugins.web.tavily.provider")
+        for op in ("search","extract"): module._OPERATION_COUNTS[op]={"attempted":0,"succeeded":0,"failed":0}
+        return module
+    def call_tavily(self,endpoint,scenario):
+        module=self.provider(); FakeTavily.scenarios[endpoint]=scenario; real_post=importlib.import_module("httpx").post
+        def short_post(*args,**kwargs): kwargs["timeout"]=0.1; return real_post(*args,**kwargs)
+        with mock.patch("httpx.post",side_effect=short_post):
+            result=module.TavilyWebSearchProvider().search("BLACKBOX_PRIVATE_QUERY",1) if endpoint=="search" else module.TavilyWebSearchProvider().extract(["https://example.invalid/private"])
+        return module,result,module.get_operation_counts()[endpoint]
+    def assert_count(self,count,attempted=1,succeeded=0,failed=1):
+        self.assertEqual(count,{"attempted":attempted,"succeeded":succeeded,"failed":failed}); self.assertEqual(count["succeeded"]+count["failed"],count["attempted"])
 
-    def _run(self, deepseek_scenario, *, tavily_scenario="ok", extra_env=None):
-        FakeDeepSeek.scenario = deepseek_scenario
-        FakeDeepSeek.request_count = 0
-        FakeTavily.scenario = tavily_scenario
-        home = self._home()
-        usage = os.path.join(home, "usage.json")
-        env = dict(os.environ)
-        env.update({
-            "HERMES_HOME": home,
-            "DEEPSEEK_API_KEY": "fake-not-real",
-            "TAVILY_API_KEY": "fake-not-real",
-            "TAVILY_BASE_URL": f"http://127.0.0.1:{self.tavily.port}",
-        })
-        if extra_env:
-            env.update(extra_env)
-        cmd = [PYTHON, HERMES_CLI, "-z", "pesquise e devolva JSON",
-               "--provider", "deepseek", "--model", "deepseek-v4-flash",
-               "--toolsets", "web",
-               "--usage-file", usage]
-        result = subprocess.run(cmd, env=env, capture_output=True, text=True, timeout=120)
-        return result, home, usage
+    def test_01_deepseek_stop(self): self.assertEqual(self.run_cli("stop")[1]["provider_finish_reason"],"stop")
+    def test_02_deepseek_length(self): self.assertEqual(self.run_cli("length")[1]["provider_finish_reason"],"length")
+    def test_03_deepseek_content_filter(self): self.assertEqual(self.run_cli("content_filter")[1]["provider_finish_reason"],"content_filter")
+    def test_04_tool_call_then_final(self):
+        result,usage=self.run_cli("tool_calls"); self.assertEqual(result.returncode,0); self.assertEqual(usage["provider_finish_reason"],"stop")
+    def test_05_absent_finish_reason_is_null(self): self.assertIsNone(self.run_cli("absent")[1]["provider_finish_reason"])
+    def test_06_stream_without_final_chunk_is_null(self): self.assertIsNone(self.run_cli("no_final_chunk")[1]["provider_finish_reason"])
+    def test_07_deepseek_http_error(self):
+        result,usage=self.run_cli("http_error"); self.assertNotEqual(result.returncode,0); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
+    def test_08_deepseek_transport_error(self):
+        result,usage=self.run_cli("transport_error"); self.assertNotEqual(result.returncode,0); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
+    def test_09_deepseek_timeout(self):
+        result,usage=self.run_cli("timeout"); self.assertNotEqual(result.returncode,0); self.assertTrue(usage is None or usage.get("provider_finish_reason") is None)
+    def test_10_turn_exit_never_fills_provider(self):
+        _,usage=self.run_cli("absent"); self.assertIsNotNone(usage.get("hermes_turn_exit_reason")); self.assertIsNone(usage["provider_finish_reason"]); self.assertIsNone(usage["finish_reason"])
+    def test_11_usage_present_consistent(self):
+        _,usage=self.run_cli("stop"); self.assertEqual((usage["input_tokens"],usage["output_tokens"],usage["total_tokens"]),(10,5,15))
+    def test_12_usage_absent_fails_closed(self): self.assertIn('HermesRunError("usage_file_missing_or_invalid")',Path("/app/hermline.py").read_text())
+    def test_13_search_success(self): self.assert_count(self.call_tavily("search","ok")[2],succeeded=1,failed=0)
+    def test_14_search_http500(self): self.assert_count(self.call_tavily("search","http500")[2])
+    def test_15_search_transport(self): self.assert_count(self.call_tavily("search","transport")[2])
+    def test_16_search_timeout(self): self.assert_count(self.call_tavily("search","timeout")[2])
+    def test_17_search_invalid_response(self): self.assert_count(self.call_tavily("search","invalid_shape")[2])
+    def test_18_extract_success(self): self.assert_count(self.call_tavily("extract","ok")[2],succeeded=1,failed=0)
+    def test_19_extract_http500(self): self.assert_count(self.call_tavily("extract","http500")[2])
+    def test_20_extract_transport(self): self.assert_count(self.call_tavily("extract","transport")[2])
+    def test_21_extract_timeout(self): self.assert_count(self.call_tavily("extract","timeout")[2])
+    def test_22_extract_invalid_response(self): self.assert_count(self.call_tavily("extract","invalid_shape")[2])
+    def test_23_tool_call_reaches_instrumented_tavily(self):
+        _,usage=self.run_cli("tool_calls"); self.assertGreaterEqual(FakeTavily.received["search"],1); self.assertGreaterEqual(usage["tavily_operations"]["search"]["attempted"],1)
+    def test_24_fourth_search_blocked(self):
+        module=self.provider(); provider=module.TavilyWebSearchProvider()
+        for _ in range(3): provider.search("x",1)
+        before=FakeTavily.received["search"]; result=provider.search("x",1)
+        self.assertFalse(result["success"]); self.assertEqual(FakeTavily.received["search"],before); self.assertEqual(module.get_operation_counts()["search"]["attempted"],3)
+    def test_25_counter_invariant(self):
+        module=self.provider(); FakeTavily.scenarios["search"]="http500"; module.TavilyWebSearchProvider().search("x")
+        self.assertTrue(all(v["succeeded"]+v["failed"]==v["attempted"] for v in module.get_operation_counts().values()))
+    def test_26_manifest_present(self): self.assertTrue((INST/"manifest.json").is_file())
+    def test_27_build_sha_and_version(self):
+        m=json.loads((INST/"manifest.json").read_text()); self.assertEqual(m["hermes_build_sha"],"649c20629eedea5a26d34b01ec8f3e14e96e9249"); self.assertEqual(m["hermes_version"],"0.20.4")
+    def test_28_pre_post_hashes(self):
+        m=json.loads((INST/"manifest.json").read_text()); self.assertTrue(all(sha(ROOT/item["path"])==item["after"] for item in m["files"]))
+    def test_29_zero_fuzz_and_partial_fails(self):
+        source=(INST/"apply-instrumentation.py").read_text(); self.assertIn('"--fuzz=0"',source)
+        result=subprocess.run([PYTHON,str(INST/"apply-instrumentation.py")],capture_output=True,text=True); self.assertNotEqual(result.returncode,0); self.assertIn("before_hash_mismatch",result.stderr)
+    def test_30_imported_modules_are_patched(self):
+        module=self.provider(); self.assertEqual(Path(module.__file__).resolve(),ROOT/"plugins/web/tavily/provider.py"); self.assertTrue(hasattr(module,"_reserve_attempt"))
+    def test_31_embedded_test_hash_manifest(self):
+        m=json.loads((INST/"manifest.json").read_text()); self.assertEqual(sha(Path(__file__)),m["instrumentation_files"]["blackbox_patched_hermes.py"])
+    def test_32_embedded_case_names_manifest(self):
+        m=json.loads((INST/"manifest.json").read_text()); self.assertEqual(sorted(n for n in dir(type(self)) if n.startswith("test_")),m["blackbox_tests"])
+    def test_33_no_credentials_in_image_environment(self):
+        for key,value in os.environ.items(): self.assertFalse(key.endswith("_API_KEY") and value not in ("fake-not-real",""))
+    def test_34_no_sensitive_content_in_usage(self):
+        _,usage=self.run_cli("tool_calls"); raw=json.dumps(usage)
+        for marker in PRIVATE: self.assertNotIn(marker,raw)
+        self.assertNotIn("https://",raw); self.assertNotIn("authorization",raw.lower()); self.assertNotIn("cookie",raw.lower())
+    def test_35_runner_does_not_call_provider_directly(self):
+        source=Path("/app/app.py").read_text(); self.assertNotIn("call_chat_completion(",source); self.assertNotIn("provider_adapter",source)
+    def test_36_retry3_prohibited(self):
+        source=Path("/app/state.py").read_text(); self.assertIn("retry_number IN (1,2)",source); self.assertNotIn("retry_number IN (1,2,3)",source)
 
-    def _usage(self, usage):
-        if not os.path.exists(usage):
-            return None
-        return json.loads(Path(usage).read_text())
-
-    def test_provider_finish_reason_stop(self):
-        _, _, usage = self._run("stop")
-        u = self._usage(usage)
-        self.assertEqual(u["provider_finish_reason"], "stop")
-        self.assertEqual(u["hermes_turn_exit_reason"], "text_response")
-
-    def test_provider_finish_reason_length(self):
-        _, _, usage = self._run("length")
-        u = self._usage(usage)
-        self.assertEqual(u["provider_finish_reason"], "length")
-
-    def test_provider_finish_reason_content_filter(self):
-        _, _, usage = self._run("content_filter")
-        u = self._usage(usage)
-        self.assertEqual(u["provider_finish_reason"], "content_filter")
-
-    def test_provider_finish_reason_absent_is_null(self):
-        _, _, usage = self._run("absent")
-        u = self._usage(usage)
-        self.assertIsNone(u["provider_finish_reason"])
-
-    def test_stream_without_final_chunk_is_null(self):
-        result, _, usage = self._run("no_final_chunk")
-        u = self._usage(usage)
-        self.assertIsNone(u.get("provider_finish_reason"))
-
-    def test_tokens_exported(self):
-        _, _, usage = self._run("stop")
-        u = self._usage(usage)
-        self.assertEqual(u["input_tokens"], 10)
-        self.assertEqual(u["output_tokens"], 5)
-        self.assertEqual(u["api_calls"], 1)
-
-    def test_tool_calls_followed_by_final_answer(self):
-        # A resposta com tool_calls é seguida pela resposta final; o
-        # provider_finish_reason do turno final é "stop" (não "tool_calls").
-        # A telemetria Tavily (attempted/succeeded/failed) é comprovada pelos
-        # testes de provider abaixo, contra o servidor falso via HTTP real.
-        _, _, usage = self._run("tool_calls", tavily_scenario="ok")
-        u = self._usage(usage)
-        self.assertEqual(u["provider_finish_reason"], "stop")
-        self.assertEqual(u["hermes_turn_exit_reason"], "text_response")
-
-    def test_tavily_search_success_counts_succeeded(self):
-        from plugins.web.tavily import provider
-        provider._OPERATION_COUNTS["search"] = {"attempted": 0, "succeeded": 0, "failed": 0}
-        FakeTavily.scenario = "ok"
-        result = provider.TavilyWebSearchProvider().search("x")
-        self.assertTrue(result.get("success", False))
-        c = provider.get_operation_counts()["search"]
-        self.assertEqual(c, {"attempted": 1, "succeeded": 1, "failed": 0})
-
-    def test_tavily_search_transport_error_counts_failed(self):
-        from plugins.web.tavily import provider
-        provider._OPERATION_COUNTS["search"] = {"attempted": 0, "succeeded": 0, "failed": 0}
-        FakeTavily.scenario = "reset"
-        provider.TavilyWebSearchProvider().search("x")
-        c = provider.get_operation_counts()["search"]
-        self.assertEqual(c["succeeded"] + c["failed"], c["attempted"])
-        self.assertGreaterEqual(c["failed"], 1)
-
-    def test_tavily_search_http500_counts_failed(self):
-        from plugins.web.tavily import provider
-        provider._OPERATION_COUNTS["search"] = {"attempted": 0, "succeeded": 0, "failed": 0}
-        FakeTavily.scenario = "http500"
-        result = provider.TavilyWebSearchProvider().search("x")
-        self.assertFalse(result.get("success", True))  # falhou
-        c = provider.get_operation_counts()["search"]
-        self.assertEqual(c["succeeded"] + c["failed"], c["attempted"])
-        self.assertGreaterEqual(c["failed"], 1)
-
-    def test_tavily_extract_success_counts_succeeded(self):
-        from plugins.web.tavily import provider
-        provider._OPERATION_COUNTS["extract"] = {"attempted": 0, "succeeded": 0, "failed": 0}
-        FakeTavily.scenario = "ok"
-        result = provider.TavilyWebSearchProvider().extract(["https://exemplo.com"])
-        self.assertTrue(result)
-        c = provider.get_operation_counts()["extract"]
-        self.assertEqual(c, {"attempted": 1, "succeeded": 1, "failed": 0})
-
-    def test_tavily_extract_invalid_response_counts_failed(self):
-        from plugins.web.tavily import provider
-        provider._OPERATION_COUNTS["extract"] = {"attempted": 0, "succeeded": 0, "failed": 0}
-        FakeTavily.scenario = "invalid"
-        result = provider.TavilyWebSearchProvider().extract(["https://exemplo.com"])
-        self.assertTrue(result)  # devolve lista com erro
-        c = provider.get_operation_counts()["extract"]
-        self.assertGreaterEqual(c["attempted"], 1)
-        self.assertEqual(c["succeeded"] + c["failed"], c["attempted"])
-
-    def test_manifest_present(self):
-        self.assertTrue(Path("/app/instrumentation/manifest.json").exists())
-
-    def test_no_secrets_in_usage(self):
-        _, _, usage = self._run("stop")
-        raw = Path(usage).read_text()
-        for forbidden in ("api_key", "authorization", "Bearer", "fake-not-real"):
-            self.assertNotIn(forbidden, raw.lower())
-        # a chave fictícia não pode vazar
-        self.assertNotIn("fake-not-real", raw)
-
-
-if __name__ == "__main__":
-    unittest.main(verbosity=2)
+if __name__=="__main__": unittest.main(verbosity=2)

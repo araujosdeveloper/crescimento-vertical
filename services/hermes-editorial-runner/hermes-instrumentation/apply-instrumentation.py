@@ -12,6 +12,7 @@ Uso (dentro da imagem candidata, como usuário de build):
 from __future__ import annotations
 
 import hashlib
+import ast
 import json
 import os
 import subprocess
@@ -37,12 +38,12 @@ TARGETS = [
     {
         "path": "plugins/web/tavily/provider.py",
         "before": "2ef90e4d6064e291d9882d3d9863c7c124c21666b44d617edba03dd92e37eb19",
-        "after": "8b62315d9f8ba1b9ecf4cbbb9876ae37d90de134fa76bdd0c851a58d1b83ec39",
+        "after": "35a91028500b72d30667922fde3e3c770140be6155479fae9b5c7f0f7a7a9ffd",
     },
     {
         "path": "agent/chat_completion_helpers.py",
         "before": "d9a5a7b6733ef50525df4861568c2b92e08ee879e17f6a2113e1037b5b7fdd7b",
-        "after": "7ed8fe9551d644b3eb564e69a49fada83a365865786a015572420c21b0c5ff08",
+        "after": "a196cd676e4fd5d7dcc02250f211b712e803baa72939a5472a55f8765784ed5f",
     },
     {
         "path": "agent/turn_finalizer.py",
@@ -115,12 +116,31 @@ def _verify_after() -> None:
 
 
 def _write_manifest() -> None:
+    instrumentation_dir = PATCH_FILE.parent
+    blackbox_path = instrumentation_dir / "blackbox_patched_hermes.py"
+    tree = ast.parse(blackbox_path.read_text(encoding="utf-8"))
+    blackbox_tests = sorted(
+        node.name
+        for item in tree.body
+        if isinstance(item, ast.ClassDef) and item.name == "BlackBoxPatchedHermes"
+        for node in item.body
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name.startswith("test_")
+    )
     manifest = {
         "patch_id": PATCH_ID,
         "hermes_version": EXPECTED_VERSION,
         "hermes_build_sha": EXPECTED_BUILD_SHA,
         "observability_contract_version": CONTRACT_VERSION,
         "files": TARGETS,
+        "instrumentation_files": {
+            name: _sha256(instrumentation_dir / name)
+            for name in (
+                "apply-instrumentation.py",
+                "blackbox_patched_hermes.py",
+                "hermes-0.20.4-observability.patch",
+            )
+        },
+        "blackbox_tests": blackbox_tests,
     }
     MANIFEST_FILE.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
