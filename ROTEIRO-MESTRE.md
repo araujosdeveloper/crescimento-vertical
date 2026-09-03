@@ -35,6 +35,25 @@ um portal editorial e comercial orientado à geração de receita.
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
 
+## Situação vigente — 3 de setembro de 2026
+
+A única fase ativa é a Fase 8. Seu gate final está inválido: a imagem candidata
+e o runtime ativo não estavam comprovadamente alinhados; o black-box embutido
+divergia do Git, possuía menos casos e falhou no caminho `tool_calls → Tavily`,
+com `search.attempted=0`. As declarações anteriores de fechamento desse gate
+são históricas e foram superadas; não houve correção funcional nesta
+consolidação.
+
+O Hermes permanece editor-chefe e motor central do blog; DeepSeek e Tavily são
+subordinados, o runner exerce governança e o n8n permanece a única ponte futura
+para o Payload. A Fase 9 não foi iniciada, publicação automática e retry 3 são
+proibidos. O plano consolidado está em
+[docs/36-plano-diretor-definitivo.md](docs/36-plano-diretor-definitivo.md).
+
+Os parágrafos cronológicos abaixo são memória dos respectivos marcos. Quando
+descrevem “nenhuma fase em execução” ou fases posteriores como pendentes, devem
+ser interpretados na data indicada e não como estado presente.
+
 A Fase 3 foi iniciada formalmente em 28 de agosto de 2026, a partir da `main`
 `d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, e concluída após o aceite humano
 expresso do responsável pelo produto. Foram reconciliadas e comprovadas as

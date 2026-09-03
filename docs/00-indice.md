@@ -4,6 +4,9 @@
 
 - [Constituição do Projeto](../CONSTITUICAO-DO-PROJETO.md)
 - [Roteiro Mestre](../ROTEIRO-MESTRE.md)
+- [Plano Diretor Definitivo](36-plano-diretor-definitivo.md) — consolidação
+  vigente do estado e da execução restante; subordinada à Constituição,
+  Roteiro e ADRs.
 - [Visão e objetivos](01-visao-e-objetivos.md)
 - [Escopo e requisitos](02-escopo-e-requisitos.md)
 - [Registro de decisões](14-registro-decisoes.md)
@@ -33,6 +36,8 @@
 - [Fase 6 — SEO técnico, dados estruturados e performance](33-fase-6-seo-performance.md)
 - [Fase 7 — Captação, diagnóstico e mensuração comercial](34-fase-7-captacao-diagnostico-mensuracao.md)
 - [Fase 8 — Hermes e política editorial](35-fase-8-hermes-politica-editorial.md)
+- Fases 9–12: documentos canônicos serão criados somente nas respectivas
+  fases; permanecem pendentes.
 - [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 - [Portal editorial público](19-portal-editorial-publico.md)
 - [Deploy do portal editorial público no staging](20-deploy-phase2b-staging.md)
@@ -52,6 +57,7 @@
 - [Registro de fonte v1](schemas/source-record.v1.schema.json)
 - [Rascunho de artigo v1](schemas/article-draft.v1.schema.json)
 - [Requisição de pesquisa editorial v1](schemas/editorial-research-request.v1.schema.json)
+- [Observabilidade do Hermes v1](schemas/hermes-observability.v1.schema.json)
 
 ## Templates
 
@@ -64,3 +70,8 @@
 Cada mudança de código deve identificar qual documento governa a alteração.
 Quando o comportamento real divergir da documentação, a entrega permanece
 incompleta até que um deles seja corrigido conscientemente.
+
+Documentos de fase e auditorias antigas preservam evidência histórica. O estado
+vigente deve ser lido primeiro no Roteiro Mestre, em `docs/10`, em `docs/15` e
+no documento da fase ativa; afirmação histórica conflitante não prevalece sobre
+essas fontes atuais.

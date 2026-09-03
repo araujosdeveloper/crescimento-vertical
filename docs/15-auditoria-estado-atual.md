@@ -1,5 +1,37 @@
 # Auditoria do estado atual
 
+## Fotografia vigente — 3 de setembro de 2026
+
+Auditoria documental sobre o snapshot Git
+`207392b2e3dd574e26992e17efcad428f2f356ee`, na branch
+`feat/phase-8-hermes-editorial-policy`, com árvore inicialmente limpa e PR #14
+aberto/draft. Os quatro checks desse HEAD estavam aprovados. Nenhum banco,
+segredo, PII, container, rede, volume ou serviço foi consultado ou alterado
+nesta consolidação.
+
+| Fases | Estado oficial |
+| --- | --- |
+| 0–3 | Concluídas |
+| 4 | Concluída com ressalva de copy comercial |
+| 5–7 | Concluídas e aceitas |
+| 8 | Em execução e divergente; gate final inválido |
+| 9–12 | Pendentes |
+
+### Divergência factual aberta da Fase 8
+
+- runtime ativo e imagem candidata não estavam comprovadamente alinhados;
+- black-box embutido na candidata divergia do arquivo versionado;
+- a execução real dentro da imagem falhou em `tool_calls → Tavily`, com
+  `search.attempted=0`;
+- a imagem continha menos casos de teste que o Git;
+- os relatórios anteriores de fechamento dos gates dessa candidata estão
+  **SUPERADOS — NÃO VÁLIDOS PARA ACEITE**;
+- a auditoria que constatou a divergência não realizou deploy, merge, job,
+  retry 3 nem consumo editorial externo.
+
+Esta fotografia não afirma causa corrigida. O histórico cronológico abaixo é
+preservado como evidência datada e não substitui este estado vigente.
+
 ## Candidato da Fase 6 em staging — 29 de agosto de 2026
 
 A branch `feat/phase-6-seo-performance` partiu da main `e6c7ce5`; o PR draft
@@ -855,7 +887,7 @@ Nenhum código removeu o Hermes do caminho editorial; DeepSeek e Tavily
 continuam subordinados ao Hermes; publicação automática permanece desabilitada;
 retry 3 permanece bloqueado; e as travas continuam fechadas.
 
-## Instrumentação auditável do Hermes editor-chefe — 2 de setembro de 2026
+## SUPERADO — NÃO VÁLIDO PARA ACEITE: instrumentação auditável do Hermes editor-chefe — 2 de setembro de 2026
 
 Validação offline da instrumentação do Hermes 0.20.4, preservando-o como
 editor-chefe. Preflight confirmou branch, PR #14 draft, quatro checks verdes,

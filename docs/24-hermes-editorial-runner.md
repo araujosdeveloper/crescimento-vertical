@@ -1,5 +1,14 @@
 # Runner editorial interno (Fase 3B)
 
+## Estado vigente do gate
+
+O runner é a camada de **governança** do Hermes editor-chefe. O gate da imagem
+instrumentada auditada está inválido: runtime/imagem não estavam alinhados, o
+black-box embutido divergia do Git, tinha menos casos e falhou em
+`tool_calls → Tavily` com `search.attempted=0`. Relatos anteriores de sucesso
+dessa candidata estão **SUPERADOS — NÃO VÁLIDOS PARA ACEITE**. Nenhuma correção
+funcional é declarada neste documento; ela exige execução técnica separada.
+
 ## Papel
 
 Servidor HTTP interno (`cv-hermes-editorial-runner`) que recebe requisições de

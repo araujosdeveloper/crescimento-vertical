@@ -1,5 +1,24 @@
 # Controle de execução
 
+## Estado vigente — 3 de setembro de 2026
+
+| Campo | Estado comprovado |
+| --- | --- |
+| Branch/HEAD inicial | `feat/phase-8-hermes-editorial-policy` / `207392b2e3dd574e26992e17efcad428f2f356ee` |
+| Fase ativa | Fase 8 — em execução e divergente |
+| PR | #14 aberto e draft; quatro checks do HEAD inicial aprovados |
+| Gate atual | **INVÁLIDO** — imagem/runtime sem alinhamento comprovado; black-box embutido diferente do Git, com menos casos e falha em `tool_calls → Tavily` (`search.attempted=0`) |
+| Relatórios anteriores | **SUPERADOS — NÃO VÁLIDOS PARA ACEITE** da candidata auditada |
+| Restrições | Sem correção funcional, deploy, chamada externa, job, retry 3, publicação, dados ou Fase 9 nesta consolidação |
+
+Próxima ação única: abrir execução técnica separada para corrigir e comprovar o
+black-box da instrumentação, mantendo as travas fechadas. O Hermes permanece
+editor-chefe; runner é governança; DeepSeek/Tavily são subordinados; n8n é a
+única ponte autorizada para o Payload.
+
+Os registros abaixo são históricos e devem ser lidos segundo a data de cada
+sessão; não substituem este quadro vigente.
+
 ## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
 
 O responsável pelo produto aprovou os hubs editoriais vazios, busca e filtros,

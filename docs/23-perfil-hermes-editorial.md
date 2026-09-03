@@ -1,5 +1,13 @@
 # Perfil Hermes editorial (Fase 3B)
 
+## Estado vigente
+
+Este perfil materializa o Hermes como **editor-chefe**, não como simples
+pesquisador. DeepSeek e Tavily operam subordinados a ele; o runner limita e
+registra a execução sem tomar decisões editoriais. A Fase 8 continua em
+execução, com gate final inválido, e nenhuma execução nova é autorizada por este
+documento.
+
 ## Objetivo
 
 Distribuição versionada do perfil `crescimento-vertical-editorial`, isolado do

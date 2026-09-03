@@ -1033,3 +1033,21 @@ A auditoria read-only identificou dois riscos de inversão de papéis:
 
 Reverter por commit (código e documentação) sem migração de dados; qualquer
 mudança futura de papel exige ADR próprio e aceite humano.
+
+### Adendo de status — 3 de setembro de 2026
+
+A matriz de papéis e as proibições da ADR-034 permanecem aprovadas. O relato
+posterior de validação da imagem candidata não constitui nova decisão e foi
+invalidado por auditoria factual: runtime/imagem sem alinhamento comprovado,
+black-box embutido diferente do Git, menos casos na imagem e falha real em
+`tool_calls → Tavily` com `search.attempted=0`.
+
+Assim, qualquer registro de fechamento dos gates dessa candidata recebe o
+status **SUPERADO — NÃO VÁLIDO PARA ACEITE**. Não há decisão de causa ou
+correção funcional neste adendo. A Fase 8 continua em execução; retry 3,
+publicação automática e início da Fase 9 permanecem proibidos.
+
+As formulações históricas das ADR-016 e ADR-017 que podem sugerir credencial
+`automation` no Hermes são terminologicamente superadas pela ADR-034: o Hermes
+não recebe credencial do Payload; somente o n8n é a ponte autenticada para o
+CMS. O histórico das decisões permanece intacto.

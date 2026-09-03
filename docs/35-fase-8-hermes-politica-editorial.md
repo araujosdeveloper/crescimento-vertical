@@ -1,5 +1,23 @@
 # Fase 8 — Hermes Agent e política editorial automatizada
 
+## Estado vigente — gate final inválido
+
+A Fase 8 permanece em execução e divergente. A auditoria posterior invalidou o
+fechamento da candidata: runtime ativo e imagem candidata não estavam
+comprovadamente alinhados; o black-box embutido divergia do Git, continha menos
+casos e falhou dentro da imagem no fluxo `tool_calls → Tavily`, mantendo
+`search.attempted=0`.
+
+As seções históricas que registram aplicação determinística e aprovação de 14
+ou 20 testes na candidata são **SUPERADAS — NÃO VÁLIDAS PARA ACEITE**. Elas são
+preservadas para rastreabilidade e não comprovam o gate atual. Esta consolidação
+não corrige a causa, não reconstrói imagem, não altera runtime e não autoriza
+job, retry 3, consumo externo, publicação ou Fase 9.
+
+O Hermes continua sendo o editor-chefe e motor central do blog. DeepSeek e
+Tavily são subordinados; o runner é governança; o n8n será a única ponte para o
+Payload; aprovação humana permanece obrigatória.
+
 ## Estado e limite desta execução
 
 Esta fase inicia a reconciliação formal da execução editorial controlada. O
@@ -331,7 +349,7 @@ prompts, respostas integrais, headers, cookies ou segredos. Enquanto o patch nã
 estiver aplicado, o runner permanece fail-closed para telemetria obrigatória
 ausente.
 
-## Correção do finish_reason e validação da instrumentação (2026-09-02)
+## SUPERADO — NÃO VÁLIDO PARA ACEITE: correção do finish_reason e validação da instrumentação (2026-09-02)
 
 Correção de contrato (ADR-034 v2): `provider_finish_reason` (direto do
 chunk/resposta final do SDK) é SEPARADO de `hermes_turn_exit_reason` (decisão
