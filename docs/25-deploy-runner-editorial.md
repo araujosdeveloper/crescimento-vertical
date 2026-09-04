@@ -56,6 +56,20 @@ pesquisa real ou chamada de LLM, nenhum conteúdo criado.
 
 ## Fase 8 — candidato controlado
 
+### Checkpoint SQLite host-side
+
+Checkpoints de validação usam `scripts/phase8_checkpoint.py`, sem abrir as
+travas. O helper abre `/state/jobs.sqlite3` exclusivamente como URI `mode=ro`
+e executa a API `Connection.backup` para um snapshot novo. Em container, o
+gerador recebe o programa por `docker exec -i`, aplica `umask 0077`, fecha e
+valida o snapshot e emite um marcador sanitizado com tamanho, modo, hash,
+integridade, FKs e `user_version`. O host verifica esse marcador e transporta
+o arquivo por `docker exec cat` para um temporário exclusivo; o destino final
+só é promovido após hash e validação SQLite equivalentes. O snapshot gerado é
+autossuficiente: não se mistura com WAL antigo. Destinos existentes, fontes
+ausentes, timeout, erro de cópia ou divergência de checksum deixam o
+checkpoint incompleto e não são sinalizados como sucesso.
+
 O candidato só pode ser construído após CI verde e backup. O compose mantém
 usuário não-root, rootfs read-only, `cap_drop: ALL`, `no-new-privileges`, sem
 ports e sem Docker Socket. A flag e o arquivo de habilitação permanecem ausentes
