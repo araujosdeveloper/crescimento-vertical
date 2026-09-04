@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 import io
+import json
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -31,6 +32,7 @@ class TestExecutionGates(unittest.TestCase):
         self._orig_openai_key = os.environ.get("OPENAI_API_KEY")
         self._orig_credential_file = config.DEEPSEEK_API_KEY_FILE
         self._orig_tavily_credential_file = config.TAVILY_API_KEY_FILE
+        self._orig_usage_dir = config.USAGE_DIR
         self._tavily_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
         self._tavily_file.write("exclusive-test-tavily-key")
         self._tavily_file.close()
@@ -52,6 +54,7 @@ class TestExecutionGates(unittest.TestCase):
             os.unlink(self._enable_file.name)
         config.DEEPSEEK_API_KEY_FILE = self._orig_credential_file
         config.TAVILY_API_KEY_FILE = self._orig_tavily_credential_file
+        config.USAGE_DIR = self._orig_usage_dir
         if os.path.exists(self._tavily_file.name):
             os.unlink(self._tavily_file.name)
 
@@ -132,6 +135,28 @@ class TestExecutionGates(unittest.TestCase):
                     hermline.run_hermes(_request())
         finally:
             os.unlink(credential_path)
+
+    def test_subprocess_exception_carries_available_partial_usage(self):
+        os.environ["RUNNER_EXECUTION_ENABLED"] = "true"
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as credential:
+            credential.write("exclusive-test-key")
+            credential_path = credential.name
+        config.DEEPSEEK_API_KEY_FILE = credential_path
+        usage_dir = tempfile.mkdtemp()
+        config.USAGE_DIR = usage_dir
+        with open(os.path.join(usage_dir, "usage-idem-1.json"), "w", encoding="utf-8") as usage_file:
+            json.dump({"provider": "deepseek", "model": "deepseek-v4-flash", "api_calls": 1}, usage_file)
+        try:
+            with mock.patch("hermline.subprocess.Popen", side_effect=hermline.subprocess.TimeoutExpired("hermes", 300)):
+                with self.assertRaises(hermline.HermesTimeoutError) as raised:
+                    hermline.run_hermes(_request())
+            self.assertEqual(raised.exception.usage_meta["usage_status"], "partial")
+            self.assertFalse(raised.exception.usage_meta["usage_complete"])
+            self.assertIsNotNone(raised.exception.usage)
+        finally:
+            os.unlink(credential_path)
+            os.unlink(os.path.join(usage_dir, "usage-idem-1.json"))
+            os.rmdir(usage_dir)
 
 
 class TestCommandBuild(unittest.TestCase):

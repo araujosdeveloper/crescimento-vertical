@@ -24,6 +24,40 @@ class ProcessLifecycleError(RuntimeError):
     """Sanitized failure proving the job process group was not cleaned up."""
 
 
+class HermesTimeoutError(TimeoutError):
+    def __init__(self, message: str, *, usage: dict | None = None, usage_meta: dict | None = None):
+        super().__init__(message)
+        self.usage = usage
+        self.usage_meta = usage_meta or {}
+
+
+def _usage_path(request: dict) -> str:
+    key = request["idempotencyKey"][:48]
+    path = os.path.abspath(os.path.join(config.USAGE_DIR, f"usage-{key}.json"))
+    root = os.path.abspath(config.USAGE_DIR)
+    if os.path.commonpath((root, path)) != root:
+        raise evidence.HermesRunError("usage_path_invalid")
+    return path
+
+
+def _collect_job_usage(request: dict, *, lifecycle_proven: bool) -> tuple[dict | None, dict]:
+    result = evidence.collect_usage(_usage_path(request), lifecycle_proven=lifecycle_proven)
+    meta = {
+        "usage_status": result["status"],
+        "usage_complete": bool(result["complete"]),
+    }
+    if result.get("error"):
+        meta["usage_error"] = result["error"]
+    usage = result.get("usage")
+    if usage is not None:
+        usage = dict(usage)
+        usage["_collection_status"] = result["status"]
+        usage["_collection_complete"] = bool(result["complete"])
+        if result.get("error"):
+            usage["_collection_error"] = result["error"]
+    return usage, meta
+
+
 def _bounded_pipe_reader(stream, sink: bytearray, limit: int, done: threading.Event) -> None:
     """Drain a pipe concurrently while retaining at most ``limit`` bytes."""
     try:
@@ -209,6 +243,8 @@ def run_hermes(request: dict) -> dict:
         stdout_buffer = bytearray()
         stderr_buffer = bytearray()
         cleanup_error = None
+        collected_usage = None
+        collected_usage_meta = {}
         try:
             proc = subprocess.Popen(
                 build_hermes_command(request),
@@ -231,7 +267,8 @@ def run_hermes(request: dict) -> dict:
                 ).start()
             if not _wait_process(proc, config.JOB_TIMEOUT_SECONDS):
                 _terminate_group(proc)
-                raise TimeoutError("timeout")
+                collected_usage, collected_usage_meta = _collect_job_usage(request, lifecycle_proven=True)
+                raise HermesTimeoutError("timeout", usage=collected_usage, usage_meta=collected_usage_meta)
             # A leader exiting does not prove descendants exited. Clean up and
             # fail closed if this job group still exists.
             if _group_exists(proc.pid):
@@ -240,9 +277,15 @@ def run_hermes(request: dict) -> dict:
         except TimeoutError:
             raise
         except subprocess.TimeoutExpired:
-            raise TimeoutError("timeout") from None
+            collected_usage, collected_usage_meta = _collect_job_usage(request, lifecycle_proven=False)
+            raise HermesTimeoutError(
+                "timeout", usage=collected_usage, usage_meta=collected_usage_meta,
+            ) from None
         except ProcessLifecycleError as exc:
-            raise evidence.HermesRunError(str(exc)) from None
+            collected_usage, collected_usage_meta = _collect_job_usage(request, lifecycle_proven=False)
+            raise evidence.HermesRunError(
+                str(exc), usage=collected_usage, metadata=collected_usage_meta,
+            ) from None
         except OSError:
             raise evidence.HermesRunError("hermes_process_start_failed") from None
         finally:
@@ -252,9 +295,15 @@ def run_hermes(request: dict) -> dict:
                 except ProcessLifecycleError as exc:
                     cleanup_error = exc
         if cleanup_error is not None:
-            raise evidence.HermesRunError(str(cleanup_error)) from None
+            collected_usage, collected_usage_meta = _collect_job_usage(request, lifecycle_proven=False)
+            raise evidence.HermesRunError(
+                str(cleanup_error), usage=collected_usage, metadata=collected_usage_meta,
+            ) from None
         if proc.returncode != 0:
-            raise evidence.HermesRunError("hermes_nonzero_exit")
+            collected_usage, collected_usage_meta = _collect_job_usage(request, lifecycle_proven=True)
+            raise evidence.HermesRunError(
+                "hermes_nonzero_exit", usage=collected_usage, metadata=collected_usage_meta,
+            ) from None
         raw_output = bytes(stdout_buffer).decode("utf-8", errors="replace")
         try:
             output = bounded_stdout(raw_output)
@@ -265,14 +314,12 @@ def run_hermes(request: dict) -> dict:
             raise evidence.DossierValidationError(
                 exc.output, [], metadata, None, error_code="output_too_large"
             ) from None
-        usage = None
-        usage_path = os.path.join(config.USAGE_DIR, f"usage-{request['idempotencyKey'][:48]}.json")
-        try:
-            with open(usage_path, encoding="utf-8") as usage_file:
-                usage = evidence.sanitize_usage(json.load(usage_file))
-        except (OSError, json.JSONDecodeError):
-            usage = None
+        usage = collected_usage
+        usage_meta = collected_usage_meta
+        if usage is None:
+            usage, usage_meta = _collect_job_usage(request, lifecycle_proven=True)
         metadata = evidence.output_metadata(raw_output, usage, parse_success=False, normalized=output != raw_output.strip())
+        metadata.update(usage_meta)
         try:
             dossier = json.loads(output)
         except (json.JSONDecodeError, UnicodeDecodeError):
@@ -283,7 +330,9 @@ def run_hermes(request: dict) -> dict:
             metadata["validation_error_count"] = len(errors)
             raise evidence.DossierValidationError(raw_output, errors, metadata, usage) from None
         if usage is None:
-            raise evidence.HermesRunError("usage_file_missing_or_invalid")
+            raise evidence.HermesRunError("usage_file_missing_or_invalid", metadata=metadata)
+        if not usage.get("_collection_complete"):
+            raise evidence.HermesRunError("usage_file_incomplete", usage=usage, metadata=metadata)
         if usage.get("provider") != config.HERMES_PROVIDER or usage.get("model") != config.HERMES_MODEL:
             raise evidence.HermesRunError("usage_provider_model_mismatch", usage=usage)
         # Gate do contrato de observabilidade v1 (ADR-034): finish_reason real

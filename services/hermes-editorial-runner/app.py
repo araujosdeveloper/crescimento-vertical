@@ -71,30 +71,40 @@ def _finalize_terminal(store, job_id: str, state: str, error_code: str, *,
     inclusive falha genérica e timeout. O gate fail-closed de telemetria
     obrigatória permanece exclusivo do caminho de sucesso.
     """
-    if isinstance(usage, dict):
+    existing = store.get_by_id(job_id)
+    already_finalized = bool(
+        existing and existing.get("state") == state and existing.get("error_code") == error_code
+    )
+    usage_complete = isinstance(usage, dict) and usage.get("_collection_complete", True)
+    metadata = dict(metadata or {})
+    if isinstance(usage, dict) and usage_complete and not already_finalized:
         try:
             research = store.record_research_usage(job_id, usage)
             usage.update(research)
-        except RuntimeError:
-            pass
+        except RuntimeError as exc:
+            metadata["usage_research_persistence_error"] = str(exc)
         try:
             cost = store.record_battery_usage(usage)
             usage.update(cost)
-        except RuntimeError:
-            pass
+        except RuntimeError as exc:
+            metadata["usage_cost_persistence_error"] = str(exc)
+    if isinstance(usage, dict) and metadata:
+        usage["_collection_metadata"] = metadata
     manifest = None
     try:
         manifest = evidence.persist_failure(
-            job_id, output or "", errors or [], usage, metadata or {},
+            job_id, output or "", errors or [], usage, metadata,
             state=state, error_code=error_code,
         )
     except Exception:
         manifest = None
     if manifest is not None:
         try:
-            store.record_failure_evidence(job_id, manifest, metadata or {})
-        except Exception:
-            pass
+            store.record_failure_evidence(job_id, manifest, metadata)
+        except Exception as exc:
+            metadata["evidence_persistence_error"] = type(exc).__name__
+    if already_finalized:
+        return
     store.update(job_id, state, error_code=error_code, usage=usage)
 
 
@@ -291,8 +301,11 @@ class Handler(BaseHTTPRequestHandler):
             result["usage"].update(cost)
             store.update(job["id"], "succeeded", result=result["dossier"], usage=result["usage"])
             self._send_json(202, {"jobId": job["id"], "correlationId": cid, "state": "succeeded"})
-        except TimeoutError:
-            _finalize_terminal(store, job["id"], "timed_out", "timeout")
+        except TimeoutError as exc:
+            _finalize_terminal(
+                store, job["id"], "timed_out", "timeout",
+                usage=getattr(exc, "usage", None), metadata=getattr(exc, "usage_meta", None),
+            )
             self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
         except evidence.HermesRunError as exc:
             _finalize_terminal(

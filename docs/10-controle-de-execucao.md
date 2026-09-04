@@ -651,6 +651,15 @@ encerrado sem prova. Garantia desse caso depende de cgroup/subreaper dedicado e
 permanece pendente. Usage, reservas, deadlines HTTP e persistência/entrega da
 resposta não são alterados nesta etapa.
 
+Após sucesso, timeout ou falha de encerramento, o usage é coletado somente do
+arquivo regular associado ao job, sem seguir symlink, com limite de 256 KiB e
+classificação explícita (`present`, `partial`, `absent`, `empty`, `invalid` ou
+`read_error`). Contadores inválidos não viram zero; Tavily mantém attempted,
+succeeded e failed, inclusive tentativa sem conclusão. Usage parcial fica
+persistentemente marcado como incompleto e não entra no contabilizador de
+custo/busca. Erros original e secundário são preservados e finalização repetida
+é idempotente. Reservas, orçamento e deadlines HTTP não são modificados.
+
 Em 31 de agosto de 2026, o provider candidato foi substituído localmente por
 DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo e thinking `none`, aceita a
 credencial exclusiva somente por arquivo e falha fechado quando ausente. Não

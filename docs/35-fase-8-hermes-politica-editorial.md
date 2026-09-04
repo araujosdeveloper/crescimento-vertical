@@ -111,6 +111,19 @@ cgroup/subreaper dedicado ou mudança de arquitetura, pendência explícita para
 hardening posterior. Esta etapa não altera usage, reservas, deadlines HTTP ou
 persistência/entrega da resposta.
 
+### Usage em falhas — Etapa 3
+
+Após qualquer caminho terminal, inclusive timeout e falha de encerramento, o
+runner lê somente o arquivo de usage associado ao `idempotencyKey`, como
+arquivo regular sem symlink e dentro do limite de 256 KiB. A coleta classifica
+`present`, `partial`, `absent`, `empty`, `invalid` ou `read_error`, valida tipos,
+intervalos, finitude e invariantes de contadores e registra incompletude quando
+o lifecycle não foi comprovado. Dados parciais são persistidos como evidência,
+mas não são enviados ao contabilizador de custo/busca. O erro original e erros
+secundários de coleta/persistência são preservados; a finalização é idempotente
+e não soma o mesmo usage duas vezes. A política de reservas e a liberação de
+saldo permanecem inalteradas.
+
 ## Compatibilidade DeepSeek V4 Flash
 
 A imagem pinada contém Hermes v0.20.4 e OpenAI SDK 2.24.0. O provider nativo

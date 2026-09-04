@@ -12,11 +12,13 @@ import os
 import re
 import tempfile
 import time
+import stat
 from pathlib import Path
 
 import config
 
 EVIDENCE_MAX_BYTES = 256 * 1024
+USAGE_MAX_BYTES = 256 * 1024
 _CANDIDATE_MAX_BYTES = 192 * 1024
 _JOB_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _SECRET_RE = re.compile(
@@ -54,6 +56,111 @@ class OutputLimitError(RuntimeError):
     def __init__(self, output: str):
         super().__init__("output_too_large")
         self.output = output
+
+
+def _valid_counter(value) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool) and value >= 0
+
+
+def _validate_usage_document(raw: object) -> tuple[dict | None, str]:
+    if not isinstance(raw, dict):
+        return None, "invalid"
+    numeric = {
+        "api_calls", "input_tokens", "output_tokens", "completion_tokens",
+        "prompt_tokens", "total_tokens", "cache_read_tokens",
+        "cache_write_tokens", "reasoning_tokens", "max_output_tokens", "max_tokens",
+    }
+    for key in numeric:
+        if key in raw and not _valid_counter(raw[key]):
+            return None, "invalid"
+    for key in ("provider", "model"):
+        if key in raw and (not isinstance(raw[key], str) or not raw[key]):
+            return None, "invalid"
+    operations = raw.get("tavily_operations")
+    if operations is not None:
+        if not isinstance(operations, dict):
+            return None, "invalid"
+        for op, value in operations.items():
+            if op not in {"search", "extract", "crawl", "research"}:
+                return None, "invalid"
+            if isinstance(value, bool):
+                return None, "invalid"
+            if isinstance(value, int):
+                if value < 0:
+                    return None, "invalid"
+            elif isinstance(value, dict):
+                for key in ("attempted", "succeeded", "failed"):
+                    if key in value and not _valid_counter(value[key]):
+                        return None, "invalid"
+                attempted = value.get("attempted")
+                completed = value.get("succeeded", 0) + value.get("failed", 0)
+                if attempted is not None and completed > attempted:
+                    return None, "invalid"
+            elif isinstance(value, list):
+                if any(not isinstance(item, dict) or item.get("status") not in {"succeeded", "failed"} for item in value):
+                    return None, "invalid"
+            else:
+                return None, "invalid"
+    sanitized = sanitize_usage(raw)
+    if sanitized is None:
+        return None, "invalid"
+    required = {"provider", "model", "api_calls", "input_tokens", "output_tokens",
+                "cache_read_tokens", "cache_write_tokens", "reasoning_tokens",
+                "tavily_operations", "provider_finish_reason"}
+    return sanitized, "present" if required.issubset(raw) and finish_reason(sanitized) else "partial"
+
+
+def collect_usage(path: str, *, lifecycle_proven: bool) -> dict:
+    """Read only the job's regular usage file and classify it fail-closed."""
+    result = {"status": "absent", "usage": None, "error": None, "complete": False}
+    try:
+        st = os.lstat(path)
+    except FileNotFoundError:
+        return result
+    except OSError:
+        result.update(status="read_error", error="usage_stat_failed")
+        return result
+    if not stat.S_ISREG(st.st_mode) or os.path.islink(path):
+        result.update(status="invalid", error="usage_not_regular_file")
+        return result
+    if st.st_size == 0:
+        result.update(status="empty", error="usage_empty")
+        return result
+    if st.st_size > USAGE_MAX_BYTES:
+        result.update(status="invalid", error="usage_too_large")
+        return result
+    try:
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(path, flags)
+        try:
+            before = os.fstat(fd)
+            if not stat.S_ISREG(before.st_mode) or before.st_size > USAGE_MAX_BYTES:
+                result.update(status="invalid", error="usage_file_changed")
+                return result
+            raw_bytes = os.read(fd, USAGE_MAX_BYTES + 1)
+            after = os.fstat(fd)
+        finally:
+            os.close(fd)
+        if len(raw_bytes) > USAGE_MAX_BYTES or before.st_size != after.st_size:
+            result.update(status="invalid", error="usage_file_changed")
+            return result
+        raw = json.loads(raw_bytes.decode("utf-8"))
+    except FileNotFoundError:
+        result.update(status="absent", error="usage_disappeared")
+        return result
+    except (OSError, UnicodeDecodeError):
+        result.update(status="read_error", error="usage_read_failed")
+        return result
+    except json.JSONDecodeError:
+        result.update(status="invalid", error="usage_invalid_json")
+        return result
+    usage, status = _validate_usage_document(raw)
+    result.update(status=status, usage=usage, complete=status == "present")
+    if not lifecycle_proven and status in {"present", "partial"}:
+        result["complete"] = False
+        result["status"] = "partial"
+        result["error"] = "lifecycle_unproven"
+    return result
 
 
 def sanitize_usage(raw: dict | None) -> dict | None:
