@@ -134,7 +134,7 @@ web:
         _,usage=self.run_cli("absent"); self.assertIsNone(usage["provider_finish_reason"]); self.assertIsNone(usage.get("finish_reason")); self.assertNotEqual(usage.get("hermes_turn_exit_reason"),"stop")
     def test_11_usage_present_consistent(self):
         _,usage=self.run_cli("stop"); self.assertEqual((usage["input_tokens"],usage["output_tokens"],usage["total_tokens"]),(10,5,15))
-    def test_12_usage_absent_fails_closed(self): self.assertIn('HermesRunError("usage_file_missing_or_invalid")',Path("/app/hermline.py").read_text())
+    def test_12_usage_absent_fails_closed(self): self.assertIn('HermesRunError("usage_file_missing_or_invalid"',Path("/app/hermline.py").read_text())
     def test_13_search_success(self): self.assert_count(self.call_tavily("search","ok")[2],succeeded=1,failed=0)
     def test_14_search_http500(self): self.assert_count(self.call_tavily("search","http500")[2])
     def test_15_search_transport(self): self.assert_count(self.call_tavily("search","transport")[2])
