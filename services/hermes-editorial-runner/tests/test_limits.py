@@ -20,6 +20,12 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertEqual(config.MAX_WEB_SEARCHES, 3)
         self.assertEqual(config.MAX_FINAL_SOURCES, 4)
         self.assertEqual(config.JOB_TIMEOUT_SECONDS, 300)
+        self.assertEqual(config.CLIENT_DEADLINE_SECONDS, 330)
+        self.assertEqual(config.HTTP_POST_TIMEOUT_SECONDS, 320)
+        self.assertEqual(config.HTTP_GET_TIMEOUT_SECONDS, 30)
+        self.assertEqual(config.ADMISSION_BUDGET_SECONDS, 5)
+        self.assertEqual(config.FINALIZATION_BUDGET_SECONDS, 15)
+        self.assertEqual(config.RESPONSE_DELIVERY_BUDGET_SECONDS, 10)
         self.assertEqual(config.MODEL_MAX_TOKENS, 4096)
         self.assertEqual(config.OUTPUT_MAX_BYTES, 256 * 1024)
         self.assertEqual(config.PROVIDER_MAX_RETRIES, 1)
@@ -28,6 +34,14 @@ class TestCandidateLimits(unittest.TestCase):
 
     def test_limit_validator_accepts_candidate(self):
         config.validate_limits()
+
+    def test_deadline_validator_rejects_incompatible_contract(self):
+        with self.assertRaisesRegex(ValueError, "client_deadline_budget_insufficient"):
+            config.validate_deadline_contract(client_deadline_seconds=310)
+        with self.assertRaisesRegex(ValueError, "post_timeout_budget_insufficient"):
+            config.validate_deadline_contract(http_post_timeout_seconds=319)
+        with self.assertRaisesRegex(ValueError, "post_timeout_must_precede_client_deadline"):
+            config.validate_deadline_contract(http_post_timeout_seconds=330)
 
     def test_stdout_limit_rejects_oversize(self):
         with self.assertRaisesRegex(RuntimeError, "output_too_large"):

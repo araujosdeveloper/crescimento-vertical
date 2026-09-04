@@ -45,17 +45,39 @@ class HttpResult:
 
 
 class SinglePostExecutor:
-    def __init__(self, base_url: str, timeout_seconds: float, poll_interval_seconds: float,
-                 opener: Callable = urllib.request.urlopen):
+    def __init__(self, base_url: str, client_deadline_seconds: float,
+                 poll_interval_seconds: float, opener: Callable = urllib.request.urlopen,
+                 *, http_post_timeout_seconds: float = config.HTTP_POST_TIMEOUT_SECONDS,
+                 http_get_timeout_seconds: float = config.HTTP_GET_TIMEOUT_SECONDS,
+                 job_timeout_seconds: float = config.JOB_TIMEOUT_SECONDS,
+                 admission_budget_seconds: float = config.ADMISSION_BUDGET_SECONDS,
+                 finalization_budget_seconds: float = config.FINALIZATION_BUDGET_SECONDS,
+                 response_delivery_budget_seconds: float = config.RESPONSE_DELIVERY_BUDGET_SECONDS):
         self.base_url = base_url.rstrip("/")
-        self.timeout_seconds = timeout_seconds
+        config.validate_deadline_contract(
+            client_deadline_seconds=client_deadline_seconds,
+            http_post_timeout_seconds=http_post_timeout_seconds,
+            http_get_timeout_seconds=http_get_timeout_seconds,
+            job_timeout_seconds=job_timeout_seconds,
+            admission_budget_seconds=admission_budget_seconds,
+            finalization_budget_seconds=finalization_budget_seconds,
+            response_delivery_budget_seconds=response_delivery_budget_seconds,
+        )
+        self.client_deadline_seconds = client_deadline_seconds
+        self.http_post_timeout_seconds = http_post_timeout_seconds
+        self.http_get_timeout_seconds = http_get_timeout_seconds
         self.poll_interval_seconds = poll_interval_seconds
         self.opener = opener
         self.post_count = 0
         self.get_count = 0
         self.initial_status = None
         self.terminal_status = None
+        # This clock starts immediately before the first POST, so server-side
+        # admission and the synchronous job are inside the total budget.
         self.started = time.monotonic()
+
+    def _remaining(self) -> float:
+        return self.started + self.client_deadline_seconds - time.monotonic()
 
     @staticmethod
     def _parse_response(response, expected_job_id: str | None = None) -> HttpResult:
@@ -82,12 +104,19 @@ class SinglePostExecutor:
         return HttpResult(response.status, body)
 
     def _request(self, method: str, path: str, body: bytes | None = None) -> HttpResult:
+        remaining = self._remaining()
+        if remaining <= 0:
+            raise ExecutorError("deadline_exhausted", EXIT_TIMEOUT)
+        operation_timeout = min(
+            self.http_post_timeout_seconds if method == "POST" else self.http_get_timeout_seconds,
+            remaining,
+        )
         headers = {"Accept": "application/json"}
         if body is not None:
             headers["Content-Type"] = "application/json"
         request = urllib.request.Request(self.base_url + path, data=body, method=method, headers=headers)
         try:
-            response = self.opener(request, timeout=self.timeout_seconds)
+            response = self.opener(request, timeout=operation_timeout)
             return self._parse_response(response)
         except urllib.error.HTTPError as exc:
             try:
@@ -107,11 +136,11 @@ class SinglePostExecutor:
         current = initial
         if current.body["state"] in TERMINAL:
             return current
-        deadline = self.started + self.timeout_seconds
+        deadline = self.started + self.client_deadline_seconds
         while current.body["state"] in ACTIVE:
             if time.monotonic() >= deadline:
-                raise ExecutorError("timeout_unreconciled", EXIT_TIMEOUT)
-            time.sleep(self.poll_interval_seconds)
+                raise ExecutorError("deadline_exhausted", EXIT_TIMEOUT)
+            time.sleep(min(self.poll_interval_seconds, max(0, deadline - time.monotonic())))
             self.get_count += 1
             current = self._request("GET", "/v1/jobs/" + job_id)
             if current.body.get("jobId") != job_id:
@@ -186,7 +215,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--execute", action="store_true")
     parser.add_argument("--confirm", default="")
     parser.add_argument("--base-url", default="http://cv-hermes-editorial-runner:8100")
-    parser.add_argument("--timeout-seconds", type=float, default=300.0)
+    parser.add_argument("--timeout-seconds", "--client-deadline-seconds", dest="client_deadline_seconds",
+                        type=float, default=config.CLIENT_DEADLINE_SECONDS)
     parser.add_argument("--poll-interval-seconds", type=float, default=2.0)
     args = parser.parse_args(argv)
     if args.execute and args.dry_run or not args.execute and not args.dry_run:
@@ -195,7 +225,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.execute and args.confirm != "SINGLE_POST_AUTHORIZED":
         print(json.dumps({"error": "confirmation_required"}))
         return EXIT_CONFIG
-    if args.timeout_seconds <= 0 or args.poll_interval_seconds <= 0:
+    if args.client_deadline_seconds <= 0 or args.poll_interval_seconds <= 0:
         print(json.dumps({"error": "invalid_timing"}))
         return EXIT_CONFIG
     executor = None
@@ -204,7 +234,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.dry_run:
             print(json.dumps({"schemaValid": True, "httpPostCount": 0, "httpGetCount": 0}))
             return EXIT_SUCCEEDED
-        executor = SinglePostExecutor(args.base_url, args.timeout_seconds, args.poll_interval_seconds,
+        executor = SinglePostExecutor(args.base_url, args.client_deadline_seconds, args.poll_interval_seconds,
                                       _signing_client(args.base_url, config.HMAC_SECRET_FILE))
         summary, code = executor.execute(body)
         print(json.dumps(summary, ensure_ascii=False))
@@ -218,7 +248,10 @@ def main(argv: list[str] | None = None) -> int:
         }
         print(json.dumps(summary))
         return exc.code
-    except OSError:
+    except (OSError, ValueError) as exc:
+        if isinstance(exc, ValueError):
+            print(json.dumps({"error": "invalid_deadline_configuration"}))
+            return EXIT_CONFIG
         print(json.dumps({"error": "configuration_error"}))
         return EXIT_CONFIG
 

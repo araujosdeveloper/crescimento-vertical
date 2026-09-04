@@ -264,10 +264,20 @@ invocado por `scripts/phase8-controlled-battery.sh`. A requisição é lida
 somente de stdin e validada antes de um único POST. A resposta é capturada e
 validada (HTTP, Content-Type, tamanho, JSON, jobId e estado); apenas os estados
 `queued`/`running` entram em polling GET fixo de dois segundos até o deadline
-monotônico de 300 segundos. Não existe segundo POST, retry de POST ou teste de
-idempotência. O wrapper operacional instala `trap` antes de abrir as travas e
-recria somente o runner fechado no `finally`; o cliente roda como UID 10000,
-sem fixture montado e sem persistir o corpo.
+monotônico total do cliente (330 s na candidata). O trabalho Hermes continua
+limitado a 300 s. No POST síncrono, o timeout de socket é 320 s e cada GET tem
+timeout de operação de 30 s; cada operação é limitada novamente pelo saldo do
+deadline monotônico. O POST reserva 300 s de trabalho + 5 s de admissão + 15 s
+de margem contratual de finalização. Os 10 s de entrega da resposta ficam fora
+do timeout de socket: saldo global remanescente não prolonga uma operação cujo
+socket já expirou. Esses 15 s são margem de contrato,
+não garantia de finalização: o runner ainda não possui limite próprio
+comprovável para sua persistência e liberação de reserva, dependência da etapa
+seguinte. Configurações incompatíveis são rejeitadas antes do POST. Não existe
+segundo POST, retry de POST ou teste de idempotência. O wrapper operacional
+instala `trap` antes de abrir as travas e recria somente o runner fechado no
+`finally`; o cliente roda como UID 10000, sem fixture montado e sem persistir o
+corpo.
 
 ## Post-mortem do dossier inválido — 2026-09-01
 

@@ -2,10 +2,8 @@ import io
 import json
 import os
 import sys
-import threading
 import unittest
 from unittest import mock
-from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import controlled_battery as cb
@@ -32,7 +30,7 @@ class TestControlledBattery(unittest.TestCase):
             calls.append(request.method)
             result = responses[len(calls) - 1]
             return result
-        runner = cb.SinglePostExecutor("http://fake", 300, 0, opener)
+        runner = cb.SinglePostExecutor("http://fake", 330, 0, opener)
         with mock.patch.object(cb.time, "sleep"):
             summary, code = runner.execute(request_body())
         return summary, code, calls
@@ -76,14 +74,14 @@ class TestControlledBattery(unittest.TestCase):
             if expected == "":
                 response.raw = b"not-json"
                 expected = "invalid_response_json"
-            runner = cb.SinglePostExecutor("http://fake", 300, 0, lambda *_, **__: response)
+            runner = cb.SinglePostExecutor("http://fake", 330, 0, lambda *_, **__: response)
             with self.assertRaisesRegex(cb.ExecutorError, expected):
                 runner.execute(request_body())
             self.assertEqual(runner.post_count, 1)
 
     def test_get_id_mismatch_and_transport_errors(self):
         responses = [Response(body={"jobId":"a"*32,"state":"queued"}), Response(body={"jobId":"b"*32,"state":"running"})]
-        runner = cb.SinglePostExecutor("http://fake", 300, 0, lambda *_, **__: responses.pop(0))
+        runner = cb.SinglePostExecutor("http://fake", 330, 0, lambda *_, **__: responses.pop(0))
         with mock.patch.object(cb.time, "sleep"):
             with self.assertRaisesRegex(cb.ExecutorError, "job_id_mismatch"):
                 runner.execute(request_body())
@@ -91,25 +89,127 @@ class TestControlledBattery(unittest.TestCase):
             if request.method == "POST":
                 raise OSError("offline")
             return Response(body={"jobId":"a"*32,"state":"succeeded"})
-        runner = cb.SinglePostExecutor("http://fake", 300, 0, transport)
+        runner = cb.SinglePostExecutor("http://fake", 330, 0, transport)
         with self.assertRaisesRegex(cb.ExecutorError, "transport_error"):
             runner.execute(request_body())
         self.assertEqual(runner.post_count, 1)
 
-    def test_timeout_and_second_post_guard(self):
-        runner = cb.SinglePostExecutor("http://fake", 1, 0, lambda *_, **__: Response(body={"jobId":"a"*32,"state":"queued"}))
+    def test_deadline_and_second_post_guard(self):
+        runner = cb.SinglePostExecutor(
+            "http://fake", 10, 0,
+            lambda *_, **__: Response(body={"jobId":"a"*32,"state":"queued"}),
+            http_post_timeout_seconds=8, http_get_timeout_seconds=2,
+            job_timeout_seconds=1, admission_budget_seconds=1,
+            finalization_budget_seconds=1, response_delivery_budget_seconds=1,
+        )
         runner.started = 0
-        with mock.patch.object(cb.time, "monotonic", side_effect=[0, 2]), mock.patch.object(cb.time, "sleep"):
-            with self.assertRaisesRegex(cb.ExecutorError, "timeout_unreconciled"):
+        with mock.patch.object(cb.time, "monotonic", side_effect=[0, 11]), mock.patch.object(cb.time, "sleep"):
+            with self.assertRaisesRegex(cb.ExecutorError, "deadline_exhausted"):
                 runner.execute(request_body())
         with self.assertRaisesRegex(cb.ExecutorError, "second_post_blocked"):
             runner.post_once(request_body())
 
+    def test_operation_timeout_is_bounded_by_global_deadline(self):
+        observed = []
+        def opener(request, timeout):
+            observed.append((request.method, timeout))
+            return Response(body={"jobId":"a"*32,"state":"succeeded"})
+        with mock.patch.object(cb.time, "monotonic", side_effect=[0, 4, 4]):
+            runner = cb.SinglePostExecutor("http://fake", 330, 0, opener)
+            runner.execute(request_body())
+        self.assertEqual(observed, [("POST", 320)])
+
+    def test_admission_delay_reduces_operation_timeout_from_remaining_budget(self):
+        observed = []
+        with mock.patch.object(cb.time, "monotonic", side_effect=[0, 20, 20]):
+            runner = cb.SinglePostExecutor("http://fake", 330, 0,
+                                           lambda request, timeout: (observed.append(timeout),
+                                           Response(body={"jobId":"a"*32,"state":"succeeded"}))[1])
+            runner.execute(request_body())
+        self.assertEqual(observed, [310])
+
+    def test_previous_race_terminal_504_fits_response_margin(self):
+        observed = []
+        def opener(request, timeout):
+            observed.append((request.method, timeout))
+            return Response(status=504, body={"jobId":"a"*32,"state":"timed_out"})
+        runner = cb.SinglePostExecutor("http://fake", 330, 0, opener)
+        summary, code = runner.execute(request_body())
+        self.assertEqual(code, cb.EXIT_TERMINAL_FAILURE)
+        self.assertEqual(observed, [("POST", 320)])
+        self.assertEqual(summary["httpPostCount"], 1)
+        self.assertEqual(summary["terminalStatus"], "timed_out")
+
+    def test_http_error_504_is_parsed_as_terminal_response(self):
+        payload = json.dumps({"jobId": "a" * 32, "state": "timed_out"}).encode()
+        headers = {"Content-Type": "application/json"}
+
+        def transport(request, timeout):
+            raise cb.urllib.error.HTTPError(
+                request.full_url, 504, "Gateway Timeout", headers, io.BytesIO(payload)
+            )
+
+        runner = cb.SinglePostExecutor("http://fake", 330, 0, transport)
+        summary, code = runner.execute(request_body())
+        self.assertEqual(code, cb.EXIT_TERMINAL_FAILURE)
+        self.assertEqual(summary["terminalStatus"], "timed_out")
+        self.assertEqual(runner.post_count, 1)
+
+    def test_socket_expiry_is_not_extended_by_delivery_margin(self):
+        clock = [0.0]
+
+        def transport(request, timeout):
+            self.assertEqual(request.method, "POST")
+            self.assertEqual(timeout, 320)
+            clock[0] = 320.0
+            raise TimeoutError("socket expired")
+
+        with mock.patch.object(cb.time, "monotonic", side_effect=lambda: clock[0]):
+            runner = cb.SinglePostExecutor("http://fake", 330, 0, transport)
+            with self.assertRaisesRegex(cb.ExecutorError, "transport_error"):
+                runner.execute(request_body())
+        self.assertEqual(runner.post_count, 1)
+        self.assertEqual(runner.get_count, 0)
+
+    def test_terminal_response_after_job_and_finalization_delay_is_accepted(self):
+        clock = [0.0]
+        def opener(request, timeout):
+            self.assertEqual(timeout, 320)
+            clock[0] = 315.0
+            return Response(status=504, body={"jobId":"a"*32,"state":"timed_out"})
+        with mock.patch.object(cb.time, "monotonic", side_effect=lambda: clock[0]):
+            runner = cb.SinglePostExecutor("http://fake", 330, 0, opener)
+            summary, code = runner.execute(request_body())
+        self.assertEqual(code, cb.EXIT_TERMINAL_FAILURE)
+        self.assertEqual(summary["terminalStatus"], "timed_out")
+
+    def test_invalid_deadline_rejected_before_post(self):
+        calls = []
+        with self.assertRaisesRegex(ValueError, "client_deadline_budget_insufficient"):
+            cb.SinglePostExecutor("http://fake", 310, 0, lambda *args: calls.append(args))
+        self.assertEqual(calls, [])
+
+    def test_transport_timeout_does_not_assign_job_state(self):
+        def transport(request, timeout):
+            self.assertEqual(request.method, "POST")
+            self.assertEqual(timeout, 320)
+            raise TimeoutError("socket")
+        runner = cb.SinglePostExecutor("http://fake", 330, 0, transport)
+        with self.assertRaisesRegex(cb.ExecutorError, "transport_error"):
+            runner.execute(request_body())
+        self.assertIsNone(runner.terminal_status)
+        self.assertEqual(runner.post_count, 1)
+
     def test_input_strict_and_dry_run(self):
-        with mock.patch.object(cb.sys, "stdin", io.TextIOWrapper(io.BytesIO(request_body()))):
-            self.assertEqual(cb.main(["--dry-run"]), cb.EXIT_SUCCEEDED)
-        with mock.patch.object(cb.sys, "stdin", io.TextIOWrapper(io.BytesIO(request_body() + b"x"))):
-            self.assertEqual(cb.main(["--dry-run"]), cb.EXIT_INVALID)
+        schema_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "docs", "schemas")
+        class FakeStdin:
+            def __init__(self, raw):
+                self.buffer = io.BytesIO(raw)
+        with mock.patch.object(cb.config, "SCHEMAS_DIR", schema_dir):
+            with mock.patch.object(cb.sys, "stdin", FakeStdin(request_body())):
+                self.assertEqual(cb.main(["--dry-run"]), cb.EXIT_SUCCEEDED)
+            with mock.patch.object(cb.sys, "stdin", FakeStdin(request_body() + b"x")):
+                self.assertEqual(cb.main(["--dry-run"]), cb.EXIT_INVALID)
 
     def test_static_single_post_and_only_get_polling(self):
         with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), "controlled_battery.py"), encoding="utf-8") as handle:
@@ -118,25 +218,18 @@ class TestControlledBattery(unittest.TestCase):
         self.assertEqual(source.count('self._request("GET"'), 1)
         self.assertNotIn("idempot", source.lower())
 
-    def test_local_http_server_exercises_one_post_and_get_polling(self):
+    def test_fake_transport_exercises_one_post_and_get_polling(self):
         calls = []
-        class Handler(BaseHTTPRequestHandler):
-            def do_POST(self):
-                calls.append(self.command)
-                self.rfile.read(int(self.headers["Content-Length"]))
-                payload = json.dumps({"jobId": "c" * 32, "state": "queued"}).encode()
-                self.send_response(202); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(payload))); self.end_headers(); self.wfile.write(payload)
-            def do_GET(self):
-                calls.append(self.command)
-                payload = json.dumps({"jobId": "c" * 32, "state": "succeeded"}).encode()
-                self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(payload))); self.end_headers(); self.wfile.write(payload)
-            def log_message(self, *_): pass
-        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
-        threading.Thread(target=server.serve_forever, daemon=True).start()
-        runner = cb.SinglePostExecutor(f"http://127.0.0.1:{server.server_address[1]}", 2, 0.001)
+        responses = [
+            Response(body={"jobId": "c" * 32, "state": "queued"}),
+            Response(body={"jobId": "c" * 32, "state": "succeeded"}),
+        ]
+        def opener(request, timeout):
+            calls.append(request.method)
+            return responses.pop(0)
+        runner = cb.SinglePostExecutor("http://fake", 330, 0.001, opener)
         with mock.patch.object(cb.time, "sleep"):
             summary, code = runner.execute(request_body())
-        server.shutdown(); server.server_close()
         self.assertEqual(code, cb.EXIT_SUCCEEDED)
         self.assertEqual(calls, ["POST", "GET"])
         self.assertEqual(summary["httpPostCount"], 1)

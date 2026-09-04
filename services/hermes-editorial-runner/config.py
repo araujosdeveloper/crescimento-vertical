@@ -43,6 +43,15 @@ EXECUTION_ENABLE_FILE = os.environ.get(
     "EXECUTION_ENABLE_FILE", "/run/secrets/execution-enable"
 )
 JOB_TIMEOUT_SECONDS = _env_int("JOB_TIMEOUT_SECONDS", 300)
+# The synchronous client has independent budgets.  The job budget remains
+# 300s; the other values reserve explicit time for admission, terminal
+# persistence, and delivery of the HTTP response.
+ADMISSION_BUDGET_SECONDS = _env_int("ADMISSION_BUDGET_SECONDS", 5)
+FINALIZATION_BUDGET_SECONDS = _env_int("FINALIZATION_BUDGET_SECONDS", 15)
+RESPONSE_DELIVERY_BUDGET_SECONDS = _env_int("RESPONSE_DELIVERY_BUDGET_SECONDS", 10)
+CLIENT_DEADLINE_SECONDS = _env_int("CLIENT_DEADLINE_SECONDS", 330)
+HTTP_POST_TIMEOUT_SECONDS = _env_int("HTTP_POST_TIMEOUT_SECONDS", 320)
+HTTP_GET_TIMEOUT_SECONDS = _env_int("HTTP_GET_TIMEOUT_SECONDS", 30)
 MAX_TURNS = _env_int("MAX_TURNS", 8)
 MAX_WEB_SEARCHES = _env_int("MAX_WEB_SEARCHES", 3)
 MAX_FINAL_SOURCES = _env_int("MAX_FINAL_SOURCES", 4)
@@ -114,3 +123,42 @@ def validate_limits() -> None:
         raise ValueError("configured_limits_invalid")
     if MAX_BATCH_JOBS > 4 or MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
         raise ValueError("configured_limits_exceeded")
+    validate_deadline_contract()
+
+
+def validate_deadline_contract(*, client_deadline_seconds: float | None = None,
+                               http_post_timeout_seconds: float | None = None,
+                               http_get_timeout_seconds: float | None = None,
+                               job_timeout_seconds: float | None = None,
+                               admission_budget_seconds: float | None = None,
+                               finalization_budget_seconds: float | None = None,
+                               response_delivery_budget_seconds: float | None = None) -> None:
+    """Reject timing configurations before a request can be sent.
+
+    The monotonic client deadline starts before the POST.  The POST socket
+    timeout is shorter than that deadline so a synchronous terminal response
+    still has delivery budget.  Runner finalization is not currently bounded
+    by code, therefore the finalization budget is an explicit contract margin,
+    not a guarantee; that dependency remains a later lifecycle step.
+    """
+    client = CLIENT_DEADLINE_SECONDS if client_deadline_seconds is None else client_deadline_seconds
+    post = HTTP_POST_TIMEOUT_SECONDS if http_post_timeout_seconds is None else http_post_timeout_seconds
+    get = HTTP_GET_TIMEOUT_SECONDS if http_get_timeout_seconds is None else http_get_timeout_seconds
+    job = JOB_TIMEOUT_SECONDS if job_timeout_seconds is None else job_timeout_seconds
+    admission = ADMISSION_BUDGET_SECONDS if admission_budget_seconds is None else admission_budget_seconds
+    finalization = FINALIZATION_BUDGET_SECONDS if finalization_budget_seconds is None else finalization_budget_seconds
+    response = RESPONSE_DELIVERY_BUDGET_SECONDS if response_delivery_budget_seconds is None else response_delivery_budget_seconds
+    values = (client, post, get, job, admission, finalization, response)
+    if any(value <= 0 for value in values):
+        raise ValueError("deadline_values_must_be_positive")
+    if client < job + admission + finalization + response:
+        raise ValueError("client_deadline_budget_insufficient")
+    # Work, admission, and the contractual finalization margin belong to the
+    # POST socket budget. Delivery is outside it; global slack cannot extend
+    # an already expired POST operation.
+    if post < job + admission + finalization:
+        raise ValueError("post_timeout_budget_insufficient")
+    if post >= client:
+        raise ValueError("post_timeout_must_precede_client_deadline")
+    if get > client:
+        raise ValueError("get_timeout_exceeds_client_deadline")

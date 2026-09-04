@@ -625,8 +625,15 @@ Ao concluir uma sessão de trabalho, registrar:
 O runner aceita somente requisição estruturada, aplica escopo fechado,
 canonicalização e deduplicação, e persiste apenas estado operacional mínimo.
 Há uma execução ativa no máximo e bateria de até 4 jobs; cada job limita 8
-turnos, 3 buscas, 4 fontes, 300 segundos, 4096 tokens por chamada e 256 KiB de
-stdout. O guardrail persistente reserva US$ 0,50/job até US$ 2. A agenda
+turnos, 3 buscas, 4 fontes e 300 segundos de trabalho Hermes, 4096 tokens por
+chamada e 256 KiB de stdout. O cliente síncrono usa deadline monotônico total
+de 330 s, timeout de POST de 320 s e timeout de cada GET de 30 s, sempre
+limitados pelo saldo do deadline. O POST reserva 300 s de trabalho + 5 s de
+admissão + 15 s de margem contratual de finalização. Os 10 s de entrega da
+resposta ficam fora do timeout de socket: saldo global remanescente não prolonga
+uma operação cujo socket já expirou; a margem de finalização não é
+garantia enquanto o runner não tiver limite próprio comprovável. O guardrail
+persistente reserva US$ 0,50/job até US$ 2. A agenda
 candidata é apenas declarada; cron,
 webhook, gateway e workflow n8n permanecem desativados. Mesmo com credenciais
 exclusivas montadas, a execução e a bateria real permanecem bloqueadas pelas
