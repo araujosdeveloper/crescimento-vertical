@@ -4,17 +4,32 @@
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `dc0197c` |
-| Fase ativa | Fase 8 — em execução; não encerrada |
+| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `6922bbb` |
+| Fase ativa | Fase 8 — pronta para aceite humano; bateria real concluída com sucesso |
 | PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
-| Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-f10488a`, Image ID `sha256:70630655…`, black-box real com 36 cenários aprovados em `network none` |
-| Runtime ativo | Deploy fechado aprovado: runner `75c116b1adc9…` healthy na imagem/digest `sha256:70630655…`; proxy `cd0d152c05ee…` preservado |
-| Correções em branch | `b6f5f99`…`fcc83c0` + teste black-box alinhado (`f10488a`) incorporados e implantados; runtime alinhado ao código do HEAD |
-| Restrições | Sem chamada externa, job, retry 3, publicação, alteração de dados ou Fase 9 |
+| Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-d301284`, Image ID `sha256:5d575d02…`, black-box real com 36 cenários aprovados em `network none` |
+| Bateria real | **SUCESSO** — job raiz `44666d93…` `succeeded`, dossiê `editorial-dossier.v1` válido, `provider_finish_reason=stop`, Tavily `search 3/3` e `extract 1/1`, custo acumulado US$ 0,1053, `retry3=0` |
+| Runtime ativo | runner `28c9b870…` healthy na imagem/digest `sha256:5d575d02…`; proxy `cd0d152c05ee…` preservado; travas fechadas |
+| Restrições | Publicação automática, retry 3 e Fase 9 continuam proibidos |
 
-Próxima ação única: solicitar autorização humana para a validação controlada
-final da Fase 8. O Hermes permanece editor-chefe; runner é governança;
-DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada para o Payload.
+Próxima ação única: **aceite humano da Fase 8**. O Hermes permanece editor-chefe;
+runner é governança; DeepSeek/Tavily são subordinados; n8n é a única ponte
+autorizada para o Payload.
+
+### Bateria real final — 4 de setembro de 2026
+
+Após o ADR-035 (teto efetivo de 5 jobs para o job raiz final), a janela
+controlada `scripts/phase8-controlled-battery.sh` executou exatamente um POST e
+o job raiz `44666d93297d…` terminou `succeeded` em ~216 s, sem polling e sem
+retry. O dossiê `editorial-dossier.v1` é válido (`contentType=analysis`,
+`primaryPillar=sales-attendance`, `riskLevel=low`, 3 fontes — 2 nível A e 1
+nível B). A observabilidade `hermes-observability.v1` registrou
+`provider_finish_reason=stop` e Tavily `search attempted=3/succeeded=3` e
+`extract attempted=1/succeeded=1` (invariante `succeeded+failed==attempted`
+preservada). O custo acumulado passou de US$ 0,0543 para US$ 0,1053
+(`api_calls` 8→15), dentro do guardrail de US$ 2. As duas travas foram abertas
+e fechadas em bloco; `jobs_reserved=5`, `lineage=2`, `retry3=0` e reserva zero
+ao final. Nenhuma publicação, Payload, n8n, Fase 9 ou alteração de dados.
 
 ### Deploy fechado das correções em branch — 4 de setembro de 2026
 

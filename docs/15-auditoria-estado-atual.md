@@ -26,12 +26,24 @@ continuaram fechadas. O 4º job (`3754da2d`, `timed_out`) foi executado por
 outro agente (bateria/teste) e não pertence à linhagem de retry; `retry3`
 permanece inexistente.
 
+Bateria real final (4 de setembro de 2026): o ADR-035 elevou o teto efetivo da
+bateria para 5 jobs para admitir o job raiz final. A janela controlada
+(`scripts/phase8-controlled-battery.sh`) executou um único POST; o job raiz
+`44666d93297d…` terminou `succeeded` em ~216 s. O dossiê `editorial-dossier.v1`
+foi validado (`contentType=analysis`, `primaryPillar=sales-attendance`,
+`riskLevel=low`, 3 fontes — 2 nível A e 1 nível B). A observabilidade
+`hermes-observability.v1` registrou `provider_finish_reason=stop` e Tavily
+`search attempted=3/succeeded=3`, `extract attempted=1/succeeded=1`. O custo
+acumulado subiu de US$ 0,0543 para US$ 0,1053 (`api_calls` 8→15), dentro do
+guardrail de US$ 2. Ao final: `jobs_reserved=5`, `lineage=2`, `retry3=0`,
+reserva zero e travas fechadas. Nenhuma publicação, Payload, n8n ou Fase 9.
+
 | Fases | Estado oficial |
 | --- | --- |
 | 0–3 | Concluídas |
 | 4 | Concluída com ressalva de copy comercial |
 | 5–7 | Concluídas e aceitas |
-| 8 | Em execução; gate offline corrigido, aceite humano pendente |
+| 8 | Em execução; gate offline corrigido e bateria real bem-sucedida, aceite humano pendente |
 | 9–12 | Pendentes |
 
 ### Correção comprovada do gate offline da Fase 8
