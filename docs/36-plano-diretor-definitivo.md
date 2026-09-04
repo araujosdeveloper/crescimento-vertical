@@ -5,6 +5,13 @@
 **Natureza:** proposta de consolidação para aceite humano; não altera o repositório nem o runtime
 **Regra central:** este documento organiza a execução, mas não substitui a Constituição, o Roteiro-Mestre, os ADRs nem os aceites humanos.
 
+> **Atualização de estado (4 de setembro de 2026):** o bloqueador descrito em
+> §5.1 foi resolvido pela candidata corrigida `phase8-instrumentation-e154bf4`
+> (Image ID `sha256:cad0e4f…`), com black-box embutido idêntico ao Git, 36
+> cenários aprovados em `network none` e deploy fechado apenas do runner
+> (`bc89e74680e9…`). As seções §4.3, §5.1, §5.3 e §11 foram reconciliadas com
+> esse estado; a Fase 8 permanece em execução aguardando aceite humano.
+
 ---
 
 ## 1. Compromisso de execução
@@ -189,7 +196,7 @@ Fontes autorizadas → Hermes editor-chefe → dossiê estruturado e rastreável
 | 5 | Portal editorial e experiência de leitura | Concluída | Aceite humano registrado |
 | 6 | SEO técnico, dados estruturados e performance | Concluída | GA4 e Search Console continuam desativados por decisão |
 | 7 | Captação, diagnóstico e mensuração comercial | Concluída | Fluxo real e notificação recebida |
-| 8 | Hermes Agent e política editorial automatizada | Em execução e divergente | Gate final ainda inválido; requer remediação controlada |
+| 8 | Hermes Agent e política editorial automatizada | Em execução | Gate offline corrigido (`phase8-instrumentation-e154bf4`, 36 cenários, deploy fechado); aceite humano pendente |
 | 9 | n8n, Telegram, aprovação e publicação | Pendente | Não iniciar antes do aceite da Fase 8 |
 | 10 | Conteúdo inicial e validação editorial | Pendente | Conteúdo real e calendário de 90 dias |
 | 11 | Segurança, observabilidade, backup e recuperação | Pendente | Hardening e continuidade finais |
@@ -210,6 +217,12 @@ Esses aceites permanecem válidos. Pendências posteriores não devem falsamente
 ## 5. Divergências e dívidas atuais
 
 ### 5.1 Bloqueador imediato da Fase 8
+
+> **SUPERADO — resolvido em 3 de setembro de 2026.** O bloqueador abaixo foi
+> superado pela candidata corrigida `phase8-instrumentation-e154bf4` (Image ID
+> `sha256:cad0e4f…`), com black-box embutido idêntico ao Git, 36 cenários
+> aprovados em `network none` e deploy fechado exclusivo do runner. O texto a
+> seguir é preservado como registro histórico do diagnóstico.
 
 O snapshot aponta o Compose para a imagem candidata `phase8-instrumentation-f37f99c`, mas:
 
@@ -234,7 +247,7 @@ Uma nova execução não pode ser apresentada como retry 3. Ela só poderá ser 
 
 ### 5.3 Documentação divergente
 
-- `README.md` ainda descreve estado antigo da Fase 2.
+- `README.md` já descreve o estado real da Fase 8 (item concluído na consolidação de 3 de setembro de 2026).
 - documentos históricos conservam afirmações superadas sobre o papel do Hermes.
 - relatórios cronológicos aparecem fora de ordem e misturados ao estado vigente.
 - o contrato de integração mais antigo descreve Hermes como pesquisador, enquanto ADR-034 o consolida como editor-chefe.
@@ -744,7 +757,12 @@ O projeto só poderá ser declarado concluído quando todos os itens abaixo fore
 
 ## 11. Próxima ação única recomendada
 
-Após o aceite humano deste Plano Diretor:
+> **Atualizado em 4 de setembro de 2026.** Os itens 2–4 da sequência original
+> já foram concluídos pela candidata corrigida `phase8-instrumentation-e154bf4`
+> (36 cenários aprovados, deploy fechado). A ação única remanescente é
+> solicitar autorização humana para a validação controlada final da Fase 8.
+
+A sequência original da proposta (após o aceite humano deste Plano Diretor):
 
 1. criar a documentação canônica consolidada sem alterar runtime;
 2. abrir uma tarefa exclusivamente para corrigir e comprovar o black-box da instrumentação da Fase 8;
@@ -752,7 +770,7 @@ Após o aceite humano deste Plano Diretor:
 4. passar CI e deploy fechado;
 5. somente então solicitar autorização para a execução real final da Fase 8.
 
-Não iniciar Fase 9, não fazer merge do PR #14 e não executar nova chamada externa enquanto o gate da imagem instrumentada permanecer inválido.
+Não iniciar Fase 9, não fazer merge do PR #14 e não executar nova chamada externa antes do aceite humano da Fase 8.
 
 ---
 

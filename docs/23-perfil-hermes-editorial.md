@@ -5,8 +5,9 @@
 Este perfil materializa o Hermes como **editor-chefe**, não como simples
 pesquisador. DeepSeek e Tavily operam subordinados a ele; o runner limita e
 registra a execução sem tomar decisões editoriais. A Fase 8 continua em
-execução, com gate final inválido, e nenhuma execução nova é autorizada por este
-documento.
+execução, com o gate offline da imagem instrumentada corrigido e comprovado
+(`phase8-instrumentation-e154bf4`, 36 cenários); nenhuma execução nova é
+autorizada por este documento.
 
 ## Objetivo
 

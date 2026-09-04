@@ -4,11 +4,12 @@
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD inicial | `feat/phase-8-hermes-editorial-policy` / `7ca990f62a0e848086dff524fec7f0e21c362065` |
+| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `fcc83c073c48e29051051d22af955b3769d91b8d` |
 | Fase ativa | Fase 8 — em execução; não encerrada |
 | PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
 | Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-e154bf4`, Image ID `sha256:cad0e4f…`, black-box real com 36 cenários aprovados em `network none` |
 | Runtime ativo | Deploy fechado aprovado: runner `bc89e74680e9…` healthy na imagem/digest `sha256:cad0e4f…`; proxy `cd0d152c05ee…` preservado |
+| Correções em branch após o deploy | `b6f5f99`, `9c47bcf`, `67dfe47`, `21dcd43`, `fcc83c0` (referência imutável por Image ID, transfer atômico de checkpoint, orçamentos de deadline do cliente, encerramento do grupo de subprocessos, persistência de usage em falhas terminais); ainda não implantadas — runtime permanece em `sha256:cad0e4f…` |
 | Restrições | Sem chamada externa, job, retry 3, publicação, alteração de dados ou Fase 9 |
 
 Próxima ação única: solicitar autorização humana para a validação controlada

@@ -1051,3 +1051,11 @@ As formulações históricas das ADR-016 e ADR-017 que podem sugerir credencial
 `automation` no Hermes são terminologicamente superadas pela ADR-034: o Hermes
 não recebe credencial do Payload; somente o n8n é a ponte autenticada para o
 CMS. O histórico das decisões permanece intacto.
+
+> **Nota de acompanhamento (4 de setembro de 2026):** a correção funcional que
+> este adendo declarou pendente foi entregue pela candidata
+> `phase8-instrumentation-e154bf4` (Image ID `sha256:cad0e4f…`), com black-box
+> embutido idêntico ao Git, 36 cenários aprovados em `network none` e deploy
+> fechado apenas do runner. A Fase 8 permanece em execução e aguarda aceite
+> humano; as proibições da ADR-034 (retry 3, publicação automática e início da
+> Fase 9) continuam válidas.

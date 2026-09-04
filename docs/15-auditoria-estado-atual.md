@@ -10,6 +10,14 @@ exclusivamente à instrumentação autorizada; sua autoria técnica inicial é
 indeterminada. O deploy fechado posterior recriou exclusivamente o runner na
 imagem aprovada; o proxy e os dados persistentes foram preservados.
 
+Atualização documental (4 de setembro de 2026): o HEAD da branch passou a
+`fcc83c073c48e29051051d22af955b3769d91b8d`, com cinco correções em branch
+posteriores ao deploy fechado (`b6f5f99`, `9c47bcf`, `67dfe47`, `21dcd43`,
+`fcc83c0`): referência imutável por Image ID, transfer atômico de snapshot de
+checkpoint, orçamentos de deadline do cliente, encerramento do grupo de
+subprocessos e persistência de usage em falhas terminais. Essas correções ainda
+não foram implantadas; o runtime permanece na imagem `sha256:cad0e4f…`.
+
 | Fases | Estado oficial |
 | --- | --- |
 | 0–3 | Concluídas |
