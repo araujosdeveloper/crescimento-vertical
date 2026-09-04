@@ -43,6 +43,11 @@ EXECUTION_ENABLE_FILE = os.environ.get(
     "EXECUTION_ENABLE_FILE", "/run/secrets/execution-enable"
 )
 JOB_TIMEOUT_SECONDS = _env_int("JOB_TIMEOUT_SECONDS", 300)
+# Process lifecycle budgets are intentionally independent from HTTP deadlines.
+# They are bounded tolerances, not guarantees of OS scheduling latency.
+PROCESS_TERM_GRACE_SECONDS = _env_int("PROCESS_TERM_GRACE_SECONDS", 2)
+PROCESS_KILL_WAIT_SECONDS = _env_int("PROCESS_KILL_WAIT_SECONDS", 2)
+PROCESS_PIPE_DRAIN_SECONDS = _env_int("PROCESS_PIPE_DRAIN_SECONDS", 1)
 # The synchronous client has independent budgets.  The job budget remains
 # 300s; the other values reserve explicit time for admission, terminal
 # persistence, and delivery of the HTTP response.
@@ -123,6 +128,12 @@ def validate_limits() -> None:
         raise ValueError("configured_limits_invalid")
     if MAX_BATCH_JOBS > 4 or MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
         raise ValueError("configured_limits_exceeded")
+    if any(value <= 0 for value in (
+        PROCESS_TERM_GRACE_SECONDS,
+        PROCESS_KILL_WAIT_SECONDS,
+        PROCESS_PIPE_DRAIN_SECONDS,
+    )):
+        raise ValueError("process_lifecycle_limits_invalid")
     validate_deadline_contract()
 
 

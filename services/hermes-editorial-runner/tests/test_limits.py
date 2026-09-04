@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -20,6 +21,9 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertEqual(config.MAX_WEB_SEARCHES, 3)
         self.assertEqual(config.MAX_FINAL_SOURCES, 4)
         self.assertEqual(config.JOB_TIMEOUT_SECONDS, 300)
+        self.assertEqual(config.PROCESS_TERM_GRACE_SECONDS, 2)
+        self.assertEqual(config.PROCESS_KILL_WAIT_SECONDS, 2)
+        self.assertEqual(config.PROCESS_PIPE_DRAIN_SECONDS, 1)
         self.assertEqual(config.CLIENT_DEADLINE_SECONDS, 330)
         self.assertEqual(config.HTTP_POST_TIMEOUT_SECONDS, 320)
         self.assertEqual(config.HTTP_GET_TIMEOUT_SECONDS, 30)
@@ -34,6 +38,11 @@ class TestCandidateLimits(unittest.TestCase):
 
     def test_limit_validator_accepts_candidate(self):
         config.validate_limits()
+
+    def test_process_lifecycle_limits_are_positive(self):
+        with mock.patch.object(config, "PROCESS_TERM_GRACE_SECONDS", 0):
+            with self.assertRaisesRegex(ValueError, "process_lifecycle_limits_invalid"):
+                config.validate_limits()
 
     def test_deadline_validator_rejects_incompatible_contract(self):
         with self.assertRaisesRegex(ValueError, "client_deadline_budget_insufficient"):

@@ -10,12 +10,96 @@ import subprocess
 import threading
 import json
 import os
+import signal
+import time
 
 import config
 import evidence
 import schemas
 
 _execution_lock = threading.Lock()  # concorrência máxima de 1 execução
+
+
+class ProcessLifecycleError(RuntimeError):
+    """Sanitized failure proving the job process group was not cleaned up."""
+
+
+def _bounded_pipe_reader(stream, sink: bytearray, limit: int, done: threading.Event) -> None:
+    """Drain a pipe concurrently while retaining at most ``limit`` bytes."""
+    try:
+        while True:
+            chunk = stream.read(65536)
+            if not chunk:
+                return
+            remaining = limit - len(sink)
+            if remaining > 0:
+                sink.extend(chunk[:remaining])
+    except (OSError, ValueError):
+        # The owner may close a pipe after the bounded cleanup deadline.
+        return
+    finally:
+        done.set()
+
+
+def _group_exists(pgid: int) -> bool:
+    try:
+        os.killpg(pgid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        raise ProcessLifecycleError("hermes_process_group_unverifiable") from None
+    return True
+
+
+def _signal_group(pgid: int, sig: signal.Signals) -> None:
+    try:
+        os.killpg(pgid, sig)
+    except ProcessLookupError:
+        return
+    except OSError:
+        raise ProcessLifecycleError("hermes_process_signal_failed") from None
+
+
+def _wait_process(proc: subprocess.Popen, timeout: float) -> bool:
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return False
+    return True
+
+
+def _terminate_group(proc: subprocess.Popen) -> None:
+    """TERM, then KILL, only within this job's process group."""
+    pgid = proc.pid
+    _signal_group(pgid, signal.SIGTERM)
+    if not _wait_process(proc, config.PROCESS_TERM_GRACE_SECONDS):
+        _signal_group(pgid, signal.SIGKILL)
+        if not _wait_process(proc, config.PROCESS_KILL_WAIT_SECONDS):
+            raise ProcessLifecycleError("hermes_process_reap_timeout")
+    # The direct child may have exited while a descendant retained the group.
+    if _group_exists(pgid):
+        _signal_group(pgid, signal.SIGKILL)
+        if not _wait_process(proc, config.PROCESS_KILL_WAIT_SECONDS) and _group_exists(pgid):
+            raise ProcessLifecycleError("hermes_process_group_not_empty")
+        if _group_exists(pgid):
+            raise ProcessLifecycleError("hermes_process_group_not_empty")
+
+
+def _close_pipes_and_join(readers: list[tuple[object, threading.Event]]) -> None:
+    deadline = time.monotonic() + config.PROCESS_PIPE_DRAIN_SECONDS
+    for _, done in readers:
+        remaining = max(0.0, deadline - time.monotonic())
+        done.wait(remaining)
+    # A descendant outside the group may retain a pipe indefinitely. Close
+    # our descriptors at the bounded deadline and never wait without a cap.
+    for stream, done in readers:
+        if not done.is_set():
+            try:
+                stream.close()
+            except (OSError, ValueError):
+                pass
+    if any(not done.is_set() for _, done in readers):
+        raise ProcessLifecycleError("hermes_pipe_drain_timeout")
 
 
 class ExecutionDisabledError(RuntimeError):
@@ -120,20 +204,58 @@ def run_hermes(request: dict) -> dict:
         child_env["HERMES_INFERENCE_PROVIDER"] = config.HERMES_PROVIDER
         child_env["HERMES_INFERENCE_MODEL"] = config.HERMES_MODEL
         child_env["HERMES_STREAM_RETRIES"] = str(config.STREAM_RETRIES)
+        proc = None
+        readers = []
+        stdout_buffer = bytearray()
+        stderr_buffer = bytearray()
+        cleanup_error = None
         try:
-            proc = subprocess.run(
+            proc = subprocess.Popen(
                 build_hermes_command(request),
-                capture_output=True,
-                text=True,
-                timeout=config.JOB_TIMEOUT_SECONDS,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                start_new_session=True,
                 shell=False,
                 env=child_env,
             )
+            stdout_done, stderr_done = threading.Event(), threading.Event()
+            readers = [(proc.stdout, stdout_done), (proc.stderr, stderr_done)]
+            for stream, done, buffer in (
+                (proc.stdout, stdout_done, stdout_buffer),
+                (proc.stderr, stderr_done, stderr_buffer),
+            ):
+                threading.Thread(
+                    target=_bounded_pipe_reader,
+                    args=(stream, buffer, config.OUTPUT_MAX_BYTES, done),
+                    daemon=True,
+                ).start()
+            if not _wait_process(proc, config.JOB_TIMEOUT_SECONDS):
+                _terminate_group(proc)
+                raise TimeoutError("timeout")
+            # A leader exiting does not prove descendants exited. Clean up and
+            # fail closed if this job group still exists.
+            if _group_exists(proc.pid):
+                _terminate_group(proc)
+                raise ProcessLifecycleError("hermes_descendants_remaining")
+        except TimeoutError:
+            raise
         except subprocess.TimeoutExpired:
             raise TimeoutError("timeout") from None
+        except ProcessLifecycleError as exc:
+            raise evidence.HermesRunError(str(exc)) from None
+        except OSError:
+            raise evidence.HermesRunError("hermes_process_start_failed") from None
+        finally:
+            if proc is not None:
+                try:
+                    _close_pipes_and_join(readers)
+                except ProcessLifecycleError as exc:
+                    cleanup_error = exc
+        if cleanup_error is not None:
+            raise evidence.HermesRunError(str(cleanup_error)) from None
         if proc.returncode != 0:
             raise evidence.HermesRunError("hermes_nonzero_exit")
-        raw_output = proc.stdout
+        raw_output = bytes(stdout_buffer).decode("utf-8", errors="replace")
         try:
             output = bounded_stdout(raw_output)
         except evidence.OutputLimitError as exc:

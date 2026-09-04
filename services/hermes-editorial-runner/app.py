@@ -317,6 +317,13 @@ class Handler(BaseHTTPRequestHandler):
                 "tavily_usage_unavailable",
                 "tavily_usage_invalid",
                 "tavily_search_limit_reached",
+                "hermes_process_start_failed",
+                "hermes_process_signal_failed",
+                "hermes_process_reap_timeout",
+                "hermes_process_group_not_empty",
+                "hermes_process_group_unverifiable",
+                "hermes_descendants_remaining",
+                "hermes_pipe_drain_timeout",
             }
             code = str(exc) if str(exc) in safe_codes else "job_failed"
             _finalize_terminal(store, job["id"], "failed", code)

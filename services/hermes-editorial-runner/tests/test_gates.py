@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import unittest
+import io
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -102,9 +103,11 @@ class TestExecutionGates(unittest.TestCase):
             credential.write("exclusive-test-key")
             credential_path = credential.name
         config.DEEPSEEK_API_KEY_FILE = credential_path
-        completed = mock.Mock(returncode=1, stdout="", stderr="provider error")
+        completed = mock.Mock(returncode=1, stdout=io.BytesIO(), stderr=io.BytesIO())
+        completed.pid = 999999
+        completed.wait.return_value = 1
         try:
-            with mock.patch("hermline.subprocess.run", return_value=completed) as run:
+            with mock.patch("hermline.subprocess.Popen", return_value=completed) as run:
                 with self.assertRaisesRegex(RuntimeError, "hermes_nonzero_exit"):
                     hermline.run_hermes(_request())
             child_env = run.call_args.kwargs["env"]
@@ -124,10 +127,7 @@ class TestExecutionGates(unittest.TestCase):
             credential_path = credential.name
         config.DEEPSEEK_API_KEY_FILE = credential_path
         try:
-            with mock.patch(
-                "hermline.subprocess.run",
-                side_effect=hermline.subprocess.TimeoutExpired("hermes", 300),
-            ):
+            with mock.patch("hermline.subprocess.Popen", side_effect=hermline.subprocess.TimeoutExpired("hermes", 300)):
                 with self.assertRaisesRegex(TimeoutError, "timeout"):
                     hermline.run_hermes(_request())
         finally:

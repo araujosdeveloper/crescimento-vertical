@@ -94,6 +94,23 @@ ativa. A agenda candidata fica apenas
 documentada (sem cron, workflow n8n ou gateway). O n8n permanece futuro
 orquestrador da Fase 9 e validate-only.
 
+### Encerramento controlado — Etapa 2
+
+O one-shot é iniciado com `start_new_session=True`, `shell=False`, stdout e
+stderr drenados concorrentemente e retenção limitada a 256 KiB por stream. O
+trabalho tem 300 s; no timeout, o runner envia TERM somente ao process group do
+job, aguarda tolerância limitada de 2 s e envia KILL se necessário, aguardando
+no máximo mais 2 s. Pipes são fechados após uma janela limitada de 1 s e o
+grupo é verificado depois da coleta. Líder encerrado não é tratado como prova
+de que filhos/netos terminaram; grupo remanescente produz erro sanitizado.
+
+O Python do runner não é subreaper. O `docker-init` do container é o
+subreaper/recolhedor de órfãos, mas um descendente que escape da sessão/grupo
+não pode ser declarado encerrado por esta etapa. Garantia desse caso exige
+cgroup/subreaper dedicado ou mudança de arquitetura, pendência explícita para
+hardening posterior. Esta etapa não altera usage, reservas, deadlines HTTP ou
+persistência/entrega da resposta.
+
 ## Compatibilidade DeepSeek V4 Flash
 
 A imagem pinada contém Hermes v0.20.4 e OpenAI SDK 2.24.0. O provider nativo

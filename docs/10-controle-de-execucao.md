@@ -639,6 +639,18 @@ webhook, gateway e workflow n8n permanecem desativados. Mesmo com credenciais
 exclusivas montadas, a execução e a bateria real permanecem bloqueadas pelas
 duas travas.
 
+O subprocesso Hermes usa sessão/grupo próprio (`start_new_session=True`) e
+stdout/stderr drenados concorrentemente com retenção máxima de 256 KiB por
+stream. O limite de trabalho é 300 s; no timeout há TERM ao grupo, tolerância
+de 2 s, KILL quando necessário, espera de coleta de até 2 s e drenagem/fechamento
+de pipes limitada a 1 s. Depois do `wait` direto, o grupo é verificado: líder
+encerrado não prova que filhos ou netos terminaram e grupo remanescente falha
+fechado com erro sanitizado. O Python não é subreaper; `docker-init` recolhe
+órfãos no runtime, mas descendente que escape da sessão não é declarado
+encerrado sem prova. Garantia desse caso depende de cgroup/subreaper dedicado e
+permanece pendente. Usage, reservas, deadlines HTTP e persistência/entrega da
+resposta não são alterados nesta etapa.
+
 Em 31 de agosto de 2026, o provider candidato foi substituído localmente por
 DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo e thinking `none`, aceita a
 credencial exclusiva somente por arquivo e falha fechado quando ausente. Não
