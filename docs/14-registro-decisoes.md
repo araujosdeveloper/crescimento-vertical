@@ -1059,3 +1059,53 @@ CMS. O histórico das decisões permanece intacto.
 > fechado apenas do runner. A Fase 8 permanece em execução e aguarda aceite
 > humano; as proibições da ADR-034 (retry 3, publicação automática e início da
 > Fase 9) continuam válidas.
+
+## ADR-035 — Job raiz final da bateria Fase 8 e teto efetivo de 5 jobs
+
+- Data: 2026-09-04
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: 8 (validação controlada final)
+
+### Contexto
+
+A bateria `phase-8-deepseek-v4-flash-candidate-v1` tem limite
+`MAX_BATCH_JOBS = 4` (constante em `config.py`, validada em `validate_limits`).
+O contador persistente `jobs_reserved` já está em 4: três jobs da linhagem
+oficial de retry (original + retry 1 + retry 2, todos `failed`) e um quarto job
+(`3754da2d`, `timed_out`) executado por outro agente, fora da linhagem oficial.
+
+Para a validação controlada final da Fase 8 é necessário um novo job raiz
+real. O limite vigente o rejeitaria com `battery_job_limit_reached`.
+
+### Decisão
+
+1. Autorizar exatamente **um** novo job raiz real como validação final da
+   Fase 8, elevando o teto efetivo desta bateria de 4 para **5** jobs
+   reservados. A mudança de `MAX_BATCH_JOBS` de 4 para 5 em `config.py` (e o
+   ajuste do teste que fixava o valor 4) é a forma determinística e auditável
+   de admitir esse único job; não reabre a bateria para novos jobs.
+2. O job é um **root job novo** (sem `retryOfJobId`/`retryNumber`), nunca um
+   retry 3. `MAX_RETRY_CHAIN = 2` e `RETRY3 = PROIBIDO` permanecem válidos.
+3. Orçamento: reserva de US$ 0,50/job e guardrail persistente de US$ 2
+   (`BATTERY_BUDGET_USD`) continuam aplicáveis; custo acumulado atual
+   US$ 0,054254576.
+4. Execução exclusivamente pela janela controlada versionada
+   (`scripts/phase8-controlled-battery.sh`), com as duas travas abertas e
+   fechadas em bloco, sem `build`/`pull`, sem recriar outro serviço.
+5. Falha não autoriza retry automático; vira evidência para post-mortem.
+
+### Consequências e reversão
+
+- Positivas: prova real de ponta a ponta (DeepSeek + Tavily → dossiê válido) e
+  fechamento da Fase 8 com evidência factual.
+- Riscos: o job real pode falhar (schema/telemetria/timeout), consumindo até
+  ~US$ 0,50 sem dossiê; não há fallback automático.
+- Reversão: restaurar `MAX_BATCH_JOBS = 4` (e o teste) e recriar o runner com a
+  imagem anterior; o job e seus contadores permanecem imutáveis para auditoria.
+
+### Critério de validação
+
+Job raiz termina `succeeded` com dossiê válido (`editorial-dossier.v1`),
+observabilidade `hermes-observability.v1` completa, `retry3=0`, custo dentro do
+guardrail e travas fechadas ao final.

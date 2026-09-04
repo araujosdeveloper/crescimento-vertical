@@ -55,6 +55,7 @@ class TestJobStore(unittest.TestCase):
             store = JobStore(os.path.join(directory, "jobs.sqlite3"))
             for _ in range(config.MAX_BATCH_JOBS):
                 store.reserve_battery_job()
+                store.release_battery_reservation()
             with self.assertRaisesRegex(RuntimeError, "battery_job_limit_reached"):
                 store.reserve_battery_job()
 

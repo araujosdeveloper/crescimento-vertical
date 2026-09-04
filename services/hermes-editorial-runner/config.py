@@ -62,7 +62,7 @@ MAX_WEB_SEARCHES = _env_int("MAX_WEB_SEARCHES", 3)
 MAX_FINAL_SOURCES = _env_int("MAX_FINAL_SOURCES", 4)
 OUTPUT_MAX_BYTES = _env_int("OUTPUT_MAX_BYTES", 256 * 1024)
 MAX_CONCURRENT_JOBS = 1
-MAX_BATCH_JOBS = 4
+MAX_BATCH_JOBS = 5
 MAX_SEARCHES_PER_JOB = 3
 MODEL_MAX_TOKENS = 4096
 PROVIDER_MAX_RETRIES = 1  # Hermes: 1 tentativa, zero repeticoes ordinarias.
@@ -126,7 +126,7 @@ def validate_limits() -> None:
         raise ValueError("configured_limits_exceeded")
     if not 0 < JOB_TIMEOUT_SECONDS <= 300 or not 0 < OUTPUT_MAX_BYTES <= 256 * 1024:
         raise ValueError("configured_limits_invalid")
-    if MAX_BATCH_JOBS > 4 or MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
+    if MAX_BATCH_JOBS > 5 or MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
         raise ValueError("configured_limits_exceeded")
     if any(value <= 0 for value in (
         PROCESS_TERM_GRACE_SECONDS,
