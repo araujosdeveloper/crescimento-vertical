@@ -1,21 +1,42 @@
 # Controle de execução
 
-## Estado vigente — 3 de setembro de 2026
+## Estado vigente — 4 de setembro de 2026
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `fcc83c073c48e29051051d22af955b3769d91b8d` |
+| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `dc0197c` |
 | Fase ativa | Fase 8 — em execução; não encerrada |
 | PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
-| Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-e154bf4`, Image ID `sha256:cad0e4f…`, black-box real com 36 cenários aprovados em `network none` |
-| Runtime ativo | Deploy fechado aprovado: runner `bc89e74680e9…` healthy na imagem/digest `sha256:cad0e4f…`; proxy `cd0d152c05ee…` preservado |
-| Correções em branch após o deploy | `b6f5f99`, `9c47bcf`, `67dfe47`, `21dcd43`, `fcc83c0` (referência imutável por Image ID, transfer atômico de checkpoint, orçamentos de deadline do cliente, encerramento do grupo de subprocessos, persistência de usage em falhas terminais); ainda não implantadas — runtime permanece em `sha256:cad0e4f…` |
+| Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-f10488a`, Image ID `sha256:70630655…`, black-box real com 36 cenários aprovados em `network none` |
+| Runtime ativo | Deploy fechado aprovado: runner `75c116b1adc9…` healthy na imagem/digest `sha256:70630655…`; proxy `cd0d152c05ee…` preservado |
+| Correções em branch | `b6f5f99`…`fcc83c0` + teste black-box alinhado (`f10488a`) incorporados e implantados; runtime alinhado ao código do HEAD |
 | Restrições | Sem chamada externa, job, retry 3, publicação, alteração de dados ou Fase 9 |
 
 Próxima ação única: solicitar autorização humana para a validação controlada
-final da Fase 8. O Hermes permanece
-editor-chefe; runner é governança; DeepSeek/Tavily são subordinados; n8n é a
-única ponte autorizada para o Payload.
+final da Fase 8. O Hermes permanece editor-chefe; runner é governança;
+DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada para o Payload.
+
+### Deploy fechado das correções em branch — 4 de setembro de 2026
+
+As cinco correções em branch (`b6f5f99`…`fcc83c0`) não estavam na imagem
+implantada. A auditoria constatou que o black-box embutido também estava
+defasado: `test_12` exigia a string exata da chamada antiga de
+`HermesRunError`, incompatível com a refatoração de `fcc83c0` (que adicionou o
+kwarg `metadata`). A asserção foi alinhada em `f10488a`, preservando a
+semântica fail-closed. A imagem `phase8-instrumentation-f10488a` foi
+reconstruída, aprovou os 36 cenários offline e foi implantada de forma fechada
+apenas no runner, por RepoDigest local
+`cv-hermes-editorial-runner@sha256:70630655a4d354552d09ea177133b28c92ee40c865d10866b544c33dc5ef2a32`.
+O checkpoint pré-deploy validado está em
+`/opt/backups/crescimento-vertical/phase8-fixes-predeploy-f10488a-20260904T192911Z`
+(sha256 `73dac348…`, integrity ok, v5). O state preservou `jobs=4`,
+`lineage=2` e reserva zero; as duas travas permaneceram fechadas e não houve
+API editorial, pesquisa, inferência, token/custo, job novo, publicação ou
+Fase 9.
+
+Nota: o 4º job (`3754da2d`, `timed_out`) não pertence à linhagem de retry da
+bateria; foi executado por outro agente (bateria/teste) e é preservado como
+estado histórico. `retry3` permanece inexistente.
 
 ### Deploy fechado da instrumentação — 3 de setembro de 2026
 

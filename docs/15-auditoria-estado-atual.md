@@ -1,6 +1,6 @@
 # Auditoria do estado atual
 
-## Fotografia vigente — 3 de setembro de 2026
+## Fotografia vigente — 4 de setembro de 2026
 
 Correção técnica iniciada no snapshot Git
 `7ca990f62a0e848086dff524fec7f0e21c362065`, na branch
@@ -10,13 +10,21 @@ exclusivamente à instrumentação autorizada; sua autoria técnica inicial é
 indeterminada. O deploy fechado posterior recriou exclusivamente o runner na
 imagem aprovada; o proxy e os dados persistentes foram preservados.
 
-Atualização documental (4 de setembro de 2026): o HEAD da branch passou a
-`fcc83c073c48e29051051d22af955b3769d91b8d`, com cinco correções em branch
-posteriores ao deploy fechado (`b6f5f99`, `9c47bcf`, `67dfe47`, `21dcd43`,
-`fcc83c0`): referência imutável por Image ID, transfer atômico de snapshot de
-checkpoint, orçamentos de deadline do cliente, encerramento do grupo de
-subprocessos e persistência de usage em falhas terminais. Essas correções ainda
-não foram implantadas; o runtime permanece na imagem `sha256:cad0e4f…`.
+Deploy das correções em branch (4 de setembro de 2026): as cinco correções
+`b6f5f99`…`fcc83c0` não estavam implantadas. O black-box embutido também estava
+defasado (`test_12` exigia a string exata da chamada antiga de
+`HermesRunError`, que `fcc83c0` alterou ao adicionar o kwarg `metadata`). A
+asserção foi alinhada em `f10488a`, preservando a semântica fail-closed. A
+imagem `phase8-instrumentation-f10488a` (Image ID
+`sha256:70630655a4d354552d09ea177133b28c92ee40c865d10866b544c33dc5ef2a32`)
+foi reconstruída, aprovou os 36 cenários offline e foi implantada fechada
+apenas no runner (container `75c116b1adc9…`, healthy; proxy `cd0d152c05ee…`
+preservado). O checkpoint pré-deploy validado está em
+`/opt/backups/crescimento-vertical/phase8-fixes-predeploy-f10488a-20260904T192911Z`.
+O state permaneceu SQLite v5, `jobs=4`, `lineage=2`, reserva zero; as travas
+continuaram fechadas. O 4º job (`3754da2d`, `timed_out`) foi executado por
+outro agente (bateria/teste) e não pertence à linhagem de retry; `retry3`
+permanece inexistente.
 
 | Fases | Estado oficial |
 | --- | --- |
