@@ -1109,3 +1109,37 @@ real. O limite vigente o rejeitaria com `battery_job_limit_reached`.
 Job raiz termina `succeeded` com dossiê válido (`editorial-dossier.v1`),
 observabilidade `hermes-observability.v1` completa, `retry3=0`, custo dentro do
 guardrail e travas fechadas ao final.
+
+## ADR-036 — Job raiz de teste E2E da Fase 9 (teto efetivo de 6 jobs)
+
+- Data: 2026-09-05
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: 9 (validação E2E)
+
+### Contexto
+
+Após o ADR-035, a bateria `phase-8-deepseek-v4-flash-candidate-v1` tem teto de
+5 jobs, e `jobs_reserved` já está em 5. A conclusão da Fase 9 exige o teste E2E
+completo — uma execução real do Hermes alimentando o pipeline n8n → draft →
+Telegram. Esse teste consome 1 novo job raiz, o qual o limite vigente rejeitaria
+com `battery_job_limit_reached`.
+
+### Decisão
+
+1. Autorizar **um** novo job raiz real como teste E2E da Fase 9, elevando o teto
+   efetivo de 5 para **6** (`MAX_BATCH_JOBS` 5→6 em `config.py` + teste).
+2. O job é **root novo**, nunca retry 3; `MAX_RETRY_CHAIN=2` e `RETRY3=PROIBIDO`
+   permanecem válidos.
+3. Guardrail de US$ 2 e reserva de US$ 0,50/job continuam aplicáveis; custo
+   acumulado atual US$ 0,1053.
+4. Execução apenas pela janela controlada versionada, com as duas travas abertas
+   e fechadas em bloco; sem build/pull, sem recriar outro serviço.
+5. Falha não autoriza retry automático; vira evidência para post-mortem.
+
+### Consequências e reversão
+
+- Positivas: prova E2E do pipeline editorial completo em staging.
+- Riscos: o job pode falhar, consumindo até ~US$ 0,50 sem dossiê.
+- Reversão: restaurar `MAX_BATCH_JOBS=5` e recriar o runner com a imagem
+  anterior; contadores permanecem imutáveis para auditoria.
