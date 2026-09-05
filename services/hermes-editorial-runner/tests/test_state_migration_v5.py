@@ -83,7 +83,12 @@ def snapshot(path):
     result = {
         "version": db.execute("PRAGMA user_version").fetchone()[0],
         "jobs": db.execute("SELECT * FROM jobs ORDER BY id").fetchall(),
-        "usage": db.execute("SELECT * FROM battery_usage ORDER BY battery_id").fetchall(),
+        "usage": db.execute(
+            "SELECT battery_id, jobs_reserved, reserved_usd, estimated_usd, api_calls, "
+            "input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, "
+            "reasoning_tokens, search_calls, extract_calls, updated_at "
+            "FROM battery_usage ORDER BY battery_id"
+        ).fetchall(),
         "research": db.execute("SELECT * FROM research_operations ORDER BY id").fetchall(),
         "lineage": db.execute("SELECT * FROM retry_lineage ORDER BY created_at").fetchall(),
     }
@@ -99,7 +104,7 @@ class TestStateMigrationV5(unittest.TestCase):
             before = snapshot(path)
             JobStore(path)
             after = snapshot(path)
-            self.assertEqual(after["version"], 5)
+            self.assertEqual(after["version"], 6)
             self.assertEqual(after["jobs"], before["jobs"])
             self.assertEqual(after["usage"], before["usage"])
             self.assertEqual(after["research"], before["research"])
@@ -214,7 +219,7 @@ class TestStateMigrationV5(unittest.TestCase):
             self.assertEqual(errors, [])
             self.assertEqual(len(stores), 4)
             after = snapshot(path)
-            self.assertEqual(after["version"], 5)
+            self.assertEqual(after["version"], 6)
             self.assertEqual(after["jobs"], before["jobs"])
             self.assertEqual(after["usage"], before["usage"])
             self.assertEqual(after["research"], before["research"])
@@ -225,7 +230,7 @@ class TestStateMigrationV5(unittest.TestCase):
             path = os.path.join(directory, "jobs.sqlite3")
             JobStore(path)
             with sqlite3.connect(path) as db:
-                self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 5)
+                self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 6)
                 root = {row[1]: row for row in db.execute("PRAGMA table_info(retry_lineage)")}["root_job_id"]
                 self.assertEqual(root[3], 1)
 
@@ -237,7 +242,7 @@ class TestStateMigrationV5(unittest.TestCase):
             with sqlite3.connect(source) as src, sqlite3.connect(restored) as dst:
                 src.backup(dst)
             JobStore(restored)
-            self.assertEqual(snapshot(restored)["version"], 5)
+            self.assertEqual(snapshot(restored)["version"], 6)
 
     def test_migration_uses_zero_external_network(self):
         with tempfile.TemporaryDirectory() as directory:

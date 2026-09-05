@@ -25,6 +25,16 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _env_float(name: str, default: float) -> float:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
+
+
 HMAC_SECRET_FILE = os.environ.get("HMAC_SECRET_FILE", "/run/secrets/hmac-secret")
 TIMESTAMP_TOLERANCE_SECONDS = _env_int("TIMESTAMP_TOLERANCE_SECONDS", 300)
 BODY_MAX_BYTES = _env_int("BODY_MAX_BYTES", 1024 * 1024)
@@ -62,13 +72,12 @@ MAX_WEB_SEARCHES = _env_int("MAX_WEB_SEARCHES", 3)
 MAX_FINAL_SOURCES = _env_int("MAX_FINAL_SOURCES", 4)
 OUTPUT_MAX_BYTES = _env_int("OUTPUT_MAX_BYTES", 256 * 1024)
 MAX_CONCURRENT_JOBS = 1
-MAX_BATCH_JOBS = 8
 MAX_SEARCHES_PER_JOB = 3
 MODEL_MAX_TOKENS = 4096
 PROVIDER_MAX_RETRIES = 1  # Hermes: 1 tentativa, zero repeticoes ordinarias.
 STREAM_RETRIES = 0
 BATTERY_ID = "phase-8-deepseek-v4-flash-candidate-v1"
-BATTERY_BUDGET_USD = 2.0
+MONTHLY_BUDGET_USD = _env_float("MONTHLY_BUDGET_USD", 10.0)
 JOB_RESERVATION_USD = 0.50
 # Precos oficiais DeepSeek consultados em 2026-09-01; usa faixa peak.
 PRICE_CACHE_HIT_PER_MILLION = 0.014
@@ -126,7 +135,7 @@ def validate_limits() -> None:
         raise ValueError("configured_limits_exceeded")
     if not 0 < JOB_TIMEOUT_SECONDS <= 300 or not 0 < OUTPUT_MAX_BYTES <= 256 * 1024:
         raise ValueError("configured_limits_invalid")
-    if MAX_BATCH_JOBS > 8 or MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
+    if MAX_CONCURRENT_JOBS != 1 or MODEL_MAX_TOKENS > 4096:
         raise ValueError("configured_limits_exceeded")
     if any(value <= 0 for value in (
         PROCESS_TERM_GRACE_SECONDS,

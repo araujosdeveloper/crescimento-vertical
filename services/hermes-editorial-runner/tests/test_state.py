@@ -20,7 +20,7 @@ class TestJobStore(unittest.TestCase):
             retry, _ = store.create_or_get({"idempotencyKey": "retry1", "correlationId": "r", "retryOfJobId": original["id"], "retryReason": "retry_after_ephemeral_logging_fix"}, "fp")
             store.update(retry["id"], "failed", error_code="invalid_dossier_schema")
             with store._connect() as db:
-                self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 5)
+                self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 6)
                 self.assertIsNotNone(db.execute("SELECT 1 FROM failure_evidence WHERE 0").description)
             denied = store.retry2_eligibility(retry["id"], accumulated_cost_usd=0.05, reserve_usd=0, human_authorized=False)
             self.assertEqual(denied["reason"], "human_authorization_required")
@@ -50,13 +50,18 @@ class TestJobStore(unittest.TestCase):
             with self.assertRaisesRegex(IdempotencyConflictError, "idempotency_conflict"):
                 store.create_or_get(request, "fingerprint-b")
 
-    def test_battery_guardrail_persists_and_limits_jobs(self):
+    def test_monthly_budget_guardrail_persists(self):
         with tempfile.TemporaryDirectory() as directory:
             store = JobStore(os.path.join(directory, "jobs.sqlite3"))
-            for _ in range(config.MAX_BATCH_JOBS):
-                store.reserve_battery_job()
-                store.release_battery_reservation()
-            with self.assertRaisesRegex(RuntimeError, "battery_job_limit_reached"):
+            store.reserve_battery_job()
+            store.record_battery_usage({
+                "api_calls": 1,
+                "input_tokens": int(config.MONTHLY_BUDGET_USD * 1_000_000 / config.PRICE_CACHE_MISS_PER_MILLION),
+                "output_tokens": 0, "cache_read_tokens": 0, "cache_write_tokens": 0,
+                "reasoning_tokens": 0,
+            })
+            store.release_battery_reservation()
+            with self.assertRaisesRegex(RuntimeError, "monthly_budget_guardrail_reached"):
                 store.reserve_battery_job()
 
     def test_battery_usage_counts_cost_dimensions(self):

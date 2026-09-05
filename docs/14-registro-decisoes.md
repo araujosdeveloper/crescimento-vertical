@@ -1160,3 +1160,47 @@ O slot 7 terminou `invalid_dossier_schema`: o prompt do runner mencionava
 realinhado ao `editorial-dossier.v1` (commit `a365a4f`) e os enums explicitados.
 Autoriza-se **uma** nova re-execução (slot 8, `MAX_BATCH_JOBS` 7→8) para obter
 o sucesso limpo do E2E; mesmas restrições.
+
+## ADR-038 — Transição da bateria de validação para orçamento mensal de produção
+
+- Data: 2026-09-05
+- Status: aprovada
+- Responsável: responsável técnico (delegação expressa do responsável pelo produto)
+- Fase afetada: 10 (produção editorial contínua)
+
+### Contexto
+
+O runner foi construído para a **validação** das Fases 8/9 com limites
+**cumulativos**: `MAX_BATCH_JOBS` (teto de jobs, hoje 8/8) e
+`BATTERY_BUDGET_USD` (US$ 2,0 acumulados, hoje US$ 0,24). Esses contadores
+nunca resetam. Para a Fase 10 (produção de ~24 pautas), qualquer teto
+cumulativo eventualmente trava a operação — o que não representa o modelo de
+custo desejado.
+
+### Decisão
+
+1. **Remover o teto cumulativo de jobs** (`MAX_BATCH_JOBS`): a bateria de
+   validação está concluída; a produção é contínua e limitada por custo, não
+   por contagem. `jobs_reserved` permanece apenas como métrica de auditoria.
+2. **Orçamento passa a ser mensal** (`MONTHLY_BUDGET_USD`, padrão US$ 10,00,
+   sobrescrevível por env). O gasto é contabilizado por mês-calendário
+   (`budget_month` + `month_spend_usd`), e a reserva de US$ 0,50/job é mantida.
+   `MAX_CONCURRENT_JOBS = 1` permanece.
+3. `retry3=proibido`, `MAX_RETRY_CHAIN=2` e publicação humana permanecem
+   inalterados.
+
+### Justificativa do valor (sem inventar)
+
+Custo real observado por job `succeeded`: ~US$ 0,045–0,051 (bateria da Fase 8
+e E2E da Fase 9). Na cadência alvo de 2 pautas/semana (~8–9/mês), o consumo
+esperado é ~US$ 0,40–0,50/mês. O teto de US$ 10,00 dá ~20× de folga, cobrindo
+pautas mais densas (mais fontes/claims) sem expor o projeto a custo aberto.
+
+### Consequências e reversão
+
+- Positivas: produção contínua, custo previsível e limitado por mês.
+- Riscos: o teto mensal é um guardrail, não um teto transacional — uma chamada
+  já iniciada pode ultrapassar o saldo do mês (mesma semântica anterior).
+- Reversão: restaurar `MAX_BATCH_JOBS`/`BATTERY_BUDGET_USD` via commit e
+  recriar o runner com a imagem anterior; os dados históricos de custo e jobs
+  permanecem intactos na tabela `jobs`.

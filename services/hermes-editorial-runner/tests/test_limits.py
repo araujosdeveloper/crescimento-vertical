@@ -16,7 +16,7 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertEqual(config.HERMES_MODEL, "deepseek-v4-flash")
         self.assertEqual(config.HERMES_REASONING, "none")
         self.assertEqual(config.MAX_CONCURRENT_JOBS, 1)
-        self.assertEqual(config.MAX_BATCH_JOBS, 8)
+        self.assertEqual(config.MONTHLY_BUDGET_USD, 10.0)
         self.assertEqual(config.MAX_TURNS, 8)
         self.assertEqual(config.MAX_WEB_SEARCHES, 3)
         self.assertEqual(config.MAX_FINAL_SOURCES, 4)
@@ -34,7 +34,7 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertEqual(config.OUTPUT_MAX_BYTES, 256 * 1024)
         self.assertEqual(config.PROVIDER_MAX_RETRIES, 1)
         self.assertEqual(config.STREAM_RETRIES, 0)
-        self.assertEqual(config.BATTERY_BUDGET_USD, 2.0)
+        self.assertEqual(config.JOB_RESERVATION_USD, 0.50)
 
     def test_limit_validator_accepts_candidate(self):
         config.validate_limits()

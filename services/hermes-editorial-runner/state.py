@@ -21,7 +21,7 @@ class RetryLineageError(RuntimeError):
 
 
 class JobStore:
-    SCHEMA_VERSION = 5
+    SCHEMA_VERSION = 6
     _INITIALIZATION_LOCK = threading.Lock()
     RETRY_REASONS = {
         1: "retry_after_ephemeral_logging_fix",
@@ -68,7 +68,9 @@ class JobStore:
                     reasoning_tokens INTEGER NOT NULL DEFAULT 0,
                     search_calls INTEGER NOT NULL DEFAULT 0,
                     extract_calls INTEGER NOT NULL DEFAULT 0,
-                    updated_at REAL NOT NULL
+                    updated_at REAL NOT NULL,
+                    budget_month TEXT NOT NULL DEFAULT '',
+                    month_spend_usd REAL NOT NULL DEFAULT 0
                 )"""
         )
         db.execute(
@@ -307,6 +309,12 @@ class JobStore:
                 db.execute("DROP TABLE retry_lineage")
                 db.execute("ALTER TABLE retry_lineage_v5_new RENAME TO retry_lineage")
                 self._create_lineage_triggers(db)
+            elif version == 5:
+                db.execute("ALTER TABLE battery_usage ADD COLUMN budget_month TEXT NOT NULL DEFAULT ''")
+                db.execute("ALTER TABLE battery_usage ADD COLUMN month_spend_usd REAL NOT NULL DEFAULT 0")
+                battery_cols = {row[1] for row in db.execute("PRAGMA table_info(battery_usage)")}
+                if not {"budget_month", "month_spend_usd"} <= battery_cols:
+                    raise RuntimeError("battery_usage_v6_columns_missing")
             elif version == self.SCHEMA_VERSION:
                 self._validate_v5(db)
                 db.execute("COMMIT")
@@ -419,7 +427,7 @@ class JobStore:
             )
 
     def reserve_battery_job(self) -> None:
-        """Reserva persistente e atomica; e guardrail, nao teto transacional."""
+        """Reserva persistente e atomica; guardrail mensal, nao teto transacional."""
         with self._lock, self._connect() as db:
             db.execute(
                 "INSERT OR IGNORE INTO battery_usage (battery_id, updated_at) VALUES (?, ?)",
@@ -428,15 +436,14 @@ class JobStore:
             row = db.execute(
                 "SELECT * FROM battery_usage WHERE battery_id = ?", (config.BATTERY_ID,)
             ).fetchone()
-            if row["jobs_reserved"] >= config.MAX_BATCH_JOBS:
-                raise RuntimeError("battery_job_limit_reached")
-            effective = max(row["reserved_usd"], row["estimated_usd"])
-            if effective + config.JOB_RESERVATION_USD > config.BATTERY_BUDGET_USD:
-                raise RuntimeError("budget_guardrail_reached")
+            month = time.strftime("%Y-%m", time.gmtime())
+            month_spend = row["month_spend_usd"] if row["budget_month"] == month else 0.0
+            if month_spend + config.JOB_RESERVATION_USD > config.MONTHLY_BUDGET_USD:
+                raise RuntimeError("monthly_budget_guardrail_reached")
             db.execute(
                 "UPDATE battery_usage SET jobs_reserved=jobs_reserved+1, "
-                "reserved_usd=reserved_usd+?, updated_at=? WHERE battery_id=?",
-                (config.JOB_RESERVATION_USD, time.time(), config.BATTERY_ID),
+                "reserved_usd=reserved_usd+?, budget_month=?, updated_at=? WHERE battery_id=?",
+                (config.JOB_RESERVATION_USD, month, time.time(), config.BATTERY_ID),
             )
 
     def record_battery_usage(self, usage: dict) -> dict:
@@ -457,14 +464,25 @@ class JobStore:
             + cache_write * config.PRICE_CACHE_MISS_PER_MILLION
             + output_billed * config.PRICE_OUTPUT_PER_MILLION
         ) / 1_000_000
+        month = time.strftime("%Y-%m", time.gmtime())
         with self._lock, self._connect() as db:
+            row = db.execute(
+                "SELECT budget_month, month_spend_usd FROM battery_usage WHERE battery_id = ?",
+                (config.BATTERY_ID,),
+            ).fetchone()
+            month_spend = (
+                row["month_spend_usd"] + estimated
+                if row and row["budget_month"] == month
+                else estimated
+            )
             db.execute(
-                "UPDATE battery_usage SET estimated_usd=estimated_usd+?, api_calls=api_calls+?, "
+                "UPDATE battery_usage SET estimated_usd=estimated_usd+?, month_spend_usd=?, "
+                "budget_month=?, api_calls=api_calls+?, "
                 "input_tokens=input_tokens+?, output_tokens=output_tokens+?, "
                 "cache_read_tokens=cache_read_tokens+?, cache_write_tokens=cache_write_tokens+?, "
                 "reasoning_tokens=reasoning_tokens+?, updated_at=? WHERE battery_id=?",
-                (estimated, count("api_calls"), input_tokens, output_tokens, cache_read,
-                 cache_write, reasoning, time.time(), config.BATTERY_ID),
+                (estimated, month_spend, month, count("api_calls"), input_tokens, output_tokens,
+                 cache_read, cache_write, reasoning, time.time(), config.BATTERY_ID),
             )
         return {"estimatedCostUsd": round(estimated, 8), "costStatus": "estimated"}
 
@@ -577,7 +595,7 @@ class JobStore:
                 return {"eligible": False, "reason": "retry1_lineage_invalid"}
             if db.execute("SELECT 1 FROM retry_lineage WHERE original_job_id = ? AND retry_number = 2", (retry1_job_id,)).fetchone():
                 return {"eligible": False, "reason": "retry2_already_exists"}
-            if accumulated_cost_usd + reserve_usd >= config.BATTERY_BUDGET_USD:
+            if accumulated_cost_usd + reserve_usd >= config.MONTHLY_BUDGET_USD:
                 return {"eligible": False, "reason": "retry2_budget_guardrail"}
             if not human_authorized:
                 return {"eligible": False, "reason": "human_authorization_required"}
