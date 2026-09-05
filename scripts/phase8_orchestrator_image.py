@@ -111,7 +111,7 @@ def _probe_contract(pinned_reference: str, runner=subprocess.run) -> None:
         "import json, pathlib; from state import JobStore; import config, provider_adapter; "
         "schema=json.loads(pathlib.Path('/app/schemas/editorial-research-request.v1.schema.json').read_text()); "
         "payload=provider_adapter.build_deepseek_payload('deepseek-v4-flash',[],4096,'none'); "
-        "assert JobStore.SCHEMA_VERSION==5; assert pathlib.Path('/app/controlled_battery.py').is_file(); "
+        "assert JobStore.SCHEMA_VERSION==6; assert pathlib.Path('/app/controlled_battery.py').is_file(); "
         "assert pathlib.Path('/app/evidence.py').is_file(); assert schema['properties']['retryNumber']['const']==2; "
         "assert 'rootJobId' in schema['properties']; assert config.MAX_RETRY_CHAIN==2; "
         "assert payload['extra_body']['thinking']['type']=='disabled'; "
