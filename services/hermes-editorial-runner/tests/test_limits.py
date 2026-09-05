@@ -16,7 +16,7 @@ class TestCandidateLimits(unittest.TestCase):
         self.assertEqual(config.HERMES_MODEL, "deepseek-v4-flash")
         self.assertEqual(config.HERMES_REASONING, "none")
         self.assertEqual(config.MAX_CONCURRENT_JOBS, 1)
-        self.assertEqual(config.MAX_BATCH_JOBS, 7)
+        self.assertEqual(config.MAX_BATCH_JOBS, 8)
         self.assertEqual(config.MAX_TURNS, 8)
         self.assertEqual(config.MAX_WEB_SEARCHES, 3)
         self.assertEqual(config.MAX_FINAL_SOURCES, 4)

@@ -1153,3 +1153,10 @@ falhou. A normalização foi corrigida (commit `1584e47`, extração do primeiro
 `{` ao último `}`) e validada offline contra a saída real (0 erros de schema).
 Autoriza-se **uma** re-execução do E2E (slot 7, `MAX_BATCH_JOBS` 6→7) para
 obter o sucesso limpo; mesmas restrições de custo, retry 3 e travas.
+
+O slot 7 terminou `invalid_dossier_schema`: o prompt do runner mencionava
+"justificativa 400" (campo inexistente no schema) e omitia os enums de
+`riskFlags`/`claims`, levando o Hermes a emitir campos inválidos. O prompt foi
+realinhado ao `editorial-dossier.v1` (commit `a365a4f`) e os enums explicitados.
+Autoriza-se **uma** nova re-execução (slot 8, `MAX_BATCH_JOBS` 7→8) para obter
+o sucesso limpo do E2E; mesmas restrições.
