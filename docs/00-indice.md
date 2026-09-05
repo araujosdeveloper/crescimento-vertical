@@ -36,7 +36,8 @@
 - [Fase 6 — SEO técnico, dados estruturados e performance](33-fase-6-seo-performance.md)
 - [Fase 7 — Captação, diagnóstico e mensuração comercial](34-fase-7-captacao-diagnostico-mensuracao.md)
 - [Fase 8 — Hermes e política editorial](35-fase-8-hermes-politica-editorial.md)
-- Fases 9–12: documentos canônicos serão criados somente nas respectivas
+- [Fase 9 — n8n, Telegram, aprovação e publicação](37-fase-9-n8n-telegram-aprovacao-publicacao.md)
+- Fases 10–12: documentos canônicos serão criados somente nas respectivas
   fases; permanecem pendentes.
 - [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 - [Portal editorial público](19-portal-editorial-publico.md)
