@@ -7,6 +7,12 @@ class TestHermlineContract(unittest.TestCase):
         self.assertEqual(hermline.normalize_json_output('\ufeff```json\n{"a":1}\n```'), '{"a":1}')
         self.assertEqual(hermline.normalize_json_output('{"a":1}\nextra'), '{"a":1}\nextra')
 
+    def test_extracts_json_from_text_preface(self):
+        self.assertEqual(
+            hermline.normalize_json_output('Pesquisa concluída.\n\n{"a":1}\n'),
+            '{"a":1}',
+        )
+
     def test_prompt_contains_exact_contract_and_limits(self):
         prompt = hermline.build_prompt({"topic":"x", "primaryPillar":"ai-business", "searchIntent":"s", "maxSources":4})
         self.assertIn("Chaves obrigatórias exatamente", prompt)

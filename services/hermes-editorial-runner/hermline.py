@@ -154,6 +154,12 @@ def normalize_json_output(stdout: str) -> str:
         inner = output[7:-3].strip()
         if inner and "```" not in inner:
             return inner
+    if output.startswith("{"):
+        return output
+    start = output.find("{")
+    end = output.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        return output[start : end + 1].strip()
     return output
 
 
