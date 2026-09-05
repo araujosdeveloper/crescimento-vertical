@@ -11,16 +11,32 @@ COPY services/hermes-editorial-runner/app.py \
      services/hermes-editorial-runner/nonce_store.py \
      services/hermes-editorial-runner/schemas.py \
      services/hermes-editorial-runner/hermline.py \
+     services/hermes-editorial-runner/evidence.py \
+     services/hermes-editorial-runner/provider_adapter.py \
+     services/hermes-editorial-runner/policy.py \
+     services/hermes-editorial-runner/state.py \
+     services/hermes-editorial-runner/hermes_wrapper.py \
+     services/hermes-editorial-runner/controlled_battery.py \
      ./
 COPY docs/schemas/ ./schemas/
 
-RUN chown -R hermes:hermes /app && chmod -R a+rX /app
+# Instrumentação determinística do Hermes 0.20.4 (observabilidade v1).
+# Aplica o patch com zero fuzz após verificar build SHA, versão e hashes antes/
+# depois; grava manifesto não secreto. Falha fechado em qualquer divergência.
+COPY services/hermes-editorial-runner/hermes-instrumentation/ ./instrumentation/
+RUN /opt/hermes/.venv/bin/python3 /app/instrumentation/apply-instrumentation.py \
+    && chmod 0644 /app/instrumentation/manifest.json
+
+RUN chown -R hermes:hermes /app && chmod -R a+rX /app \
+    && chmod 0755 /app/hermes_wrapper.py \
+    && install -d -o 10000 -g 10000 -m 0700 /state
 
 ENV SCHEMAS_DIR=/app/schemas \
     RUNNER_EXECUTION_ENABLED=false \
     RUNNER_HOST=0.0.0.0 \
     RUNNER_PORT=8100 \
-    HERMES_BIN=hermes \
+    HERMES_BIN=/app/hermes_wrapper.py \
+    RUNNER_STATE_DIR=/state \
     HMAC_SECRET_FILE=/run/secrets/hmac-secret \
     EXECUTION_ENABLE_FILE=/run/secrets/execution-enable
 

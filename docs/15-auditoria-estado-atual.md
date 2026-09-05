@@ -1,5 +1,73 @@
 # Auditoria do estado atual
 
+## Fotografia vigente — 4 de setembro de 2026
+
+Correção técnica iniciada no snapshot Git
+`7ca990f62a0e848086dff524fec7f0e21c362065`, na branch
+`feat/phase-8-hermes-editorial-policy`, com PR #14 aberto/draft. A única
+modificação local preexistente foi auditada, preservada e adotada por pertencer
+exclusivamente à instrumentação autorizada; sua autoria técnica inicial é
+indeterminada. O deploy fechado posterior recriou exclusivamente o runner na
+imagem aprovada; o proxy e os dados persistentes foram preservados.
+
+Deploy das correções em branch (4 de setembro de 2026): as cinco correções
+`b6f5f99`…`fcc83c0` não estavam implantadas. O black-box embutido também estava
+defasado (`test_12` exigia a string exata da chamada antiga de
+`HermesRunError`, que `fcc83c0` alterou ao adicionar o kwarg `metadata`). A
+asserção foi alinhada em `f10488a`, preservando a semântica fail-closed. A
+imagem `phase8-instrumentation-f10488a` (Image ID
+`sha256:70630655a4d354552d09ea177133b28c92ee40c865d10866b544c33dc5ef2a32`)
+foi reconstruída, aprovou os 36 cenários offline e foi implantada fechada
+apenas no runner (container `75c116b1adc9…`, healthy; proxy `cd0d152c05ee…`
+preservado). O checkpoint pré-deploy validado está em
+`/opt/backups/crescimento-vertical/phase8-fixes-predeploy-f10488a-20260904T192911Z`.
+O state permaneceu SQLite v5, `jobs=4`, `lineage=2`, reserva zero; as travas
+continuaram fechadas. O 4º job (`3754da2d`, `timed_out`) foi executado por
+outro agente (bateria/teste) e não pertence à linhagem de retry; `retry3`
+permanece inexistente.
+
+Bateria real final (4 de setembro de 2026): o ADR-035 elevou o teto efetivo da
+bateria para 5 jobs para admitir o job raiz final. A janela controlada
+(`scripts/phase8-controlled-battery.sh`) executou um único POST; o job raiz
+`44666d93297d…` terminou `succeeded` em ~216 s. O dossiê `editorial-dossier.v1`
+foi validado (`contentType=analysis`, `primaryPillar=sales-attendance`,
+`riskLevel=low`, 3 fontes — 2 nível A e 1 nível B). A observabilidade
+`hermes-observability.v1` registrou `provider_finish_reason=stop` e Tavily
+`search attempted=3/succeeded=3`, `extract attempted=1/succeeded=1`. O custo
+acumulado subiu de US$ 0,0543 para US$ 0,1053 (`api_calls` 8→15), dentro do
+guardrail de US$ 2. Ao final: `jobs_reserved=5`, `lineage=2`, `retry3=0`,
+reserva zero e travas fechadas. Nenhuma publicação, Payload, n8n ou Fase 9.
+
+| Fases | Estado oficial |
+| --- | --- |
+| 0–3 | Concluídas |
+| 4 | Concluída com ressalva de copy comercial |
+| 5–7 | Concluídas e aceitas |
+| 8 | Concluída — aceite humano (4/9/2026): black-box 36/36 + bateria real `succeeded` |
+| 9 | Concluída — aceite humano (5/9/2026): E2E completo + workflows CV-01..04 ativos |
+| 10 | Concluída — aceite humano (5/9/2026): 1 artigo publicado por pilar (5 pilares) |
+| 11–12 | Pendentes (Fase 11 em execução) |
+
+### Correção comprovada do gate offline da Fase 8
+
+- a candidata corrigida é `phase8-instrumentation-e154bf4`, Image ID
+  `sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`;
+- o teste embutido coincide com o Git e executa o caminho real do Hermes;
+- 36 cenários passaram com `--network none`, inclusive `tool_calls → Tavily`;
+- manifesto, hashes, limites, respostas inválidas, falhas e sanitização foram
+  verificados;
+- na prova offline anterior não houve deploy, merge, job, retry 3 nem consumo
+  editorial externo.
+
+Após essa prova, o deploy fechado autorizado implantou somente o runner por
+RepoDigest. O container mudou de `bc7bcc220763…` para `bc89e74680e9…`; o proxy
+permaneceu `cd0d152c05ee…`. As travas continuaram fechadas e SQLite permaneceu
+v5 íntegro, `jobs=3`, `lineage=2`, `retry3=0`, sem custo adicional. Não houve
+merge nem início da Fase 9.
+
+O histórico cronológico abaixo é preservado como evidência datada e não
+substitui este estado vigente.
+
 ## Candidato da Fase 6 em staging — 29 de agosto de 2026
 
 A branch `feat/phase-6-seo-performance` partiu da main `e6c7ce5`; o PR draft
@@ -788,3 +856,87 @@ mensagem foi enviada e recebida. Produção, n8n e Hermes foram preservados; GA4
 e Search Console continuam desativados. A Fase 7 está concluída, nenhuma fase
 está em execução e as Fases 8–12 permanecem pendentes. A homologação responsiva
 integral e a concretização da copy da Fase 4 continuam gates de produção.
+
+## Início formal da Fase 8 — 30 de agosto de 2026
+
+A `main` de referência é `b8fbd9484b6ffe334747352eb2b1ef11ecb53165`. A
+auditoria read-only confirmou Hermes v0.20.4, perfil editorial somente leitura,
+runner não-root com rootfs read-only, `cap_drop=ALL`, sem portas públicas ou
+Docker Socket, e workflow n8n validate-only inativo. A execução continua
+desabilitada por dupla trava. A única credencial de modelo observada está no
+perfil default compartilhado; classificação B, sem reutilização autorizada.
+
+Foram reconciliados política editorial, escopo, canonicalização, fingerprints,
+estado persistente mínimo, idempotência, limites e validação estrita. Não houve
+pesquisa, chamada de modelo, publicação, criação no Payload ou alteração de
+portal, PostgreSQL, n8n, Hermes compartilhado ou produção. A Fase 8 aguarda
+credencial exclusiva para qualquer bateria real; Fases 9–12 permanecem
+pendentes e os dois gates pré-produção continuam preservados.
+
+## Compatibilidade local com DeepSeek — 31 de agosto de 2026
+
+Sem autenticação, a imagem pinada confirmou Hermes v0.20.4, OpenAI SDK 2.24.0
+e provider nativo `deepseek`: base URL `https://api.deepseek.com/v1`, variável
+`DEEPSEEK_API_KEY`, modelo `deepseek-v4-flash`, tool calls via Chat Completions,
+preservação de `reasoning_content`, usage normalizado e parâmetros de timeout e
+limite de saída. O código candidato do runner foi preparado com credencial por
+arquivo e sem fallback. Containers, perfis instalados, credenciais, n8n,
+Payload/PostgreSQL, staging e produção não foram modificados.
+
+## Remediações isoladas do runner — 1º de setembro de 2026
+
+O volume `/state` foi corrigido para UID/GID 10000, diretório 0700 e SQLite
+0600, com integridade e persistência comprovadas offline. Em seguida foi
+identificado que a recriação anterior preservara o volume anônimo herdado em
+`/opt/data`, mesmo com tmpfs configurado. A correção permanente usa container
+realmente novo e tmpfs limitado a 16 MiB com `nosuid,nodev,noexec`; somente
+`/state` pode persistir. As travas permaneceram fechadas e não houve chamada
+DeepSeek, Tavily, pesquisa ou inferência.
+
+## Reconciliação de papéis da Fase 8 — 2 de setembro de 2026
+
+Auditoria read-only confirmou branch `feat/phase-8-hermes-editorial-policy` no
+HEAD `34ff3e2`, working tree limpa e PR #14 em draft, preservado sem merge. A
+auditoria localizou e corrigiu divergências entre o código e a arquitetura
+original do blog:
+
+- O Hermes estava descrito como "pesquisador editorial técnico" que "não toma
+  decisão editorial" (SOUL.md/SKILL.md/docs/06), divergindo do papel de
+  **editor-chefe** que decide pauta, estratégia de pesquisa, fontes, estrutura e
+  conteúdo. Reconciliação: SOUL/SKILL/docs/06 passaram a declarar o Hermes como
+  editor-chefe (ADR-034).
+- `services/hermes-editorial-runner/provider_adapter.py` monta payload DeepSeek
+  dentro do runner (risco de chamada direta em substituição ao Hermes). A
+  auditoria confirmou que ele é usado somente na prova de contrato de
+  capacidades do orquestrador e em testes, nunca no caminho editorial; o papel
+  foi declarado explicitamente.
+- O runner exigia `finish_reason` e `tavily_operations` no `--usage-file`, campos
+  que o Hermes 0.20.4 não exporta. Criados o contrato versionado
+  `hermes-observability.v1` e a instrumentação mínima versionada; o runner
+  permanece fail-closed enquanto o patch não for aplicado.
+- O runner não persistia usage/evidência/contabilização em todos os estados
+  terminais (falha genérica e timeout descartavam usage e não gravavam
+  evidência). Corrigido com contabilização em bloco seguro e evidência em todos
+  os estados terminais.
+
+Nenhum código removeu o Hermes do caminho editorial; DeepSeek e Tavily
+continuam subordinados ao Hermes; publicação automática permanece desabilitada;
+retry 3 permanece bloqueado; e as travas continuam fechadas.
+
+## SUPERADO — NÃO VÁLIDO PARA ACEITE: instrumentação auditável do Hermes editor-chefe — 2 de setembro de 2026
+
+Validação offline da instrumentação do Hermes 0.20.4, preservando-o como
+editor-chefe. Preflight confirmou branch, PR #14 draft, quatro checks verdes,
+runner/proxy healthy, travas fechadas, `RUNNER_EXECUTION_ENABLED=false`,
+execution-enable ausente, zero processos Hermes one-shot, SQLite v5 íntegro,
+jobs=3, retry_lineage=2, retry3 inexistente e reserved_usd=0.
+
+Correções: `provider_finish_reason` (direto do SDK) separado de
+`hermes_turn_exit_reason` (decisão interna do loop, enumerada); telemetria
+Tavily `attempted`/`succeeded`/`failed` no ponto real do HTTP com invariante
+`succeeded + failed == attempted`. O patch foi aplicado deterministicamente na
+imagem candidata (build SHA e hashes conferidos, zero fuzz, manifesto não
+secreto) e o Hermes realmente patchado foi testado dentro da imagem com
+`--network none` e sem credenciais (20 testes aprovados). O runtime ativo não
+foi alterado; runner e proxy mantiveram os mesmos IDs; nenhuma chamada
+DeepSeek/Tavily, nenhum custo, nenhuma publicação e a Fase 9 não foi iniciada.

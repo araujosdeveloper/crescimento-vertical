@@ -1,0 +1,47 @@
+{
+  "name": "CV-03 — Publicação no CMS",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "hermes-editorial/decision",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "c1010000-0000-4001-8001-000000000001",
+      "name": "Webhook Decisão",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, 0],
+      "webhookId": "cv03-decisao-aprovacao"
+    },
+    {
+      "parameters": {
+        "chatId": "5710991322",
+        "text": "=Decisão registrada: {{ $json.body.decision }} (artigo {{ $json.body.articleId }}). A publicação final é feita por um revisor no Payload Admin.",
+        "additionalFields": {}
+      },
+      "id": "c2020000-0000-4002-8002-000000000002",
+      "name": "Telegram Confirmar Decisão",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [-220, 0],
+      "credentials": {
+        "telegramApi": {
+          "id": "3f535ab5-8faf-4c1a-85e6-72e196480c28",
+          "name": "CV Telegram Bot — Revisão Editorial"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Decisão": {
+      "main": [[{ "node": "Telegram Confirmar Decisão", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "c3030000-0000-4003-8003-000000000003",
+  "id": "c4040000-0000-4004-8004-000000000004",
+  "pinData": {}
+}

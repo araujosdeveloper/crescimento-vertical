@@ -1,10 +1,24 @@
 # Hermes Agent
 
+## Papel canônico vigente
+
+O Hermes é o **editor-chefe e motor central do blog**: decide pauta, estratégia
+de pesquisa, seleção de fontes, estrutura e preparação do conteúdo dentro da
+política editorial. DeepSeek é seu modelo de inferência e Tavily sua ferramenta
+de pesquisa/extração; nenhum deles substitui o Hermes. O runner fornece
+governança e o n8n fornece orquestração operacional.
+
+Os limites permanecem absolutos: Hermes não publica, não acessa diretamente
+Payload/PostgreSQL, não administra usuários e não recebe autoridade sobre
+leads. Publicação depende de aprovação humana persistida no CMS.
+
 ## Papel
 
-O Hermes é o núcleo de inteligência editorial. Ele pesquisa, extrai, compara,
-classifica, deduplica e prepara o dossiê. Não é CMS, não é banco e não possui
-autoridade de publicação.
+O Hermes é o **editor-chefe** e motor editorial do blog. Ele decide pauta,
+estratégia de pesquisa, fontes, estrutura e conteúdo; pesquisa, extrai, compara,
+classifica, deduplica e produz o dossiê autoral. Não é CMS, não é banco e não
+possui autoridade de publicação: a publicação é decisão humana posterior
+(ADR-034).
 
 ~~~text
 Fontes → Hermes → dossiê assinado → n8n → draft no CMS
@@ -248,3 +262,11 @@ Nenhuma falha é contornada por publicação direta.
 - [Ferramentas disponíveis](https://hermes-agent.nousresearch.com/docs/user-guide/features/tools/)
 - [Pesquisa e extração web](https://hermes-agent.nousresearch.com/docs/user-guide/features/web-search)
 - [Tarefas agendadas, continuidade e histórico](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)
+
+## Fase 8 — execução controlada
+
+O perfil `crescimento-vertical-editorial` usa somente a skill editorial e o
+toolset web. O runner aplica canonicalização HTTPS, remoção de trackers,
+fingerprints de pauta, deduplicação, limites firmes, usage file e validação
+estrita do dossiê. Execução depende de credencial exclusiva e dupla trava; a
+credencial compartilhada observada no perfil default não é reutilizada.

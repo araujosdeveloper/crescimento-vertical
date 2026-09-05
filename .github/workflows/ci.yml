@@ -102,7 +102,10 @@ jobs:
           cd services/hermes-editorial-runner
           python -m unittest discover -s tests -t .
 
-      - name: Validar quatro schemas (Draft 2020-12)
+      - name: Testes da política do proxy de egress
+        run: python -m unittest discover -s services/phase8-egress-proxy -p 'test_*.py'
+
+      - name: Validar schemas (Draft 2020-12)
         run: |
           python - << 'PY'
           import json, glob
@@ -119,6 +122,11 @@ jobs:
           if grep -qE '^[[:space:]]*ports:' docker-compose.hermes-editorial.yml; then echo "ERRO: ports publicados"; exit 1; fi
           if grep -qiE 'traefik\.' docker-compose.hermes-editorial.yml; then echo "ERRO: label Traefik"; exit 1; fi
           if grep -q 'docker.sock' docker-compose.hermes-editorial.yml services/hermes-editorial-runner/Dockerfile; then echo "ERRO: Docker Socket"; exit 1; fi
+          grep -q 'internal: true' docker-compose.hermes-editorial.yml
+          grep -q 'phase8_execution' docker-compose.hermes-editorial.yml
+          grep -q 'phase8_egress' docker-compose.hermes-editorial.yml
+          grep -q 'install -d -o 10000 -g 10000 -m 0700 /state' services/hermes-editorial-runner/Dockerfile
+          grep -q 'os.umask(0o077)' services/hermes-editorial-runner/app.py
           echo "OK: execução desabilitada, sem ports/Traefik/Docker Socket"
 
       - name: Compose config (valores fictícios, secret temporário)
@@ -127,11 +135,16 @@ jobs:
         run: |
           mkdir -p .secrets /tmp/fake-profile
           printf 'ci-fake-hmac-secret-not-used-anywhere-1234567890' > .secrets/hmac-secret
+          printf 'ci-fake-deepseek-key-not-used-anywhere' > .secrets/hermes-editorial-deepseek-api-key
+          printf 'ci-fake-tavily-key-not-used-anywhere' > .secrets/hermes-editorial-tavily-api-key
           docker compose -f docker-compose.hermes-editorial.yml config --quiet
 
       - name: Docker build do runner (imagem Hermes pinada por digest)
         run: |
           docker build -f services/hermes-editorial-runner/Dockerfile -t cv-hermes-editorial-runner:ci .
+
+      - name: Docker build do proxy (imagem Python pinada por digest)
+        run: docker build -f services/phase8-egress-proxy/Dockerfile -t cv-phase8-egress-proxy:ci .
 
   n8n-hermes-connector:
     name: n8n-hermes-connector (node package, workflows, docker build)

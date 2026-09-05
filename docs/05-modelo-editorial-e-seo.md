@@ -209,6 +209,11 @@ A Fase 2B implementou, em código, a exposição pública do conteúdo editorial
   apenas de artigos publicados.
 - `SITE_NOINDEX` preservado: staging permanece noindex; produção só indexa com
   `SITE_NOINDEX=false`.
+
+Na Fase 8, o dossiê não é conteúdo publicado nem rascunho do CMS. A política
+fecha os cinco pilares comerciais, exige proveniência e trata páginas externas
+como dados não confiáveis. Evidência insuficiente, contradição não resolvida,
+prompt injection e pauta fora do escopo encerram o fluxo de forma estruturada.
 # Atualização Fase 5
 
 Artigos agora possuem tipo fechado, revisor público, tempo de leitura,

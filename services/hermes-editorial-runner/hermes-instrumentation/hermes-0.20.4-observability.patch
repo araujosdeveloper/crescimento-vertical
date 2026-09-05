@@ -1,0 +1,182 @@
+diff -u -r a/agent/chat_completion_helpers.py b/agent/chat_completion_helpers.py
+--- a/agent/chat_completion_helpers.py	2026-08-19 06:34:24.000000000 +0000
++++ b/agent/chat_completion_helpers.py	2026-09-03 03:42:40.142605128 +0000
+@@ -3766,6 +3766,9 @@
+                 logger.debug("Managed provider stream cleanup failed", exc_info=True)
+ 
+     def _start_stream_attempt() -> int:
++        # Cada tentativa começa sem finish_reason. Erro, timeout ou stream
++        # incompleto permanecem None e nunca reutilizam o turno anterior.
++        agent._last_provider_finish_reason = None
+         with stream_attempt_lock:
+             stream_attempt_state["current"] += 1
+             attempt_id = int(stream_attempt_state["current"])
+@@ -4266,6 +4269,14 @@
+ 
+         _close_managed_stream()
+ 
++        # Observabilidade v1 (ADR-034): finish_reason cru do SDK, capturado
++        # antes do fallback "stop" e dos early-returns (empty stream, tool-args
++        # drop, text-only drop, stream error). Ausência permanece None.
++        if finish_reason in ("stop", "length", "content_filter", "tool_calls"):
++            agent._last_provider_finish_reason = finish_reason
++        else:
++            agent._last_provider_finish_reason = None
++
+         if _stream_attempt_was_cancelled(stream_attempt_id):
+             raise _httpx.RemoteProtocolError(
+                 f"stream attempt {stream_attempt_id} was superseded"
+diff -u -r a/agent/turn_finalizer.py b/agent/turn_finalizer.py
+--- a/agent/turn_finalizer.py	2026-08-19 06:34:24.000000000 +0000
++++ b/agent/turn_finalizer.py	2026-09-03 03:42:22.946587096 +0000
+@@ -698,6 +698,7 @@
+         "api_calls": api_call_count,
+         "completed": completed,
+         "turn_exit_reason": _turn_exit_reason,
++        "provider_finish_reason": getattr(agent, "_last_provider_finish_reason", None),
+         "failed": failed,
+         "partial": False,  # True only when stopped due to invalid tool calls
+         "interrupted": interrupted,
+diff -u -r a/hermes_cli/oneshot.py b/hermes_cli/oneshot.py
+--- a/hermes_cli/oneshot.py	2026-08-19 06:34:24.000000000 +0000
++++ b/hermes_cli/oneshot.py	2026-09-03 03:42:22.946587096 +0000
+@@ -124,6 +124,25 @@
+     return valid, None
+ 
+ 
++_TURN_EXIT_REASON_CATEGORIES = frozenset({
++    "text_response", "max_iterations_reached", "budget_exhausted",
++    "interrupted_by_user", "interrupted_during_api_call",
++    "all_retries_exhausted_no_response", "empty_response_exhausted",
++    "compaction_handoff_not_actionable", "session_persistence_failed",
++    "guardrail_halt", "partial_stream_recovery", "fallback_prior_turn_content",
++    "local_processing_error", "error_near_max_iterations",
++    "ollama_runtime_context_too_small", "unknown",
++})
++
++
++def _sanitize_turn_exit_reason(turn_exit_reason):
++    """Enumera e sanitiza a decisão interna do loop (nunca finish_reason do SDK)."""
++    if not isinstance(turn_exit_reason, str) or not turn_exit_reason.strip():
++        return None
++    prefix = turn_exit_reason.strip().split("(", 1)[0].strip()
++    return prefix if prefix in _TURN_EXIT_REASON_CATEGORIES else "unknown"
++
++
+ def _write_usage_file(path: Optional[str], result: dict, failure: Optional[str] = None) -> None:
+     """Best-effort JSON usage report for pipelines (``-z --usage-file``).
+ 
+@@ -157,6 +176,12 @@
+             # paying for actually went out on the wire (July 2026 incident:
+             # a config-matching bug silently dropped flex -> 2.3x billing).
+             "service_tier": result.get("service_tier"),
++            # Contrato de observabilidade v1 (ADR-034): finish_reason do SDK
++            # separado da decisão interna do loop; nunca prompts, respostas
++            # integrais, headers, cookies ou segredos.
++            "provider_finish_reason": result.get("provider_finish_reason"),
++            "hermes_turn_exit_reason": _sanitize_turn_exit_reason(result.get("turn_exit_reason")),
++            "tavily_operations": _tavily_operation_counts(),
+         }
+         if failure is not None:
+             report["failure"] = failure
+@@ -167,6 +192,16 @@
+         pass
+ 
+ 
++def _tavily_operation_counts() -> dict:
++    """Contadores Tavily (attempted/succeeded/failed) no ponto real do HTTP."""
++    try:
++        from plugins.web.tavily.provider import get_operation_counts
++
++        return get_operation_counts()
++    except Exception:
++        return {}
++
++
+ def run_oneshot(
+     prompt: str,
+     model: Optional[str] = None,
+@@ -469,6 +504,10 @@
+         agent.tool_gen_callback = None
+ 
+         result = agent.run_conversation(prompt)
++        result = dict(result) if isinstance(result, dict) else {}
++        # Observabilidade v1: finish_reason do SDK, mesmo em turnos não limpos
++        # (truncamento/refusal), lido diretamente do agente.
++        result["provider_finish_reason"] = getattr(agent, "_last_provider_finish_reason", None)
+         return (result.get("final_response") or "", result)
+     finally:
+         # Ordering deliberately mirrors gateway/run.py:_cleanup_agent_resources,
+diff -u -r a/plugins/web/tavily/provider.py b/plugins/web/tavily/provider.py
+--- a/plugins/web/tavily/provider.py	2026-08-19 06:34:24.000000000 +0000
++++ b/plugins/web/tavily/provider.py	2026-09-03 03:42:40.482605485 +0000
+@@ -31,6 +31,48 @@
+ 
+ logger = logging.getLogger(__name__)
+ 
++_OPERATION_COUNTS = {
++    "search": {"attempted": 0, "succeeded": 0, "failed": 0},
++    "extract": {"attempted": 0, "succeeded": 0, "failed": 0},
++}
++_MAX_SEARCH_ATTEMPTS = 3
++
++
++class TavilySearchLimitError(RuntimeError):
++    """Bloqueia a quarta busca antes de qualquer HTTP."""
++
++
++def _reserve_attempt(endpoint: str) -> None:
++    if endpoint not in _OPERATION_COUNTS:
++        return
++    if endpoint == "search" and _OPERATION_COUNTS[endpoint]["attempted"] >= _MAX_SEARCH_ATTEMPTS:
++        raise TavilySearchLimitError("tavily_search_limit_reached")
++    _OPERATION_COUNTS[endpoint]["attempted"] += 1
++
++
++def _record_result(endpoint: str, ok: bool) -> None:
++    if endpoint in _OPERATION_COUNTS:
++        _OPERATION_COUNTS[endpoint]["succeeded" if ok else "failed"] += 1
++
++
++def get_operation_counts() -> Dict[str, Dict[str, int]]:
++    """Devolve contadores exatos ``{search/extract: {attempted, succeeded, failed}}``."""
++    return {op: dict(_OPERATION_COUNTS[op]) for op in _OPERATION_COUNTS}
++
++
++def _validate_tavily_response(endpoint: str, data: Any) -> None:
++    """Rejeita HTTP 200 cujo JSON não satisfaça o envelope Tavily mínimo."""
++    if not isinstance(data, dict):
++        raise ValueError("tavily_invalid_response")
++    if endpoint == "search":
++        if not isinstance(data.get("results"), list):
++            raise ValueError("tavily_invalid_response")
++        return
++    if endpoint == "extract":
++        list_fields = ("results", "failed_results", "failed_urls")
++        if not any(isinstance(data.get(field), list) for field in list_fields):
++            raise ValueError("tavily_invalid_response")
++
+ 
+ def _tavily_request(endpoint: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+     """POST to the Tavily API and return the parsed JSON response.
+@@ -56,9 +98,17 @@
+     url = f"{base_url}/{endpoint.lstrip('/')}"
+     logger.info("Tavily %s request to %s", endpoint, url)
+ 
+-    response = httpx.post(url, json=payload, timeout=60)
+-    response.raise_for_status()
+-    return response.json()
++    _reserve_attempt(endpoint)
++    try:
++        response = httpx.post(url, json=payload, timeout=60)
++        response.raise_for_status()
++        data = response.json()
++        _validate_tavily_response(endpoint, data)
++    except Exception:
++        _record_result(endpoint, False)
++        raise
++    _record_result(endpoint, True)
++    return data
+ 
+ 
+ def _normalize_tavily_search_results(response: Dict[str, Any]) -> Dict[str, Any]:

@@ -1,5 +1,71 @@
 # Controle de execução
 
+## Estado vigente — 5 de setembro de 2026
+
+| Campo | Estado comprovado |
+| --- | --- |
+| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `d747134` |
+| Fase ativa | Fase 10 — **concluída e aceita** (aceite humano 5/9/2026); Fase 11 em execução |
+| PR | #14 aberto e draft (Fases 8–10 empilhadas na mesma branch; merge pendente) |
+| Fase 10 | **SUCESSO** — 5 artigos publicados (1 por pilar), com fonte nível A, capa, revisor, categoria, serviço e SEO; calendário de 90 dias em docs/38 |
+| Identidade visual | nova paleta laranja/grafite/preto (ADR-039) aplicada e capas regeneradas |
+| Runtime | runner healthy; travas fechadas; `retry3=0`; custo do mês US$ 0,27 (teto US$ 10) |
+| Restrições | Publicação automática e retry 3 continuam proibidos |
+
+Próxima ação: iniciar a Fase 11 (segurança, observabilidade, backup e
+recuperação). O Hermes permanece editor-chefe; runner é governança;
+DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada para o Payload.
+
+### Bateria real final — 4 de setembro de 2026
+
+Após o ADR-035 (teto efetivo de 5 jobs para o job raiz final), a janela
+controlada `scripts/phase8-controlled-battery.sh` executou exatamente um POST e
+o job raiz `44666d93297d…` terminou `succeeded` em ~216 s, sem polling e sem
+retry. O dossiê `editorial-dossier.v1` é válido (`contentType=analysis`,
+`primaryPillar=sales-attendance`, `riskLevel=low`, 3 fontes — 2 nível A e 1
+nível B). A observabilidade `hermes-observability.v1` registrou
+`provider_finish_reason=stop` e Tavily `search attempted=3/succeeded=3` e
+`extract attempted=1/succeeded=1` (invariante `succeeded+failed==attempted`
+preservada). O custo acumulado passou de US$ 0,0543 para US$ 0,1053
+(`api_calls` 8→15), dentro do guardrail de US$ 2. As duas travas foram abertas
+e fechadas em bloco; `jobs_reserved=5`, `lineage=2`, `retry3=0` e reserva zero
+ao final. Nenhuma publicação, Payload, n8n, Fase 9 ou alteração de dados.
+
+### Deploy fechado das correções em branch — 4 de setembro de 2026
+
+As cinco correções em branch (`b6f5f99`…`fcc83c0`) não estavam na imagem
+implantada. A auditoria constatou que o black-box embutido também estava
+defasado: `test_12` exigia a string exata da chamada antiga de
+`HermesRunError`, incompatível com a refatoração de `fcc83c0` (que adicionou o
+kwarg `metadata`). A asserção foi alinhada em `f10488a`, preservando a
+semântica fail-closed. A imagem `phase8-instrumentation-f10488a` foi
+reconstruída, aprovou os 36 cenários offline e foi implantada de forma fechada
+apenas no runner, por RepoDigest local
+`cv-hermes-editorial-runner@sha256:70630655a4d354552d09ea177133b28c92ee40c865d10866b544c33dc5ef2a32`.
+O checkpoint pré-deploy validado está em
+`/opt/backups/crescimento-vertical/phase8-fixes-predeploy-f10488a-20260904T192911Z`
+(sha256 `73dac348…`, integrity ok, v5). O state preservou `jobs=4`,
+`lineage=2` e reserva zero; as duas travas permaneceram fechadas e não houve
+API editorial, pesquisa, inferência, token/custo, job novo, publicação ou
+Fase 9.
+
+Nota: o 4º job (`3754da2d`, `timed_out`) não pertence à linhagem de retry da
+bateria; foi executado por outro agente (bateria/teste) e é preservado como
+estado histórico. `retry3` permanece inexistente.
+
+### Deploy fechado da instrumentação — 3 de setembro de 2026
+
+O runner foi recriado sozinho, com `--no-deps --no-build --pull never`, pelo
+RepoDigest local `cv-hermes-editorial-runner@sha256:cad0e4f0287418654c63f8f51c81622433e9b5325e770a57057de4fa2d796d9d`.
+O backup consistente e validado está em
+`/opt/backups/crescimento-vertical/phase8-instrumentation-predeploy-8c881ea-20260903T162645Z`.
+O state preservou SQLite v5, `jobs=3`, `lineage=2`, `retry3=0` e reserva zero.
+As duas travas permaneceram fechadas; não houve API editorial, pesquisa,
+inferência, token/custo adicional, job, publicação ou Fase 9.
+
+Os registros abaixo são históricos e devem ser lidos segundo a data de cada
+sessão; não substituem este quadro vigente.
+
 ## Aceite humano e encerramento da Fase 5 — 29 de agosto de 2026
 
 O responsável pelo produto aprovou os hubs editoriais vazios, busca e filtros,
@@ -590,3 +656,80 @@ Ao concluir uma sessão de trabalho, registrar:
 | Preservado | Produção, n8n, Hermes, GA4 e Search Console; nenhuma nova mensagem ou lead |
 | Estado | Fase 7 concluída; Fases 0–7 concluídas; Fases 8–12 pendentes; nenhuma fase em execução |
 | Gates | Homologação responsiva integral e concretização da copy da Fase 4 continuam bloqueando produção |
+
+## Controle editorial da Fase 8
+
+O runner aceita somente requisição estruturada, aplica escopo fechado,
+canonicalização e deduplicação, e persiste apenas estado operacional mínimo.
+Há uma execução ativa no máximo e bateria de até 4 jobs; cada job limita 8
+turnos, 3 buscas, 4 fontes e 300 segundos de trabalho Hermes, 4096 tokens por
+chamada e 256 KiB de stdout. O cliente síncrono usa deadline monotônico total
+de 330 s, timeout de POST de 320 s e timeout de cada GET de 30 s, sempre
+limitados pelo saldo do deadline. O POST reserva 300 s de trabalho + 5 s de
+admissão + 15 s de margem contratual de finalização. Os 10 s de entrega da
+resposta ficam fora do timeout de socket: saldo global remanescente não prolonga
+uma operação cujo socket já expirou; a margem de finalização não é
+garantia enquanto o runner não tiver limite próprio comprovável. O guardrail
+persistente reserva US$ 0,50/job até US$ 2. A agenda
+candidata é apenas declarada; cron,
+webhook, gateway e workflow n8n permanecem desativados. Mesmo com credenciais
+exclusivas montadas, a execução e a bateria real permanecem bloqueadas pelas
+duas travas.
+
+O subprocesso Hermes usa sessão/grupo próprio (`start_new_session=True`) e
+stdout/stderr drenados concorrentemente com retenção máxima de 256 KiB por
+stream. O limite de trabalho é 300 s; no timeout há TERM ao grupo, tolerância
+de 2 s, KILL quando necessário, espera de coleta de até 2 s e drenagem/fechamento
+de pipes limitada a 1 s. Depois do `wait` direto, o grupo é verificado: líder
+encerrado não prova que filhos ou netos terminaram e grupo remanescente falha
+fechado com erro sanitizado. O Python não é subreaper; `docker-init` recolhe
+órfãos no runtime, mas descendente que escape da sessão não é declarado
+encerrado sem prova. Garantia desse caso depende de cgroup/subreaper dedicado e
+permanece pendente. Usage, reservas, deadlines HTTP e persistência/entrega da
+resposta não são alterados nesta etapa.
+
+Após sucesso, timeout ou falha de encerramento, o usage é coletado somente do
+arquivo regular associado ao job, sem seguir symlink, com limite de 256 KiB e
+classificação explícita (`present`, `partial`, `absent`, `empty`, `invalid` ou
+`read_error`). Contadores inválidos não viram zero; Tavily mantém attempted,
+succeeded e failed, inclusive tentativa sem conclusão. Usage parcial fica
+persistentemente marcado como incompleto e não entra no contabilizador de
+custo/busca. Erros original e secundário são preservados e finalização repetida
+é idempotente. Reservas, orçamento e deadlines HTTP não são modificados.
+
+Em 31 de agosto de 2026, o provider candidato foi substituído localmente por
+DeepSeek V4 Flash (ADR-030). O runner fixa provider/modelo e thinking `none`, aceita a
+credencial exclusiva somente por arquivo e falha fechado quando ausente. Não
+houve chamada de API, pesquisa, deploy, alteração de runtime ou início da Fase
+9; o PR #14 permanece draft.
+
+Em 1º de setembro de 2026, a janela de isolamento recriou somente o runner e o
+proxy exclusivo. A dupla trava permaneceu fechada. Verificações únicas de
+`GET /models` no DeepSeek e `GET /usage` no Tavily retornaram HTTP 200 sem
+inferência ou pesquisa. O runner ficou fora de `n8n_default`; egress direto foi
+bloqueado pela rede internal e somente o proxy deny-by-default participa da
+rede de saída. A bateria real não foi iniciada.
+
+Ainda em 1º de setembro, o preflight da bateria detectou `/state` sem permissão
+de escrita para UID/GID 10000 e interrompeu antes das travas. A remediação
+isolada ajustou o volume para `10000:10000 0700`, arquivos 0600 e incluiu
+criação correta na imagem mais umask 0077. Persistência e rollback foram
+comprovados offline; a bateria continuou bloqueada.
+
+O preflight posterior detectou que `/opt/data` ainda era um volume anônimo RW,
+pois a recriação havia preservado o volume herdado apesar da entrada tmpfs. A
+remediação isolada passou a exigir container realmente novo e tmpfs de 16 MiB
+com `nosuid,nodev,noexec`, modo 0700 e UID/GID 10000. A dupla trava permaneceu
+fechada e a bateria não foi executada.
+
+## Registro da sessão 2026-09-02 — reconciliação da Fase 8 com a arquitetura original
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | `feat/phase-8-hermes-editorial-policy` (PR #14 draft preservado) |
+| Fase | 8 — reconciliação de papéis e observabilidade, sem bateria nem Fase 9 |
+| Objetivo | Reaproximar código/docs/ADR da arquitetura original: Hermes editor-chefe, runner governança, DeepSeek/Tavily subordinados |
+| Alterações | ADR-034 (matriz de papéis + contrato de observabilidade), `docs/schemas/hermes-observability.v1.schema.json`, instrumentação mínima do Hermes (`hermes-instrumentation/`), correções do runner (persistência de usage/evidência/contabilização em todos os estados terminais), SOUL/SKILL e docs/06/23/24/35/10/15/ROTEIRO-MESTRE |
+| Validações | testes offline do runner (finish_reason stop/length/content_filter/tool_calls/ausente, usage presente/ausente, Tavily search/extract, limite de pesquisa, schema válido/inválido, timeout, falha do provider, evidência, sem segredo, retry 3 bloqueado); lint/typecheck/build; Compose config; diff-check; Gitleaks |
+| Riscos | patch de instrumentação ainda não aplicado à imagem em execução; runner permanece fail-closed até a aplicação; nenhuma chamada externa realizada |
+| Próxima ação | Aguardar os quatro checks verdes; não fazer merge, deploy, bateria ou Fase 9 sem autorização humana |

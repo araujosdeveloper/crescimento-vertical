@@ -26,14 +26,57 @@ um portal editorial e comercial orientado à geração de receita.
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Concluída |
-| 8 | Hermes Agent e política editorial automatizada | Fase 7 | Pendente |
-| 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
-| 10 | Conteúdo inicial e validação editorial | Fase 9 | Pendente |
-| 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Pendente |
+| 8 | Hermes Agent e política editorial automatizada | Fase 7 | Concluída |
+| 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Concluída |
+| 10 | Conteúdo inicial e validação editorial | Fase 9 | Concluída |
+| 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Em execução |
 | 12 | Migração, lançamento e estabilização | Fase 11 | Pendente |
 
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
+
+## Situação vigente — 5 de setembro de 2026
+
+As Fases 9 e 10 foram **aceitas e encerradas** em 5 de setembro de 2026, após
+aceite humano expresso do responsável pelo produto. A Fase 9 entregou o ciclo
+editorial fim a fim (Hermes → n8n → Telegram → publicação) com os 4 workflows
+ativos; a Fase 10 entregou o pacote editorial inicial com **um artigo real
+publicado por pilar** (Agentes de IA, Automação de WhatsApp, Integrações n8n,
+Sites e landing pages, Automação de processos), todos com fonte nível A,
+imagem, revisor, categoria, serviço relacionado, SEO e transparência de IA, e o
+calendário de 90 dias em docs/38. A Fase 11 passa a ser a fase em execução.
+
+## Situação vigente — 4 de setembro de 2026
+
+A Fase 8 foi **aceita e encerrada** em 4 de setembro de 2026, após aceite humano
+expresso do responsável pelo produto. A evidência é dupla: o gate offline da
+imagem instrumentada (`phase8-instrumentation-d301284`, Image ID
+`sha256:5d575d02…`) aprovou 36 cenários em `network none`, e a bateria real
+controlada executou um único job raiz `44666d93297d…` com resultado
+`succeeded` — dossiê `editorial-dossier.v1` válido, `provider_finish_reason=stop`,
+Tavily `search 3/3` e `extract 1/1`, custo acumulado US$ 0,1053 e travas
+fechadas ao final (`retry3=0`, `lineage=2`). A Fase 9 passa a ser a fase em
+preparação, ainda sem credencial Telegram/Payload de publicação; publicação
+automática e retry 3 continuam proibidos.
+
+## Situação vigente — 3 de setembro de 2026
+
+A única fase ativa é a Fase 8. O gate offline da imagem instrumentada foi
+corrigido e comprovado na referência imutável
+`phase8-instrumentation-e154bf4`: o black-box embutido executou o Hermes 0.20.4
+instalado e patchado, sem rede externa, e aprovou 36 cenários. O runtime ativo
+foi preservado e não houve deploy. A Fase 8 continua aberta para aceite humano;
+as declarações da candidata anterior permanecem históricas e superadas.
+
+O Hermes permanece editor-chefe e motor central do blog; DeepSeek e Tavily são
+subordinados, o runner exerce governança e o n8n permanece a única ponte futura
+para o Payload. A Fase 9 não foi iniciada, publicação automática e retry 3 são
+proibidos. O plano consolidado está em
+[docs/36-plano-diretor-definitivo.md](docs/36-plano-diretor-definitivo.md).
+
+Os parágrafos cronológicos abaixo são memória dos respectivos marcos. Quando
+descrevem “nenhuma fase em execução” ou fases posteriores como pendentes, devem
+ser interpretados na data indicada e não como estado presente.
 
 A Fase 3 foi iniciada formalmente em 28 de agosto de 2026, a partir da `main`
 `d0f7b33f19dc00a8053aa8c0f42359a417182ee0`, e concluída após o aceite humano
@@ -82,6 +125,21 @@ atômico completo. Produção, n8n e Hermes foram preservados; GA4 e Search Cons
 seguem desativados. As Fases 0–7 estão concluídas, as Fases 8–12 permanecem
 pendentes e nenhuma fase está em execução. Os dois gates pré-produção acima
 continuam bloqueando produção.
+
+A Fase 8 foi iniciada em 30 de agosto de 2026 a partir da `main`
+`b8fbd9484b6ffe334747352eb2b1ef11ecb53165`. A reconciliação implementa a
+política editorial, canonicalização, deduplicação, estado persistente mínimo,
+limites firmes, usage file e validação estrita no runner. O preflight classificou
+a única credencial disponível como compartilhada (B), sem autorização de
+reutilização; por isso a execução real, a bateria e qualquer pesquisa ficam
+fechadas até existir credencial exclusiva. Os gates pré-produção permanecem
+inalterados e as Fases 9–12 continuam pendentes.
+
+Em 31 de agosto de 2026, decisão expressa substituiu o candidato OpenAI por
+DeepSeek V4 Flash. A compatibilidade do Hermes v0.20.4 foi comprovada sem
+autenticação e o PR #14 passou a preparar provider/modelo, thinking, limites e
+credencial exclusiva por arquivo, sem API, pesquisa real, deploy ou runtime. A
+bateria real continua bloqueada até credencial e homologação posteriores.
 
 A Fase 6 foi iniciada e concluída em 29 de agosto de 2026 após aceite humano
 expresso. O aceite cobriu SEO técnico, metadata, canonicals, Open Graph, Twitter,
@@ -431,6 +489,15 @@ e [ADR-020](docs/14-registro-decisoes.md). Nenhum runtime da VPS é alterado.
 
 - Hermes gera dossiês rastreáveis, sem publicar, rejeita conteúdo fora do nicho e
   interrompe o fluxo quando não há evidência suficiente.
+
+### Papéis imutáveis (ADR-034)
+
+O Hermes é o **editor-chefe** e motor editorial; o runner é **governança**
+(autentica, limita, contabiliza, valida e persiste); DeepSeek e Tavily são
+subordinados ao Hermes; Payload é CMS/revisão; n8n é orquestração operacional
+futura. Publicação automática permanece desabilitada e retry 3 é proibido. A
+observabilidade segue o contrato versionado
+`docs/schemas/hermes-observability.v1.schema.json`.
 
 ## Fase 9 — n8n, Telegram, aprovação e publicação
 

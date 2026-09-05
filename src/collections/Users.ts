@@ -25,6 +25,7 @@ export const Users: CollectionConfig = {
     maxLoginAttempts: 5,
     lockTime: 5 * 60 * 1000,
     tokenExpiration: 60 * 60,
+    useAPIKey: true,
   },
   access: {
     create: usersCreate,

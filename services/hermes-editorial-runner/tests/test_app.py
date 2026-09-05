@@ -59,7 +59,7 @@ def valid_request():
         "searchIntent": "verificar impacto",
         "language": "pt-BR",
         "requestedAt": "2026-08-25T12:00:00Z",
-        "maxSources": 5,
+        "maxSources": 4,
     }
 
 

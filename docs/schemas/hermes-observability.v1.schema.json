@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crescimentovertical.com/schemas/hermes-observability.v1.schema.json",
+  "title": "Hermes Observability Contract v1",
+  "description": "Contrato versionado de observabilidade entre o runner (governança) e o Hermes (editor-chefe). Os campos 'provider.*' são exportados pelo Hermes após o patch de instrumentação; os campos 'runner.*' são persistidos pelo runner. O runner não pode exigir campo ausente na exportação atual do Hermes sem o patch correspondente.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contractVersion",
+    "provider",
+    "model",
+    "provider_finish_reason",
+    "hermes_turn_exit_reason",
+    "api_calls",
+    "input_tokens",
+    "output_tokens",
+    "reasoning_tokens",
+    "cache_read_tokens",
+    "cache_write_tokens",
+    "tavily",
+    "runner"
+  ],
+  "properties": {
+    "contractVersion": {
+      "const": "1.0"
+    },
+    "provider": {
+      "const": "deepseek",
+      "description": "Provider de inferência subordinado ao Hermes."
+    },
+    "model": {
+      "const": "deepseek-v4-flash",
+      "description": "Modelo fixado do Hermes."
+    },
+    "provider_finish_reason": {
+      "type": ["string", "null"],
+      "enum": ["stop", "length", "content_filter", "tool_calls", null],
+      "description": "finish_reason real vindo diretamente da resposta/chunk final do SDK. null indica ausência real e é tratado como fail-closed pelo runner; nunca é inferido como stop e nunca é derivado de hermes_turn_exit_reason."
+    },
+    "hermes_turn_exit_reason": {
+      "type": ["string", "null"],
+      "enum": [
+        "text_response", "max_iterations_reached", "budget_exhausted",
+        "interrupted_by_user", "interrupted_during_api_call",
+        "all_retries_exhausted_no_response", "empty_response_exhausted",
+        "compaction_handoff_not_actionable", "session_persistence_failed",
+        "guardrail_halt", "partial_stream_recovery", "fallback_prior_turn_content",
+        "local_processing_error", "error_near_max_iterations",
+        "ollama_runtime_context_too_small", "unknown", null
+      ],
+      "description": "Decisão interna do loop do Hermes, sanitizada e enumerada. Não substitui provider_finish_reason."
+    },
+    "finish_reason": {
+      "type": ["string", "null"],
+      "enum": ["stop", "length", "content_filter", "tool_calls", null],
+      "description": "DEPRECATED. Reflete somente provider_finish_reason por compatibilidade; nunca é preenchido a partir de hermes_turn_exit_reason."
+    },
+    "api_calls": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "input_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "output_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reasoning_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cache_read_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cache_write_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "total_tokens": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tavily": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["search", "extract"],
+      "properties": {
+        "search": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attempted", "succeeded", "failed"],
+          "properties": {
+            "attempted": {"type": "integer", "minimum": 0, "description": "Incrementa imediatamente antes da tentativa HTTP real."},
+            "succeeded": {"type": "integer", "minimum": 0, "description": "Incrementa somente após resposta válida."},
+            "failed": {"type": "integer", "minimum": 0, "description": "Incrementa em erro HTTP, transporte, timeout ou resposta inválida."}
+          },
+          "description": "Telemetria da operação search. Invariante: succeeded + failed == attempted."
+        },
+        "extract": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["attempted", "succeeded", "failed"],
+          "properties": {
+            "attempted": {"type": "integer", "minimum": 0},
+            "succeeded": {"type": "integer", "minimum": 0},
+            "failed": {"type": "integer", "minimum": 0}
+          },
+          "description": "Telemetria da operação extract. Invariante: succeeded + failed == attempted."
+        }
+      },
+      "description": "Telemetria Tavily instrumentada no ponto real do HTTP. Não contabiliza GET /usage, não infere por logs CONNECT e não registra consulta, URL, headers, corpo, chave ou resposta."
+    },
+    "runner": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terminal_state", "error", "dossier_schema", "evidence_available", "sources"],
+      "properties": {
+        "terminal_state": {
+          "type": "string",
+          "enum": ["succeeded", "rejected", "failed", "timed_out", "insufficient_evidence"],
+          "description": "Estado terminal persistido pelo runner."
+        },
+        "error": {
+          "type": ["string", "null"],
+          "description": "Erro sanitizado (sem texto do provider, headers, cookies ou segredos)."
+        },
+        "dossier_schema": {
+          "const": "editorial-dossier.v1",
+          "description": "Schema contra o qual o dossiê foi validado."
+        },
+        "evidence_available": {
+          "type": "boolean",
+          "description": "Indica se há evidência sanitizada persistida para o estado terminal."
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {
+            "type": "string",
+            "pattern": "^https://",
+            "description": "URL canônica sanitizada (sem trackers/fragmentos) das fontes consultadas."
+          },
+          "description": "Fontes consultadas sanitizadas, sem conteúdo, parâmetros sensíveis ou credenciais."
+        }
+      }
+    }
+  }
+}

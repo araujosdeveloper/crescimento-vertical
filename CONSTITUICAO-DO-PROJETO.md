@@ -550,9 +550,8 @@ Regras:
 Direção visual permanente:
 
 - dark premium tecnológica;
-- fundo preto/azul profundo;
-- azul elétrico e ciano como destaques;
-- branco e cinza para texto;
+- fundo preto/grafite profundo;
+- laranja como destaque, com cinza e branco para texto;
 - superfícies grafite ou glass controladas;
 - glow discreto;
 - linguagem profissional, forte, confiável e sem promessa vazia;
@@ -563,13 +562,13 @@ Tokens de origem preservados:
 
 | Papel | Valor |
 | --- | --- |
-| background | `#020617` |
-| surface | `#07111f` |
-| surface-2 | `#0b1220` |
-| foreground | `#f8fbff` |
-| muted | `#8da0bb` |
-| blue | `#0a84ff` |
-| cyan | `#00d4ff` |
+| background | `#0a0a0a` |
+| surface | `#161616` |
+| surface-2 | `#1f1f1f` |
+| foreground | `#fafafa` |
+| muted | `#a3a3a3` |
+| orange | `#f97316` |
+| orange-light | `#fb923c` |
 
 Requisitos de UX:
 

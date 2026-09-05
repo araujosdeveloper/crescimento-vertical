@@ -9,27 +9,33 @@ atendimento digital, sites e integrações.
 
 ## Estado atual
 
-- Aplicação pública em Next.js 16, React 19 e TypeScript estrito.
-- Payload CMS 3.88.0 e PostgreSQL 16 como fundação editorial, com migrações
-  versionadas.
-- Portal editorial público com DTOs estritos, RSS, sitemap e SEO técnico.
-- Design system, layout público, navegação e acessibilidade da Fase 2
-  implementados.
-- Suítes com 69 testes da aplicação, 32 do runner editorial e 34 do conector
-  n8n ↔ Hermes.
-- CI com quatro jobs obrigatórios: aplicação completa, runner editorial,
-  conector n8n e secret scan do histórico.
-- Staging blue-green protegido por autenticação e bloqueado para indexação.
-- Perfil Hermes, runner e conector n8n existentes, com execução editorial
-  desabilitada.
+- Fases 0–3 concluídas; Fase 4 concluída com ressalva de copy comercial; Fases
+  5–9 concluídas e aceitas.
+- Fase 8 (Hermes editor-chefe) encerrada: black-box 36/36 offline + bateria real
+  `succeeded`.
+- Fase 9 (n8n, Telegram, aprovação e publicação) encerrada: pipeline E2E
+  validado em staging (fonte → dossiê → rascunho → Telegram), com workflows
+  CV-01..04 ativos no n8n.
+- Fase 10 (conteúdo inicial) encerrada: pacote editorial com um artigo real por
+  pilar (5 pilares), calendário de 90 dias e pipeline automatizado.
+- Fase 11 em execução; Fase 12 pendente; publicação automática e retry 3
+  permanecem proibidos.
+- Aplicação pública em Next.js 16/React 19, com Payload CMS 3.88.0 e PostgreSQL
+  16 como fonte de verdade editorial.
+- Portal institucional, comercial e editorial, SEO técnico e captação com
+  consentimento/outbox implementados; GA4 e Search Console permanecem
+  desativados.
+- Hermes é o editor-chefe e motor central do blog. DeepSeek e Tavily são
+  recursos subordinados; o runner governa a execução; o n8n será a única ponte
+  autorizada para o Payload.
+- Perfil Hermes, runner e conector n8n existem, mas a execução editorial e os
+  workflows das Fases 8/9 permanecem fechados.
+- CI com quatro checks obrigatórios, incluindo Gitleaks sobre o histórico.
 
-As Fases 0 e 1 estão concluídas. A Fase 2 permanece em execução, aguardando
-homologação visual humana do candidato de staging.
-
-Continuam pendentes a produção editorial, as páginas comerciais, conteúdo real,
-captação e mensuração comercial, armazenamento S3, observabilidade e backup
-off-site. Nenhuma capacidade antecipada das fases posteriores substitui seus
-gates formais.
+Antes de produção continuam obrigatórios dois gates transversais: homologação
+responsiva e acessível nos cinco viewports oficiais e concretização da copy
+comercial da Fase 4. O estado e o plano restante estão consolidados no
+[Plano Diretor Definitivo](docs/36-plano-diretor-definitivo.md).
 
 O inventário técnico completo está em
 [docs/15-auditoria-estado-atual.md](docs/15-auditoria-estado-atual.md).
@@ -45,6 +51,8 @@ O inventário técnico completo está em
    arquiteturais aprovadas.
 6. [docs/10-controle-de-execucao.md](docs/10-controle-de-execucao.md) — fase e
    gates atuais.
+7. [docs/36-plano-diretor-definitivo.md](docs/36-plano-diretor-definitivo.md) —
+   consolidação aprovada do estado e da execução restante.
 
 Nenhuma fase começa sem seus critérios de entrada. Uma fase também não é
 considerada concluída apenas porque funciona localmente: CI, segurança,
