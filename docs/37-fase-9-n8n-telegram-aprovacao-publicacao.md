@@ -1,19 +1,27 @@
 # Fase 9 — n8n, Telegram, aprovação e publicação
 
-## Estado vigente
+## Estado vigente — ativação parcial em staging
 
-A Fase 9 está em **preparação sem credencial**. A Fase 8 foi aceita em
-4 de setembro de 2026; o runner editorial (`hermesEditorial`) e o conector n8n
-já existem em modo validate-only. O que falta para ativar a fase é inteiramente
-credencial e contrato externo, não código do repositório:
+A Fase 8 foi aceita em 4 de setembro de 2026 e a Fase 9 está em **ativação**:
 
-- **token do bot Telegram** (CV-02) — credencial nova, fora do Git;
-- **credencial da role `automation` no Payload** (REST API, CV-01/CV-03) —
-  para o n8n criar/atualizar rascunhos e registrar decisões, sem publicar.
+- **Migração `api_key`** aplicada no staging e `useAPIKey` ativo no Payload;
+- **Role `automation` + API key** provisionadas (`automation@crescimentovertical.com`);
+- **Bot Telegram** validado (`@AlertaHermes_Bot`) e `chat_id` de revisão `5710991322`;
+- **Credenciais** importadas no n8n (Telegram + Payload, cifradas);
+- **Workflows CV-01..CV-04** importados no n8n (inativos até o toggle no painel);
+- **Correção de conectividade** — o n8n foi reconectado à rede
+  `phase8_execution` (`docker network connect`), pois o ADR-031 havia isolado o
+  runner e quebrado a ponte n8n → runner. A correção persistente exige adicionar
+  a rede ao compose real em `/docker/n8n/docker-compose.yml` (fora do repo).
+- **Teste de componentes validado**: criação de rascunho via role `automation`
+  (201, `workflowStatus=draft`) e envio de resumo via Telegram (ok), com
+  limpeza do rascunho de teste (nenhum conteúdo fictício permanece).
 
-Nenhum workflow ativo, cron, webhook real ou publicação é autorizado antes
-dessas credenciais e do aceite específico desta fase. Publicação automática e
-retry 3 continuam proibidos (ADR-005, ADR-034).
+Restam: ativar os workflows no painel (toggle "Active"), o teste E2E completo
+com uma execução real do Hermes através do workflow ativo (exige abrir as
+travas do runner + 1 novo job — teto da bateria hoje em 5/5), e o aceite
+humano específico desta fase. Publicação automática e retry 3 continuam
+proibidos (ADR-005, ADR-034).
 
 ## Objetivo
 
