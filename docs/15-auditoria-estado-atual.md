@@ -43,7 +43,7 @@ reserva zero e travas fechadas. Nenhuma publicação, Payload, n8n ou Fase 9.
 | 0–3 | Concluídas |
 | 4 | Concluída com ressalva de copy comercial |
 | 5–7 | Concluídas e aceitas |
-| 8 | Em execução; gate offline corrigido e bateria real bem-sucedida, aceite humano pendente |
+| 8 | Concluída — aceite humano (4/9/2026): black-box 36/36 + bateria real `succeeded` |
 | 9–12 | Pendentes |
 
 ### Correção comprovada do gate offline da Fase 8

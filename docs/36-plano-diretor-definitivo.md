@@ -196,7 +196,7 @@ Fontes autorizadas → Hermes editor-chefe → dossiê estruturado e rastreável
 | 5 | Portal editorial e experiência de leitura | Concluída | Aceite humano registrado |
 | 6 | SEO técnico, dados estruturados e performance | Concluída | GA4 e Search Console continuam desativados por decisão |
 | 7 | Captação, diagnóstico e mensuração comercial | Concluída | Fluxo real e notificação recebida |
-| 8 | Hermes Agent e política editorial automatizada | Em execução | Gate offline corrigido (`phase8-instrumentation-e154bf4`, 36 cenários, deploy fechado); aceite humano pendente |
+| 8 | Hermes Agent e política editorial automatizada | Concluída | Aceite humano 4/9/2026; black-box 36/36 + bateria real `succeeded` |
 | 9 | n8n, Telegram, aprovação e publicação | Pendente | Não iniciar antes do aceite da Fase 8 |
 | 10 | Conteúdo inicial e validação editorial | Pendente | Conteúdo real e calendário de 90 dias |
 | 11 | Segurança, observabilidade, backup e recuperação | Pendente | Hardening e continuidade finais |

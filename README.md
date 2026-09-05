@@ -10,11 +10,11 @@ atendimento digital, sites e integrações.
 ## Estado atual
 
 - Fases 0–3 concluídas; Fase 4 concluída com ressalva de copy comercial; Fases
-  5–7 concluídas e aceitas.
-- Fase 8 em execução: o gate offline da imagem instrumentada foi corrigido e
-  comprovado (candidata `phase8-instrumentation-e154bf4`, 36 cenários), com
-  deploy fechado apenas do runner; aguarda aceite humano.
-- Fases 9–12 pendentes; publicação automática e retry 3 permanecem proibidos.
+  5–8 concluídas e aceitas.
+- Fase 8 (Hermes editor-chefe) encerrada com aceite humano: black-box 36/36
+  offline + bateria real `succeeded` (dossiê válido, custo US$ 0,105, retry3=0).
+- Fases 9–12 pendentes; a Fase 9 está em preparação sem credencial; publicação
+  automática e retry 3 permanecem proibidos.
 - Aplicação pública em Next.js 16/React 19, com Payload CMS 3.88.0 e PostgreSQL
   16 como fonte de verdade editorial.
 - Portal institucional, comercial e editorial, SEO técnico e captação com

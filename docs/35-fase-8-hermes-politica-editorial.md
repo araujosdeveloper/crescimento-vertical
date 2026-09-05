@@ -1,20 +1,19 @@
 # Fase 8 — Hermes Agent e política editorial automatizada
 
-## Estado vigente — gate offline corrigido e bateria real bem-sucedida
+## Estado vigente — CONCLUÍDA (aceite humano em 4 de setembro de 2026)
 
-A Fase 8 aguarda aceite humano. Em 4 de setembro de 2026, a imagem
-`phase8-instrumentation-d301284` (Image ID `sha256:5d575d02…`) incorporou as
-cinco correções em branch, o black-box embutido alinhado e o teto de 5 jobs do
-ADR-035. O black-box aprovou 36 cenários offline e a **bateria real final**
-executou um único job raiz `44666d93297d…` com resultado `succeeded`: dossiê
-`editorial-dossier.v1` válido, `provider_finish_reason=stop`, Tavily
-`search 3/3` e `extract 1/1`, custo acumulado US$ 0,1053 e travas fechadas ao
-final. A candidata histórica `e154bf4` permanece válida como registro; a
-imagem em runtime agora é `d301284`.
+A Fase 8 foi aceita e encerrada pelo responsável pelo produto em 4 de setembro
+de 2026. A imagem `phase8-instrumentation-d301284` (Image ID
+`sha256:5d575d02…`) incorporou as cinco correções em branch, o black-box
+embutido alinhado e o teto de 5 jobs do ADR-035. O black-box aprovou 36
+cenários offline e a **bateria real final** executou um único job raiz
+`44666d93297d…` com resultado `succeeded`: dossiê `editorial-dossier.v1`
+válido, `provider_finish_reason=stop`, Tavily `search 3/3` e `extract 1/1`,
+custo acumulado US$ 0,1053 e travas fechadas ao final. A Fase 9 fica em
+preparação; publicação automática e retry 3 permanecem proibidos.
 
 As seções históricas que registram as candidatas anteriores continuam
-**SUPERADAS — NÃO VÁLIDAS PARA ACEITE**. Não houve publicação, retry 3,
-consumo não autorizado ou Fase 9; a aprovação humana permanece obrigatória.
+**SUPERADAS — NÃO VÁLIDAS PARA ACEITE**.
 
 ### Deploy fechado da candidata corrigida — 3 de setembro de 2026
 

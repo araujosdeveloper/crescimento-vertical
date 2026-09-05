@@ -5,16 +5,17 @@
 | Campo | Estado comprovado |
 | --- | --- |
 | Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `6922bbb` |
-| Fase ativa | Fase 8 — pronta para aceite humano; bateria real concluída com sucesso |
+| Fase ativa | Fase 8 — **concluída e aceita** (aceite humano 4/9/2026); Fase 9 em preparação sem credencial |
 | PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
 | Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-d301284`, Image ID `sha256:5d575d02…`, black-box real com 36 cenários aprovados em `network none` |
 | Bateria real | **SUCESSO** — job raiz `44666d93…` `succeeded`, dossiê `editorial-dossier.v1` válido, `provider_finish_reason=stop`, Tavily `search 3/3` e `extract 1/1`, custo acumulado US$ 0,1053, `retry3=0` |
 | Runtime ativo | runner `28c9b870…` healthy na imagem/digest `sha256:5d575d02…`; proxy `cd0d152c05ee…` preservado; travas fechadas |
-| Restrições | Publicação automática, retry 3 e Fase 9 continuam proibidos |
+| Restrições | Publicação automática e retry 3 continuam proibidos |
 
-Próxima ação única: **aceite humano da Fase 8**. O Hermes permanece editor-chefe;
-runner é governança; DeepSeek/Tavily são subordinados; n8n é a única ponte
-autorizada para o Payload.
+Próxima ação: preparar a Fase 9 em código e documentação (sem credencial
+Telegram/Payload de publicação). O Hermes permanece editor-chefe; runner é
+governança; DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada
+para o Payload.
 
 ### Bateria real final — 4 de setembro de 2026
 

@@ -26,14 +26,27 @@ um portal editorial e comercial orientado à geração de receita.
 | 5 | Portal editorial e experiência de leitura | Fase 4 | Concluída |
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Concluída |
-| 8 | Hermes Agent e política editorial automatizada | Fase 7 | Em execução |
-| 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Pendente |
+| 8 | Hermes Agent e política editorial automatizada | Fase 7 | Concluída |
+| 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Em preparação (sem credencial) |
 | 10 | Conteúdo inicial e validação editorial | Fase 9 | Pendente |
 | 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Pendente |
 | 12 | Migração, lançamento e estabilização | Fase 11 | Pendente |
 
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
+
+## Situação vigente — 4 de setembro de 2026
+
+A Fase 8 foi **aceita e encerrada** em 4 de setembro de 2026, após aceite humano
+expresso do responsável pelo produto. A evidência é dupla: o gate offline da
+imagem instrumentada (`phase8-instrumentation-d301284`, Image ID
+`sha256:5d575d02…`) aprovou 36 cenários em `network none`, e a bateria real
+controlada executou um único job raiz `44666d93297d…` com resultado
+`succeeded` — dossiê `editorial-dossier.v1` válido, `provider_finish_reason=stop`,
+Tavily `search 3/3` e `extract 1/1`, custo acumulado US$ 0,1053 e travas
+fechadas ao final (`retry3=0`, `lineage=2`). A Fase 9 passa a ser a fase em
+preparação, ainda sem credencial Telegram/Payload de publicação; publicação
+automática e retry 3 continuam proibidos.
 
 ## Situação vigente — 3 de setembro de 2026
 
