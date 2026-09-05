@@ -8,7 +8,7 @@
         "responseMode": "onReceived",
         "options": {}
       },
-      "id": "cv01-0001-0001-4001-8001-000000000001",
+      "id": "a1010000-0000-4001-8001-000000000001",
       "name": "Webhook Intake",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -25,13 +25,14 @@
         "searchIntent": "={{ $json.body.searchIntent }}",
         "maxSources": "={{ $json.body.maxSources }}"
       },
-      "id": "cv01-0002-0002-4002-8002-000000000002",
+      "id": "a2020000-0000-4002-8002-000000000002",
       "name": "Hermes Create Job",
       "type": "CUSTOM.hermesEditorial",
       "typeVersion": 1,
       "position": [-220, 0],
       "credentials": {
         "crescimentoVerticalHermesApi": {
+          "id": "d85755ef-422b-4ed1-9406-12f10de979ec",
           "name": "CV Hermes Editorial Runner — Internal"
         }
       }
@@ -41,13 +42,14 @@
         "operation": "getJob",
         "jobId": "={{ $json.body.jobId }}"
       },
-      "id": "cv01-0003-0003-4003-8003-000000000003",
+      "id": "a3030000-0000-4003-8003-000000000003",
       "name": "Hermes Get Job",
       "type": "CUSTOM.hermesEditorial",
       "typeVersion": 1,
       "position": [20, 0],
       "credentials": {
         "crescimentoVerticalHermesApi": {
+          "id": "d85755ef-422b-4ed1-9406-12f10de979ec",
           "name": "CV Hermes Editorial Runner — Internal"
         }
       }
@@ -58,16 +60,17 @@
         "url": "={{ $env.PAYLOAD_BASE_URL }}/api/articles",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ _status: 'draft', workflowStatus: 'draft', title: $json.body.title, excerpt: $json.body.dek, content: { root: { type: 'root', children: [] }, raw: JSON.stringify($json.body) }, category: $json.body.categoryId, sources: $json.body.sourceIds }) }}",
+        "jsonBody": "={{ JSON.stringify({ _status: 'draft', workflowStatus: 'draft', title: $json.body.title, excerpt: $json.body.dek, content: { root: { type: 'root', children: [] } }, category: $json.body.categoryId, sources: $json.body.sourceIds }) }}",
         "options": {}
       },
-      "id": "cv01-0004-0004-4004-8004-000000000004",
+      "id": "a4040000-0000-4004-8004-000000000004",
       "name": "Payload Criar Rascunho",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [260, 0],
       "credentials": {
         "httpHeaderAuth": {
+          "id": "944d07f2-54ea-4699-9321-9d5fe6c1eb31",
           "name": "CV Payload Automation — API Key"
         }
       }
@@ -86,7 +89,7 @@
   },
   "active": false,
   "settings": {},
-  "versionId": "cv01-0005-0005-4005-8005-000000000005",
-  "id": "cv01-0006-0006-4006-8006-000000000006",
+  "versionId": "a5050000-0000-4005-8005-000000000005",
+  "id": "a6060000-0000-4006-8006-000000000006",
   "pinData": {}
 }

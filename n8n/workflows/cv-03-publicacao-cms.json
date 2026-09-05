@@ -8,7 +8,7 @@
         "responseMode": "onReceived",
         "options": {}
       },
-      "id": "cv03-0001-0001-4001-8001-000000000001",
+      "id": "c1010000-0000-4001-8001-000000000001",
       "name": "Webhook Decisão",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -17,54 +17,31 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $json.body.decision }}",
-              "operation": "equals",
-              "value2": "approve"
-            }
-          ]
-        }
+        "chatId": "5710991322",
+        "text": "=Decisão registrada: {{ $json.body.decision }} (artigo {{ $json.body.articleId }}). A publicação final é feita por um revisor no Payload Admin.",
+        "additionalFields": {}
       },
-      "id": "cv03-0002-0002-4002-8002-000000000002",
-      "name": "Somente Aprovado",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2,
-      "position": [-220, 0]
-    },
-    {
-      "parameters": {
-        "method": "PATCH",
-        "url": "={{ $env.PAYLOAD_BASE_URL }}/api/articles/{{ $json.body.articleId }}",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ workflowStatus: 'in_review' }) }}",
-        "options": {}
-      },
-      "id": "cv03-0003-0003-4003-8003-000000000003",
-      "name": "Payload Encaminhar Revisão",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [20, 0],
+      "id": "c2020000-0000-4002-8002-000000000002",
+      "name": "Telegram Confirmar Decisão",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [-220, 0],
       "credentials": {
-        "httpHeaderAuth": {
-          "name": "CV Payload Automation — API Key"
+        "telegramApi": {
+          "id": "3f535ab5-8faf-4c1a-85e6-72e196480c28",
+          "name": "CV Telegram Bot — Revisão Editorial"
         }
       }
     }
   ],
   "connections": {
     "Webhook Decisão": {
-      "main": [[{ "node": "Somente Aprovado", "type": "main", "index": 0 }]]
-    },
-    "Somente Aprovado": {
-      "main": [[{ "node": "Payload Encaminhar Revisão", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Telegram Confirmar Decisão", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
   "settings": {},
-  "versionId": "cv03-0004-0004-4004-8004-000000000004",
-  "id": "cv03-0005-0005-4005-8005-000000000005",
+  "versionId": "c3030000-0000-4003-8003-000000000003",
+  "id": "c4040000-0000-4004-8004-000000000004",
   "pinData": {}
 }

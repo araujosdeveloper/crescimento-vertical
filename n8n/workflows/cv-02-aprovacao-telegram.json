@@ -3,42 +3,45 @@
   "nodes": [
     {
       "parameters": {
-        "mode": "onChangedByNode",
-        "collection": "articles",
-        "event": "create"
+        "path": "hermes-editorial/notify",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
       },
-      "id": "cv02-0001-0001-4001-8001-000000000001",
-      "name": "Rascunho Criado",
-      "type": "n8n-nodes-base.payload",
-      "typeVersion": 1,
-      "position": [-460, 0]
+      "id": "b1010000-0000-4001-8001-000000000001",
+      "name": "Webhook Notificar",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, 0],
+      "webhookId": "cv02-notificar-revisao"
     },
     {
       "parameters": {
-        "chatId": "={{ $env.CV_TELEGRAM_REVIEW_CHAT_ID }}",
-        "text": "=Novo rascunho para revisão\n\nTítulo: {{ $json.title }}\nPilar: {{ $json.primaryPillar }}\n\nRevise no Payload Admin e aprove ou rejeite.",
+        "chatId": "5710991322",
+        "text": "=Novo rascunho para revisão\n\nTítulo: {{ $json.body.title }}\nPilar: {{ $json.body.primaryPillar }}\n\nRevise no Payload Admin e aprove ou rejeite.",
         "additionalFields": {}
       },
-      "id": "cv02-0002-0002-4002-8002-000000000002",
+      "id": "b2020000-0000-4002-8002-000000000002",
       "name": "Telegram Enviar Resumo",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1,
       "position": [-220, 0],
       "credentials": {
         "telegramApi": {
+          "id": "3f535ab5-8faf-4c1a-85e6-72e196480c28",
           "name": "CV Telegram Bot — Revisão Editorial"
         }
       }
     }
   ],
   "connections": {
-    "Rascunho Criado": {
+    "Webhook Notificar": {
       "main": [[{ "node": "Telegram Enviar Resumo", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
   "settings": {},
-  "versionId": "cv02-0003-0003-4003-8003-000000000003",
-  "id": "cv02-0004-0004-4004-8004-000000000004",
+  "versionId": "b3030000-0000-4003-8003-000000000003",
+  "id": "b4040000-0000-4004-8004-000000000004",
   "pinData": {}
 }
