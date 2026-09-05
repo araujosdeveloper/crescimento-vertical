@@ -60,7 +60,7 @@ apagar o histórico.
 ## ADR-008 — Identidade visual
 
 - Data: 2026-08-23
-- Status: aprovada
+- Status: aprovada (substituída pela ADR-039 em 2026-09-05)
 - Decisão: preservar direção escura em azul/ciano e amadurecê-la como design
   system.
 - Consequência: não redesenhar a marca sem decisão própria.
@@ -1143,6 +1143,49 @@ com `battery_job_limit_reached`.
 - Riscos: o job pode falhar, consumindo até ~US$ 0,50 sem dossiê.
 - Reversão: restaurar `MAX_BATCH_JOBS=5` e recriar o runner com a imagem
   anterior; contadores permanecem imutáveis para auditoria.
+
+## ADR-039 — Nova identidade visual (laranja + grafite/preto/branco/cinza)
+
+- Data: 2026-09-05
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: transversal (identidade visual)
+
+### Contexto
+
+O ADR-008 fixou a direção escura azul/ciano. O responsável pelo produto decidiu
+substituí-la por uma identidade em **laranja** sobre base neutra
+(preto/grafite) com branco e cinza para texto — mais distinta da concorrência
+de IA (que converge para azul) e alinhada ao posicionamento de "crescimento"
+(energia, ação).
+
+### Decisão
+
+Adotar a paleta:
+
+| Papel | Valor |
+| --- | --- |
+| background | `#0a0a0a` |
+| surface | `#161616` |
+| surface-raised | `#1f1f1f` |
+| foreground | `#fafafa` |
+| muted | `#a3a3a3` |
+| action (laranja) | `#f97316` |
+| accent (laranja claro) | `#fb923c` |
+| accent-light | `#fdba74` |
+| action-deep | `#ea580c` / `#c2410c` |
+
+Mantêm-se os estados de sucesso/erro/aviso (`#45d69b`, `#ff758f`, `#ffd166`) e
+a direção escura (premium). O laranja é usado como **acento** (CTAs, destaques,
+glow), nunca como fundo dominante.
+
+### Consequências e reversão
+
+- Atualizar `globals.css` (tokens + valores hardcoded), a Constituição §16 e o
+  ADR-008 (substituído por este ADR).
+- Regenerar as capas dos artigos (hoje em azul/ciano).
+- Reversão: restaurar `globals.css` ao commit anterior e recriar o app; nenhuma
+  migração de dados envolvida.
 
 ### Adendo de status (5 de setembro de 2026)
 
