@@ -72,11 +72,19 @@ ${titleSvg}
     context: { generateCover: true },
   })) as unknown as { id: number };
 
+  const admin = await payload.find({
+    collection: "users",
+    where: { email: { equals: "araujosdeveloper@gmail.com" } },
+    limit: 1,
+    overrideAccess: true,
+  });
+
   await payload.update({
     collection: "articles",
     id: articleId,
     data: { heroImage: media.id, publicReviewer: 1 },
     overrideAccess: true,
+    user: admin.docs[0],
     context: { generateCover: true },
   });
   console.log("COVER_OK", media.id);
