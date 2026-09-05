@@ -15,8 +15,10 @@ class TestHermlineContract(unittest.TestCase):
 
     def test_prompt_contains_exact_contract_and_limits(self):
         prompt = hermline.build_prompt({"topic":"x", "primaryPillar":"ai-business", "searchIntent":"s", "maxSources":4})
-        self.assertIn("Chaves obrigatórias exatamente", prompt)
-        self.assertIn("Não inclua chaves extras", prompt)
-        self.assertIn("até 4 fontes", prompt)
+        self.assertIn("Chaves obrigatórias", prompt)
+        self.assertIn("Não inclua outras chaves", prompt)
+        self.assertIn("1 a 4", prompt)
+        self.assertIn("Não use campo justification", prompt)
+        self.assertIn("unverified-claim", prompt)
 
 if __name__ == '__main__': unittest.main()
