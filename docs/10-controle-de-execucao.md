@@ -1,21 +1,20 @@
 # Controle de execução
 
-## Estado vigente — 4 de setembro de 2026
+## Estado vigente — 5 de setembro de 2026
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `6922bbb` |
-| Fase ativa | Fase 8 — **concluída e aceita** (aceite humano 4/9/2026); Fase 9 em preparação sem credencial |
-| PR | #14 aberto e draft; checks do novo HEAD devem permanecer verdes |
-| Gate offline | **COMPROVADO** — imagem `phase8-instrumentation-d301284`, Image ID `sha256:5d575d02…`, black-box real com 36 cenários aprovados em `network none` |
-| Bateria real | **SUCESSO** — job raiz `44666d93…` `succeeded`, dossiê `editorial-dossier.v1` válido, `provider_finish_reason=stop`, Tavily `search 3/3` e `extract 1/1`, custo acumulado US$ 0,1053, `retry3=0` |
-| Runtime ativo | runner `28c9b870…` healthy na imagem/digest `sha256:5d575d02…`; proxy `cd0d152c05ee…` preservado; travas fechadas |
+| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `366b3a6` |
+| Fase ativa | Fase 9 — **concluída e aceita** (aceite humano 5/9/2026); Fase 10 em execução |
+| PR | #14 aberto e draft (Fases 8 e 9 empilhadas na mesma branch; merge pendente) |
+| E2E Fase 9 | **SUCESSO** — pipeline completo em staging (fonte → Hermes → dossiê válido → draft via `automation` → Telegram); 4 workflows CV-01..04 ativos no n8n |
+| Correções do E2E | normalização de saída (`1584e47`) + prompt alinhado ao schema (`a365a4f`) |
+| Runtime | runner healthy; travas fechadas; `retry3=0`; custo US$ 0,2405 (guardrail US$ 2) |
 | Restrições | Publicação automática e retry 3 continuam proibidos |
 
-Próxima ação: preparar a Fase 9 em código e documentação (sem credencial
-Telegram/Payload de publicação). O Hermes permanece editor-chefe; runner é
-governança; DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada
-para o Payload.
+Próxima ação: iniciar a Fase 10 (conteúdo inicial + calendário editorial).
+O Hermes permanece editor-chefe; runner é governança; DeepSeek/Tavily são
+subordinados; n8n é a única ponte autorizada para o Payload.
 
 ### Bateria real final — 4 de setembro de 2026
 

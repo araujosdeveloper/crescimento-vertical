@@ -44,7 +44,8 @@ reserva zero e travas fechadas. Nenhuma publicação, Payload, n8n ou Fase 9.
 | 4 | Concluída com ressalva de copy comercial |
 | 5–7 | Concluídas e aceitas |
 | 8 | Concluída — aceite humano (4/9/2026): black-box 36/36 + bateria real `succeeded` |
-| 9–12 | Pendentes |
+| 9 | Concluída — aceite humano (5/9/2026): E2E completo + workflows CV-01..04 ativos |
+| 10–12 | Pendentes (Fase 10 em execução) |
 
 ### Correção comprovada do gate offline da Fase 8
 

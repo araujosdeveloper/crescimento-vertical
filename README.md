@@ -10,11 +10,14 @@ atendimento digital, sites e integrações.
 ## Estado atual
 
 - Fases 0–3 concluídas; Fase 4 concluída com ressalva de copy comercial; Fases
-  5–8 concluídas e aceitas.
-- Fase 8 (Hermes editor-chefe) encerrada com aceite humano: black-box 36/36
-  offline + bateria real `succeeded` (dossiê válido, custo US$ 0,105, retry3=0).
-- Fases 9–12 pendentes; a Fase 9 está em preparação sem credencial; publicação
-  automática e retry 3 permanecem proibidos.
+  5–9 concluídas e aceitas.
+- Fase 8 (Hermes editor-chefe) encerrada: black-box 36/36 offline + bateria real
+  `succeeded`.
+- Fase 9 (n8n, Telegram, aprovação e publicação) encerrada: pipeline E2E
+  validado em staging (fonte → dossiê → rascunho → Telegram), com workflows
+  CV-01..04 ativos no n8n.
+- Fase 10 em execução; Fases 11–12 pendentes; publicação automática e retry 3
+  permanecem proibidos.
 - Aplicação pública em Next.js 16/React 19, com Payload CMS 3.88.0 e PostgreSQL
   16 como fonte de verdade editorial.
 - Portal institucional, comercial e editorial, SEO técnico e captação com

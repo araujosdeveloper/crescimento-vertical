@@ -1,8 +1,13 @@
 # Fase 9 — n8n, Telegram, aprovação e publicação
 
-## Estado vigente — ativação parcial em staging
+## Estado vigente — CONCLUÍDA (aceite humano em 5 de setembro de 2026)
 
-A Fase 8 foi aceita em 4 de setembro de 2026 e a Fase 9 está em **ativação**:
+A Fase 9 foi aceita e encerrada pelo responsável pelo produto em 5 de setembro
+de 2026. O pipeline editorial completo foi validado em staging: fonte → Hermes
+→ dossiê válido → rascunho via role `automation` → notificação Telegram, com os
+4 workflows CV-01..CV-04 ativos no n8n, credenciais Telegram/Payload
+configuradas e conectividade n8n ↔ runner corrigida. A Fase 10 passa a ser a
+fase em execução.
 
 - **Migração `api_key`** aplicada no staging e `useAPIKey` ativo no Payload;
 - **Role `automation` + API key** provisionadas (`automation@crescimentovertical.com`);
