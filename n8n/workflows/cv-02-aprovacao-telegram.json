@@ -1,0 +1,44 @@
+{
+  "name": "CV-02 — Aprovação via Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "onChangedByNode",
+        "collection": "articles",
+        "event": "create"
+      },
+      "id": "cv02-0001-0001-4001-8001-000000000001",
+      "name": "Rascunho Criado",
+      "type": "n8n-nodes-base.payload",
+      "typeVersion": 1,
+      "position": [-460, 0]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.CV_TELEGRAM_REVIEW_CHAT_ID }}",
+        "text": "=Novo rascunho para revisão\n\nTítulo: {{ $json.title }}\nPilar: {{ $json.primaryPillar }}\n\nRevise no Payload Admin e aprove ou rejeite.",
+        "additionalFields": {}
+      },
+      "id": "cv02-0002-0002-4002-8002-000000000002",
+      "name": "Telegram Enviar Resumo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [-220, 0],
+      "credentials": {
+        "telegramApi": {
+          "name": "CV Telegram Bot — Revisão Editorial"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Rascunho Criado": {
+      "main": [[{ "node": "Telegram Enviar Resumo", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "cv02-0003-0003-4003-8003-000000000003",
+  "id": "cv02-0004-0004-4004-8004-000000000004",
+  "pinData": {}
+}

@@ -1,0 +1,92 @@
+{
+  "name": "CV-01 — Intake Hermes",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "hermes-editorial/intake",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "cv01-0001-0001-4001-8001-000000000001",
+      "name": "Webhook Intake",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, 0],
+      "webhookId": "cv01-intake-hermes"
+    },
+    {
+      "parameters": {
+        "operation": "createJob",
+        "correlationId": "={{ $json.body.correlationId }}",
+        "idempotencyKey": "={{ $json.body.idempotencyKey }}",
+        "topic": "={{ $json.body.topic }}",
+        "primaryPillar": "={{ $json.body.primaryPillar }}",
+        "searchIntent": "={{ $json.body.searchIntent }}",
+        "maxSources": "={{ $json.body.maxSources }}"
+      },
+      "id": "cv01-0002-0002-4002-8002-000000000002",
+      "name": "Hermes Create Job",
+      "type": "CUSTOM.hermesEditorial",
+      "typeVersion": 1,
+      "position": [-220, 0],
+      "credentials": {
+        "crescimentoVerticalHermesApi": {
+          "name": "CV Hermes Editorial Runner — Internal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getJob",
+        "jobId": "={{ $json.body.jobId }}"
+      },
+      "id": "cv01-0003-0003-4003-8003-000000000003",
+      "name": "Hermes Get Job",
+      "type": "CUSTOM.hermesEditorial",
+      "typeVersion": 1,
+      "position": [20, 0],
+      "credentials": {
+        "crescimentoVerticalHermesApi": {
+          "name": "CV Hermes Editorial Runner — Internal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.PAYLOAD_BASE_URL }}/api/articles",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ _status: 'draft', workflowStatus: 'draft', title: $json.body.title, excerpt: $json.body.dek, content: { root: { type: 'root', children: [] }, raw: JSON.stringify($json.body) }, category: $json.body.categoryId, sources: $json.body.sourceIds }) }}",
+        "options": {}
+      },
+      "id": "cv01-0004-0004-4004-8004-000000000004",
+      "name": "Payload Criar Rascunho",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "CV Payload Automation — API Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Intake": {
+      "main": [[{ "node": "Hermes Create Job", "type": "main", "index": 0 }]]
+    },
+    "Hermes Create Job": {
+      "main": [[{ "node": "Hermes Get Job", "type": "main", "index": 0 }]]
+    },
+    "Hermes Get Job": {
+      "main": [[{ "node": "Payload Criar Rascunho", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "cv01-0005-0005-4005-8005-000000000005",
+  "id": "cv01-0006-0006-4006-8006-000000000006",
+  "pinData": {}
+}

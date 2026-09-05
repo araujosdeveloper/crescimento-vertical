@@ -1,0 +1,70 @@
+{
+  "name": "CV-03 — Publicação no CMS",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "hermes-editorial/decision",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "cv03-0001-0001-4001-8001-000000000001",
+      "name": "Webhook Decisão",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, 0],
+      "webhookId": "cv03-decisao-aprovacao"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.decision }}",
+              "operation": "equals",
+              "value2": "approve"
+            }
+          ]
+        }
+      },
+      "id": "cv03-0002-0002-4002-8002-000000000002",
+      "name": "Somente Aprovado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-220, 0]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ $env.PAYLOAD_BASE_URL }}/api/articles/{{ $json.body.articleId }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ workflowStatus: 'in_review' }) }}",
+        "options": {}
+      },
+      "id": "cv03-0003-0003-4003-8003-000000000003",
+      "name": "Payload Encaminhar Revisão",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [20, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "CV Payload Automation — API Key"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Decisão": {
+      "main": [[{ "node": "Somente Aprovado", "type": "main", "index": 0 }]]
+    },
+    "Somente Aprovado": {
+      "main": [[{ "node": "Payload Encaminhar Revisão", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "cv03-0004-0004-4004-8004-000000000004",
+  "id": "cv03-0005-0005-4005-8005-000000000005",
+  "pinData": {}
+}

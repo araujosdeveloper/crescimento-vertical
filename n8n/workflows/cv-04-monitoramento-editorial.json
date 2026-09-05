@@ -1,0 +1,65 @@
+{
+  "name": "CV-04 — Monitoramento Editorial",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "daysInterval": 7 }]
+        }
+      },
+      "id": "cv04-0001-0001-4001-8001-000000000001",
+      "name": "Agenda Semanal",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-460, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAYLOAD_BASE_URL }}/api/articles?where[workflowStatus][equals]=published",
+        "sendBody": false,
+        "options": {}
+      },
+      "id": "cv04-0002-0002-4002-8002-000000000002",
+      "name": "Payload Listar Publicados",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-220, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "CV Payload Automation — API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.CV_TELEGRAM_REVIEW_CHAT_ID }}",
+        "text": "=Revisão semanal: {{ $json.totalDocs }} artigos publicados para verificar links e fontes.",
+        "additionalFields": {}
+      },
+      "id": "cv04-0003-0003-4003-8003-000000000003",
+      "name": "Telegram Lembrete de Revisão",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [20, 0],
+      "credentials": {
+        "telegramApi": {
+          "name": "CV Telegram Bot — Revisão Editorial"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Agenda Semanal": {
+      "main": [[{ "node": "Payload Listar Publicados", "type": "main", "index": 0 }]]
+    },
+    "Payload Listar Publicados": {
+      "main": [[{ "node": "Telegram Lembrete de Revisão", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "cv04-0004-0004-4004-8004-000000000004",
+  "id": "cv04-0005-0005-4005-8005-000000000005",
+  "pinData": {}
+}
