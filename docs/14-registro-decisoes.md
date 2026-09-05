@@ -1143,3 +1143,13 @@ com `battery_job_limit_reached`.
 - Riscos: o job pode falhar, consumindo até ~US$ 0,50 sem dossiê.
 - Reversão: restaurar `MAX_BATCH_JOBS=5` e recriar o runner com a imagem
   anterior; contadores permanecem imutáveis para auditoria.
+
+### Adendo de status (5 de setembro de 2026)
+
+O job E2E (slot 6) terminou `invalid_dossier_json`: o Hermes emitiu um prefácio
+de texto antes do JSON ("Pesquisa concluída… Dossiê conforme o schema…"), e a
+normalização do runner só tratava code fence. A saída era válida; a extração
+falhou. A normalização foi corrigida (commit `1584e47`, extração do primeiro
+`{` ao último `}`) e validada offline contra a saída real (0 erros de schema).
+Autoriza-se **uma** re-execução do E2E (slot 7, `MAX_BATCH_JOBS` 6→7) para
+obter o sucesso limpo; mesmas restrições de custo, retry 3 e travas.
