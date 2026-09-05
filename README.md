@@ -16,7 +16,9 @@ atendimento digital, sites e integrações.
 - Fase 9 (n8n, Telegram, aprovação e publicação) encerrada: pipeline E2E
   validado em staging (fonte → dossiê → rascunho → Telegram), com workflows
   CV-01..04 ativos no n8n.
-- Fase 10 em execução; Fases 11–12 pendentes; publicação automática e retry 3
+- Fase 10 (conteúdo inicial) encerrada: pacote editorial com um artigo real por
+  pilar (5 pilares), calendário de 90 dias e pipeline automatizado.
+- Fase 11 em execução; Fase 12 pendente; publicação automática e retry 3
   permanecem proibidos.
 - Aplicação pública em Next.js 16/React 19, com Payload CMS 3.88.0 e PostgreSQL
   16 como fonte de verdade editorial.

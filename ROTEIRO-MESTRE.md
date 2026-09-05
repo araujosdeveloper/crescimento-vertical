@@ -27,13 +27,24 @@ um portal editorial e comercial orientado à geração de receita.
 | 6 | SEO técnico, dados estruturados e performance | Fase 5 | Concluída |
 | 7 | Captação, diagnóstico e mensuração comercial | Fase 6 | Concluída |
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Concluída |
-| 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Em preparação (sem credencial) |
-| 10 | Conteúdo inicial e validação editorial | Fase 9 | Pendente |
-| 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Pendente |
+| 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Concluída |
+| 10 | Conteúdo inicial e validação editorial | Fase 9 | Concluída |
+| 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Em execução |
 | 12 | Migração, lançamento e estabilização | Fase 11 | Pendente |
 
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
+
+## Situação vigente — 5 de setembro de 2026
+
+As Fases 9 e 10 foram **aceitas e encerradas** em 5 de setembro de 2026, após
+aceite humano expresso do responsável pelo produto. A Fase 9 entregou o ciclo
+editorial fim a fim (Hermes → n8n → Telegram → publicação) com os 4 workflows
+ativos; a Fase 10 entregou o pacote editorial inicial com **um artigo real
+publicado por pilar** (Agentes de IA, Automação de WhatsApp, Integrações n8n,
+Sites e landing pages, Automação de processos), todos com fonte nível A,
+imagem, revisor, categoria, serviço relacionado, SEO e transparência de IA, e o
+calendário de 90 dias em docs/38. A Fase 11 passa a ser a fase em execução.
 
 ## Situação vigente — 4 de setembro de 2026
 

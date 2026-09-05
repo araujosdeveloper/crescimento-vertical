@@ -4,17 +4,17 @@
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `366b3a6` |
-| Fase ativa | Fase 9 — **concluída e aceita** (aceite humano 5/9/2026); Fase 10 em execução |
-| PR | #14 aberto e draft (Fases 8 e 9 empilhadas na mesma branch; merge pendente) |
-| E2E Fase 9 | **SUCESSO** — pipeline completo em staging (fonte → Hermes → dossiê válido → draft via `automation` → Telegram); 4 workflows CV-01..04 ativos no n8n |
-| Correções do E2E | normalização de saída (`1584e47`) + prompt alinhado ao schema (`a365a4f`) |
-| Runtime | runner healthy; travas fechadas; `retry3=0`; custo US$ 0,2405 (guardrail US$ 2) |
+| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `d747134` |
+| Fase ativa | Fase 10 — **concluída e aceita** (aceite humano 5/9/2026); Fase 11 em execução |
+| PR | #14 aberto e draft (Fases 8–10 empilhadas na mesma branch; merge pendente) |
+| Fase 10 | **SUCESSO** — 5 artigos publicados (1 por pilar), com fonte nível A, capa, revisor, categoria, serviço e SEO; calendário de 90 dias em docs/38 |
+| Identidade visual | nova paleta laranja/grafite/preto (ADR-039) aplicada e capas regeneradas |
+| Runtime | runner healthy; travas fechadas; `retry3=0`; custo do mês US$ 0,27 (teto US$ 10) |
 | Restrições | Publicação automática e retry 3 continuam proibidos |
 
-Próxima ação: iniciar a Fase 10 (conteúdo inicial + calendário editorial).
-O Hermes permanece editor-chefe; runner é governança; DeepSeek/Tavily são
-subordinados; n8n é a única ponte autorizada para o Payload.
+Próxima ação: iniciar a Fase 11 (segurança, observabilidade, backup e
+recuperação). O Hermes permanece editor-chefe; runner é governança;
+DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada para o Payload.
 
 ### Bateria real final — 4 de setembro de 2026
 

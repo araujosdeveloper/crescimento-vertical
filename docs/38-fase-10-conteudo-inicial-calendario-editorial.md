@@ -1,12 +1,15 @@
 # Fase 10 — Conteúdo inicial e validação editorial
 
-## Estado vigente
+## Estado vigente — CONCLUÍDA (aceite humano em 5 de setembro de 2026)
 
-A Fase 10 está em execução. A Fase 9 foi aceita em 5 de setembro de 2026; o
-pipeline editorial (Hermes → runner → n8n → Payload → Telegram) está ativo e
-validado em staging. O objetivo desta fase é produzir o conteúdo real de
-lançamento e o calendário editorial, sem conteúdo fictício e com fontes
-rastreáveis.
+A Fase 10 foi aceita e encerrada pelo responsável pelo produto em 5 de setembro
+de 2026. O pacote editorial inicial cobre os **cinco pilares** com um artigo
+real publicado por pilar (Agentes de IA, Automação de WhatsApp, Integrações
+n8n, Sites e landing pages, Automação de processos), todos com fonte nível A,
+imagem de capa, revisor, categoria própria, serviço relacionado, SEO e
+transparência de IA. A produção foi automatizada via Hermes (runner + n8n +
+scripts `produce-article.ts`/`generate-article-cover.ts`/`publish-article.ts`).
+A Fase 11 passa a ser a fase em execução.
 
 ## Objetivo
 
