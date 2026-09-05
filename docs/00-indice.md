@@ -11,6 +11,7 @@
 - [Escopo e requisitos](02-escopo-e-requisitos.md)
 - [Registro de decisões](14-registro-decisoes.md)
 - [Auditoria do estado atual](15-auditoria-estado-atual.md)
+- [Gates pré-produção — copy e responsividade](40-gates-pre-producao-copy-responsividade.md)
 
 ## Produto e experiência
 
