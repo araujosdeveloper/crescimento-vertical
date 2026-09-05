@@ -6,6 +6,7 @@ async function provisionAutomationUser() {
   const payload = await getPayload({ config });
   const email = process.env.CV_AUTOMATION_EMAIL ?? "automation@crescimentovertical.com";
   const apiKey = randomBytes(32).toString("hex");
+  const password = randomBytes(16).toString("hex");
 
   const existing = await payload.find({
     collection: "users",
@@ -19,6 +20,7 @@ async function provisionAutomationUser() {
     name: "Automação Editorial (n8n)",
     roles: ["automation"] as ("admin" | "editor" | "automation" | "reviewer" | "researcher")[],
     active: true,
+    password,
     enableAPIKey: true,
     apiKey,
   };
