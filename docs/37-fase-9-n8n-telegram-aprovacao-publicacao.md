@@ -17,11 +17,26 @@ A Fase 8 foi aceita em 4 de setembro de 2026 e a Fase 9 está em **ativação**:
   (201, `workflowStatus=draft`) e envio de resumo via Telegram (ok), com
   limpeza do rascunho de teste (nenhum conteúdo fictício permanece).
 
-Restam: ativar os workflows no painel (toggle "Active"), o teste E2E completo
-com uma execução real do Hermes através do workflow ativo (exige abrir as
-travas do runner + 1 novo job — teto da bateria hoje em 5/5), e o aceite
-humano específico desta fase. Publicação automática e retry 3 continuam
-proibidos (ADR-005, ADR-034).
+Restam: ativar os workflows no painel (toggle "Active") e o aceite humano
+específico desta fase. Publicação automática e retry 3 continuam proibidos
+(ADR-005, ADR-034).
+
+### Teste E2E completo — 5 de setembro de 2026
+
+O pipeline foi validado de ponta a ponta em staging com execução real:
+
+- **Fonte → Hermes → dossiê**: job raiz `7babd8214e…` `succeeded` (tema
+  "Sites e landing pages", `contentType=guide`, 4 fontes, 11 claims);
+- **Dossiê → draft**: criação via role `automation` (HTTP 201, `workflowStatus=draft`);
+- **Draft → Telegram**: resumo enviado ao revisor (chat `5710991322`, `message_id:4`);
+- **Limpeza**: rascunho de teste removido (0 artigos, sem conteúdo fictício);
+- **Custo acumulado**: US$ 0,2405 (guardrail US$ 2); `retry3=0`; travas fechadas.
+
+O E2E revelou e corrigiu dois defeitos reais: (1) a normalização não extraía o
+JSON quando o Hermes emitia prefácio de texto (`1584e47`); (2) o prompt do
+runner mencionava "justificativa" (campo inexistente no schema) e omitia enums,
+gerando dossiês inválidos (`a365a4f`). Ambos foram corrigidos, testados e
+validados com sucesso na re-execução.
 
 ## Objetivo
 
