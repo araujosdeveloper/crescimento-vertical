@@ -10,11 +10,48 @@
 name: crescimento-vertical-hermes-editorial
 
 services:
+  phase8-egress-proxy:
+    build:
+      context: .
+      dockerfile: services/phase8-egress-proxy/Dockerfile
+    image: cv-phase8-egress-proxy:8157454
+    container_name: cv-phase8-egress-proxy
+    restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+    expose:
+      - "3128"
+    networks:
+      - phase8_execution
+      - phase8_egress
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; s=socket.create_connection(('127.0.0.1',3128),2); s.close()"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: "2"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.20"
+          memory: 64M
+          pids: 32
+
   cv-hermes-editorial-runner:
     build:
       context: .
       dockerfile: services/hermes-editorial-runner/Dockerfile
-    image: cv-hermes-editorial-runner:latest
+    image: cv-hermes-editorial-runner:phase8-instrumentation-1c61e6b
     container_name: cv-hermes-editorial-runner
     restart: unless-stopped
     init: true
@@ -24,11 +61,29 @@ services:
       - ALL
     read_only: true
     tmpfs:
-      - /tmp
+      - /tmp:size=64m,mode=1777
+      - /opt/data:rw,nosuid,nodev,noexec,size=16m,mode=0700,uid=10000,gid=10000
     environment:
       RUNNER_EXECUTION_ENABLED: "false"
       SCHEMAS_DIR: /app/schemas
       HERMES_HOME: /home/hermes/editorial-profile
+      HERMES_BIN: /app/hermes_wrapper.py
+      HOME: /tmp/hermes-home
+      HERMES_WRITE_SAFE_ROOT: /tmp/hermes-work
+      HERMES_LAZY_INSTALL_TARGET: /tmp/hermes-lazy-packages
+      HERMES_STREAM_RETRIES: "0"
+      DEEPSEEK_API_KEY_FILE: /run/secrets/deepseek-api-key
+      TAVILY_API_KEY_FILE: /run/secrets/tavily-api-key
+      HTTP_PROXY: http://phase8-egress-proxy:3128
+      HTTPS_PROXY: http://phase8-egress-proxy:3128
+      NO_PROXY: 127.0.0.1,localhost
+      RUNNER_STATE_DIR: /state
+      RUNNER_FAILURE_DIR: /state/failures
+      MAX_TURNS: "8"
+      MAX_WEB_SEARCHES: "3"
+      MAX_FINAL_SOURCES: "4"
+      JOB_TIMEOUT_SECONDS: "300"
+      OUTPUT_MAX_BYTES: "262144"
     volumes:
       - type: bind
         source: ${EDITORIAL_PROFILE_PATH}
@@ -38,11 +93,22 @@ services:
         source: ./.secrets/hmac-secret
         target: /run/secrets/hmac-secret
         read_only: true
+      - type: bind
+        source: ./.secrets/hermes-editorial-deepseek-api-key
+        target: /run/secrets/deepseek-api-key
+        read_only: true
+      - type: bind
+        source: ./.secrets/hermes-editorial-tavily-api-key
+        target: /run/secrets/tavily-api-key
+        read_only: true
       - runner-state:/state
     expose:
       - "8100"
     networks:
-      - n8n_default
+      - phase8_execution
+    depends_on:
+      phase8-egress-proxy:
+        condition: service_healthy
     healthcheck:
       test:
         - CMD
@@ -66,8 +132,9 @@ services:
           pids: 64
 
 networks:
-  n8n_default:
-    external: true
+  phase8_execution:
+    internal: true
+  phase8_egress: {}
 
 volumes:
   runner-state:

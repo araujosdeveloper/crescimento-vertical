@@ -1,8 +1,16 @@
 # Configuração do perfil crescimento-vertical-editorial
 #
 # Perfil de pesquisa editorial em modo somente-leitura de rede (web).
-# Nenhuma credencial de modelo é definida aqui — a execução real permanece
-# desabilitada nesta fase.
+# Nenhuma credencial de modelo é definida aqui. O runner injeta a credencial
+# DeepSeek exclusiva somente no subprocesso one-shot autorizado.
+
+model:
+  provider: deepseek
+  default: deepseek-v4-flash
+  max_tokens: 4096
+
+# Sem fallback automático para OpenAI ou qualquer outro provedor.
+fallback_providers: []
 
 # Apenas o toolset de pesquisa web (web_search / web_extract).
 # Terminal, shell, edição, filesystem, browser, code_execution e mensagens
@@ -15,9 +23,14 @@ terminal:
   cwd: .
 
 agent:
-  max_turns: 40
+  max_turns: 8
+  api_max_retries: 1
+  reasoning_effort: none
   loop_caps:
-    max_web_searches: 10
+    max_web_searches: 3
 
 web:
+  backend: tavily
+  search_backend: tavily
+  extract_backend: tavily
   extract_char_limit: 12000

@@ -172,3 +172,11 @@ permanecem fora desse layout. Route groups preservam todas as URLs públicas.
 - [Hermes: cron, continuidade e entrega](https://hermes-agent.nousresearch.com/docs/user-guide/features/cron)
 - [Next.js: App Router](https://nextjs.org/docs/app)
 - [Next.js: convenções de metadata](https://nextjs.org/docs/app/api-reference/file-conventions/metadata)
+
+## Reconciliação da Fase 8
+
+O runner editorial é a única fronteira de execução e permanece sem acesso a
+Payload, PostgreSQL, Docker Socket ou portas públicas. O perfil é montado em
+modo somente leitura; jobs são one-shot, idempotentes e validados por schema.
+N8n continua validate-only até a Fase 9. A credencial de modelo deve ser
+exclusiva do perfil/runner; credencial compartilhada não é reutilizada.

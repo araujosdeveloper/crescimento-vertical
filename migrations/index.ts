@@ -4,6 +4,7 @@ import * as migration_20260828_153822_add_services_cases from './20260828_153822
 import * as migration_20260828_182146_add_phase5_editorial from './20260828_182146_add_phase5_editorial';
 import * as migration_20260829_120000_add_phase7_leads from './20260829_120000_add_phase7_leads';
 import * as migration_20260830_120000_add_lead_smtp_delivery from './20260830_120000_add_lead_smtp_delivery';
+import * as migration_20260905_032143_add_user_api_key from './20260905_032143_add_user_api_key';
 
 export const migrations = [
   {
@@ -24,16 +25,21 @@ export const migrations = [
   {
     up: migration_20260828_182146_add_phase5_editorial.up,
     down: migration_20260828_182146_add_phase5_editorial.down,
-    name: '20260828_182146_add_phase5_editorial'
+    name: '20260828_182146_add_phase5_editorial',
   },
   {
     up: migration_20260829_120000_add_phase7_leads.up,
     down: migration_20260829_120000_add_phase7_leads.down,
-    name: '20260829_120000_add_phase7_leads'
+    name: '20260829_120000_add_phase7_leads',
   },
   {
     up: migration_20260830_120000_add_lead_smtp_delivery.up,
     down: migration_20260830_120000_add_lead_smtp_delivery.down,
-    name: '20260830_120000_add_lead_smtp_delivery'
+    name: '20260830_120000_add_lead_smtp_delivery',
+  },
+  {
+    up: migration_20260905_032143_add_user_api_key.up,
+    down: migration_20260905_032143_add_user_api_key.down,
+    name: '20260905_032143_add_user_api_key'
   },
 ];

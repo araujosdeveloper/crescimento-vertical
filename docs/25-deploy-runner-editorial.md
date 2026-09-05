@@ -3,7 +3,9 @@
 ## Pré-requisitos
 
 - Perfil `crescimento-vertical-editorial` instalado (docs/23).
-- Segredos locais (fora do Git): `.env.hermes-editorial` e `.secrets/hmac-secret`.
+- Segredos locais (fora do Git): `.env.hermes-editorial`,
+  `.secrets/hmac-secret` e, somente para janela futura autorizada,
+  `.secrets/deepseek-api-key`.
 
 ## Container
 
@@ -26,6 +28,8 @@
 
 - `.env.hermes-editorial` (600): `EDITORIAL_PROFILE_PATH` real.
 - `.secrets/hmac-secret` (600, ≥32 bytes): segredo HMAC.
+- `.secrets/deepseek-api-key` (600): chave exclusiva do projeto, nunca copiada
+  do Hermes default, OpenAI ou outro projeto.
 - `.gitignore` ignora `.secrets/` e `.env.hermes-editorial`.
 
 ## Execução
@@ -49,6 +53,50 @@ docker compose --env-file .env.hermes-editorial \
 
 Execução desabilitada; nenhum workflow n8n, nenhuma credencial Payload, nenhuma
 pesquisa real ou chamada de LLM, nenhum conteúdo criado.
+
+## Fase 8 — candidato controlado
+
+### Checkpoint SQLite host-side
+
+Checkpoints de validação usam `scripts/phase8_checkpoint.py`, sem abrir as
+travas. O helper abre `/state/jobs.sqlite3` exclusivamente como URI `mode=ro`
+e executa a API `Connection.backup` para um snapshot novo. Em container, o
+gerador recebe o programa por `docker exec -i`, aplica `umask 0077`, fecha e
+valida o snapshot e emite um marcador sanitizado com tamanho, modo, hash,
+integridade, FKs e `user_version`. O host verifica esse marcador e transporta
+o arquivo por `docker exec cat` para um temporário exclusivo; o destino final
+só é promovido após hash e validação SQLite equivalentes. O snapshot gerado é
+autossuficiente: não se mistura com WAL antigo. Destinos existentes, fontes
+ausentes, timeout, erro de cópia ou divergência de checksum deixam o
+checkpoint incompleto e não são sinalizados como sucesso.
+
+O candidato só pode ser construído após CI verde e backup. O compose mantém
+usuário não-root, rootfs read-only, `cap_drop: ALL`, `no-new-privileges`, sem
+ports e sem Docker Socket. A flag e o arquivo de habilitação permanecem ausentes
+por padrão; não há cron, gateway ou workflow ativo. Sem credencial exclusiva de
+modelo, não se recria o runner nem se inicia bateria real.
+
+O arquivo DeepSeek é montado read-only. Sua ausência mantém qualquer execução
+real em falha fechada; não criar placeholder no runtime.
+
+### Imagem usada por uma janela controlada
+
+`scripts/phase8-controlled-battery.sh` deriva a imagem somente da configuração
+normalizada do serviço runner no Compose efetivo. Antes de abrir as travas, ele
+resolve a referência do Compose e o `Config.Image` do container ativo para seus
+Image IDs locais completos e exige que o Image ID do Compose, o Image ID de
+`Config.Image` e o `.Image` do inspect coincidam, com o container healthy, e
+valida as capacidades v5 dentro da imagem sem rede. Referências textuais
+diferentes (tag ↔ RepoDigest ↔ Image ID) são aceitas quando resolvem para o
+mesmo Image ID imutável. O RepoDigest resultante fica fixo durante toda a
+janela.
+
+Uma bateria nunca executa `build` ou `pull`, não usa `latest`, fallback ou
+seleção por substring e não escolhe o primeiro serviço de uma lista. A
+recriação é restrita a `cv-hermes-editorial-runner`, com `--no-deps`,
+`--no-build`, `--pull never` e sem `down` ou remoção de órfãos. Divergência de
+Compose, container, Image ID, health ou contrato falha antes da trava, reserva
+e POST.
 
 ## Integração com o n8n (Fase 3C)
 

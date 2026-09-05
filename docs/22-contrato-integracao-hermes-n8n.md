@@ -8,7 +8,10 @@ Telegram e aprovação). Nenhuma integração é ativada nesta fase.
 
 | Ator | Responsabilidade | Limites |
 | --- | --- | --- |
-| Hermes | Pesquisar, extrair, triar, deduplicar e produzir o dossiê | Nunca publica; não administra usuários; usa somente a role `automation` |
+| Hermes | Editor-chefe: decidir pauta, estratégia de pesquisa, fontes, estrutura e conteúdo; produzir o dossiê | Nunca publica; não acessa diretamente Payload/PostgreSQL; não administra usuários |
+| DeepSeek | Modelo de inferência subordinado ao Hermes | Não governa pauta; não substitui o Hermes; sem fallback automático |
+| Tavily | Pesquisa e extração subordinadas ao Hermes | Não decide fontes finais; não troca automaticamente de backend |
+| Runner | Autenticar, limitar, contabilizar, validar e registrar estado/evidência da execução one-shot do Hermes | Não cria pauta nem conteúdo por conta própria; sem acesso ao CMS/PostgreSQL |
 | n8n | Validar schema/assinatura/timestamp/idempotência; criar draft; integrar Telegram; aplicar aprovação | Determinístico e auditável; não toma decisão editorial |
 | Humano | Aprovar, revisar ou rejeitar (Telegram) | Único autorizador de publicação |
 | Payload/PostgreSQL | Fonte de verdade de conteúdo, estado e decisão | — |
@@ -182,9 +185,10 @@ válido, título/resumo/conteúdo/autor/categoria/imagem e fonte verificada.
 
 - **Hermes nunca terá credencial do Payload.** Toda escrita no CMS passa pelo
   n8n (única ponte), via REST autenticado com a role `automation`.
-- Hermes/n8n usam a role `automation` (docs/17): criam/atualizam **draft**,
-  criam `EditorialRun`; nunca publicam, apagam, administram usuários, leem leads
-  ou alteram configuração.
+- Somente o n8n usa a credencial de serviço com role `automation` (docs/17)
+  para criar/atualizar **draft** e `EditorialRun`. O Hermes não recebe
+  credencial do CMS. Nenhum deles publica, apaga, administra usuários, lê leads
+  ou altera configuração fora do contrato.
 - `automation` nunca publica (regra já aplicada em código na Fase 2A).
 - O segredo do webhook não concede acesso administrativo ao CMS.
 - `sources` e `research-dossiers` permanecem não públicos.

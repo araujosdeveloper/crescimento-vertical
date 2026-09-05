@@ -60,7 +60,7 @@ apagar o histórico.
 ## ADR-008 — Identidade visual
 
 - Data: 2026-08-23
-- Status: aprovada
+- Status: aprovada (substituída pela ADR-039 em 2026-09-05)
 - Decisão: preservar direção escura em azul/ciano e amadurecê-la como design
   system.
 - Consequência: não redesenhar a marca sem decisão própria.
@@ -763,6 +763,33 @@ Estas escolhas não mudam a arquitetura e serão fechadas na fase indicada:
 Usar docs/templates/adr.md e adicionar aqui um resumo com número sequencial,
 data, status, decisão, motivo, consequências e plano de reversão.
 
+## ADR-029 — Execução editorial controlada, credencial isolada e fail-closed do Hermes
+
+- Data: 2026-08-30
+- Status: aprovada para implementação controlada; execução real bloqueada
+- Fase afetada: 8
+- Decisão: o perfil `crescimento-vertical-editorial` deve usar credencial
+  exclusiva própria e o runner é a única fronteira de execução. Jobs são
+  one-shot, sem shell, com comando interno, saída somente por schema, estado
+  mínimo persistente, idempotência, lock de concorrência, usage file obrigatório,
+  limites de 40 turnos/10 buscas/8 fontes, timeout e fail-closed. Nenhuma
+  publicação, Payload ou banco editorial é permitida.
+- Operação: n8n continua somente validate-only e será orquestrador futuro da
+  Fase 9. Agenda é declarada apenas documentalmente; cron, gateway, webhook e
+  workflow ativo permanecem proibidos. Dupla trava e janela temporária só podem
+  existir após CI verde, validação de credencial exclusiva e aceite específico.
+- Segurança: fontes externas são dados não confiáveis; prompt injection,
+  escopo fora dos cinco pilares, URLs inseguras e evidência insuficiente são
+  recusados. Credenciais compartilhadas (incluindo o default/global) nunca são
+  copiadas ou reutilizadas.
+- Consequências: o preflight atual é classificação B; toda bateria real fica
+  bloqueada até provisionar e autorizar uma credencial isolada. O runner volta
+  sempre a desabilitado após qualquer janela de teste.
+- Reversão: desabilitar a flag e remover o arquivo de habilitação, recriar
+  somente o runner candidato com a imagem anterior, preservar o volume de estado
+  para auditoria sanitizada e manter produção, portal, PostgreSQL, n8n e Hermes
+  compartilhado intactos.
+
 ## ADR-027 — Captação first-party, consentimento versionado e entrega por outbox
 
 - Data: 2026-08-29
@@ -807,3 +834,416 @@ data, status, decisão, motivo, consequências e plano de reversão.
 - Reversão: desabilitar `LEAD_NOTIFICATION_ENABLED`, restaurar a imagem anterior
   e manter lead/outbox no PostgreSQL. Rotacionar/revogar a senha na Hostinger e
   substituir somente o arquivo protegido quando necessário.
+
+## ADR-030 — DeepSeek V4 Flash como candidato de inferência editorial
+
+- Data: 2026-08-31; reconciliada em 2026-09-01
+- Status: aprovada para implementação local; homologação real bloqueada
+- Fase afetada: 8
+- Decisão: substituir o candidato OpenAI do perfil editorial por `deepseek`
+  com o modelo oficial `deepseek-v4-flash`, Chat Completions, thinking
+  desabilitado (`none`), saída máxima de 4096 tokens e nenhum fallback. A
+  chave exclusiva será montada como arquivo somente no runner e convertida em
+  `DEEPSEEK_API_KEY` apenas no ambiente do subprocesso one-shot.
+- Compatibilidade: Hermes v0.20.4 possui provider DeepSeek nativo, preserva e
+  reenvia `reasoning_content` nas chamadas com ferramentas, normaliza usage e
+  aceita timeout/max_tokens. A documentação oficial confirma modelo, endpoint,
+  tool calls e thinking/non-thinking. A pesquisa web permanece separada.
+- Limites: nenhuma chamada autenticada, credencial, instalação, atualização do
+  Hermes, runtime, Ollama, n8n, Payload, PostgreSQL, deploy ou Fase 9 nesta
+  execução. A chave OpenAI existente permanece intocada.
+- Reconciliação: no máximo 4 jobs, serial, 8 turnos, 3 pesquisas, 4 fontes,
+  300 s e stdout de 256 KiB por job. Há reserva persistente de US$ 0,50/job e
+  guardrail de US$ 2; não é teto rígido, pois uma chamada já iniciada pode
+  ultrapassar o saldo local.
+- Alternativas rejeitadas: provider genérico OpenAI-compatible, por ocultar
+  regras de thinking; fallback OpenAI/pago, por violar controle de custo e
+  isolamento; atualização do Hermes, desnecessária na versão instalada.
+- Reversão: reverter somente esta mudança de branch/configuração; como o
+  runtime não é recriado e a execução permanece desabilitada, não há migração
+  de dados nem rollback operacional.
+
+## ADR-031 — Isolamento de egress da janela pré-run editorial
+
+- Data: 2026-09-01
+- Status: implantada como candidata; bateria bloqueada
+- Fase afetada: 8
+- Decisão: manter o runner somente em rede Docker `internal` e encaminhar HTTPS
+  por proxy CONNECT mínimo, deny-by-default, que sozinho participa da rede de
+  saída. A allowlist contém somente DeepSeek e Tavily em 443; IP literal,
+  outras portas/hosts e resolução não pública são recusados. Não se denomina
+  firewall absoluto.
+- Segredos: mounts individuais read-only, UID 0/GID 10000/mode 0640, valores
+  ausentes de env, inspect, imagem, argumentos e logs. OpenAI não é montado.
+- Persistência: `/opt/data` efetivo em tmpfs limitado; somente `/state`
+  persiste. O volume anterior é preservado para rollback e não recebe escrita.
+- Evidência: egress direto bloqueado; DeepSeek `GET /models` e Tavily
+  `GET /usage` retornaram 200 uma única vez, sem inferência/pesquisa. Dupla
+  trava fechada e zero jobs.
+- Reversão: usar o bundle, state e referência de imagem do backup pré-run;
+  recriar somente o runner anterior, sem tocar nas demais aplicações.
+
+### Adendo operacional — propriedade persistente de `/state`
+
+- Causa: o volume nomeado foi criado com raiz `root:root 0755`; o runner
+  não-root (10000:10000) não conseguia inicializar SQLite/guardrail.
+- Correção: volume real `10000:10000 0700`, arquivos 0600; imagem cria `/state`
+  previamente com esses metadados e o processo aplica umask 0077.
+- Evidência: integrity/WAL/transações, guardrail, idempotência/conflito,
+  concorrência, recriação e rollback em volume temporário aprovados sem rede.
+
+### Adendo operacional — neutralização do `VOLUME /opt/data`
+
+- Causa: a recriação preservou o volume anônimo herdado, mantendo-o junto da
+  entrada em `HostConfig.Tmpfs`; o mount de volume prevaleceu no container.
+- Correção: container realmente novo e tmpfs explícito com 16 MiB,
+  `rw,nosuid,nodev,noexec`, modo 0700 e UID/GID 10000.
+- Persistência: somente `/state`; o volume anônimo anterior permanece órfão e
+  preservado até autorização humana específica para removê-lo.
+
+### Adendo operacional — logs efêmeros do Hermes editorial
+
+O Hermes 0.20.4 fixa os handlers em `get_hermes_home()/logs`; o perfil é
+somente leitura. O runner inicia o CLI pelo wrapper `hermes_wrapper.py`, que
+chama `setup_logging` com `hermes_home=/opt/data`, limite de 1 MiB e um backup
+para `agent.log`. O tmpfs de `/opt/data` é a única área gravável efêmera;
+umask 0077 e permissões 0700/0600 impedem acesso amplo. Não há logs em
+`/state`, nem fallback ou execução de Hermes nesta correção.
+
+### Adendo operacional — linhagem persistente de retry
+
+O vínculo de uma tentativa substituta não pode depender de `/tmp` ou logs.
+Foi escolhida a tabela SQLite `retry_lineage`, criada pela migração interna
+idempotente (user_version 2), com foreign keys habilitadas, chave primária
+`(original_job_id,retry_number)`, `UNIQUE(replacement_job_id)`, motivo
+controlado e referência aos dois jobs. A API aceita `retryOfJobId` e
+`retryReason` apenas para o original `failed/hermes_nonzero_exit`; a transação
+cria job e linhagem juntos ou desfaz ambos. O estado histórico existente não é
+associado retrospectivamente.
+
+### Adendo operacional — executor controlado da bateria
+
+Para eliminar scripts efêmeros, o fluxo foi versionado em
+`controlled_battery.py` e `scripts/phase8-controlled-battery.sh`. O cliente
+recebe JSON estrito por stdin, faz exatamente um POST, captura e valida a
+resposta e, se necessário, executa apenas polling GET com deadline monotônico.
+Contador local impede segundo POST; códigos de saída distinguem sucesso,
+terminal sem sucesso, transporte, HTTP, entrada, estado desconhecido e
+timeout. A camada shell instala `trap` antes das travas e fecha o runner em
+qualquer saída. Esta implementação foi apenas testada offline.
+### ADR-032 — Evidência de dossier inválido e telemetria de pesquisa (2026-09-01)
+
+O replacement `retry=1` terminou como `invalid_dossier_schema`, mas o runner
+persistiu `result_json` nulo e os logs do Hermes eram efêmeros; não existe
+evidência local para apontar um JSON Pointer ou finish_reason. A correção é
+falhar fechado, gerar o prompt a partir do schema versionado e aceitar apenas
+normalizações não semânticas.
+
+A migração interna do SQLite para `user_version=3` adiciona contagem persistente
+de operações Tavily (`research_operations`, separando `search` e `extract`).
+Usage sem telemetria operacional é rejeitado; referências do proxy não são
+fonte de verdade. O cálculo conservador local permanece o débito do guardrail;
+estimativas do provider são informativas.
+### ADR-033 — Observabilidade de falhas e preparação controlada do retry 2
+
+Em 2026-09-01, a revisão forense corrigiu a conclusão anterior: a hipótese H
+é tecnicamente forte, mas não é causa exata reproduzida. A partir desta decisão,
+falhas finais de schema persistem evidência protegida em `/state/failures/<job>`
+(diretório 0700, arquivos 0600, limite agregado de 256 KiB, escrita atômica e
+fsync), sem credenciais, headers, cookies, prompts ou PII. O banco migra de
+`user_version=3` para 4 com um manifesto sanitizado.
+
+Metadados incluem finish reason, indicadores de truncamento, parse/normalização,
+modelo/provedor e payload efetivo sanitizado. `finish_reason` ausente não é
+interpretado como `stop`; a conclusão permanece fail-closed. O adapter local
+traduz `thinking=none` para `extra_body.thinking.type=disabled`, comprovado por
+teste offline, sem chamada ao provider.
+
+O retry 2 é somente capacidade contratual: exige autorização humana posterior,
+razão exata `retry_after_dossier_contract_and_observability_fix`, cadeia válida,
+orçamento inferior a US$ 2 e ausência de retry anterior. Nenhum job/lineage de
+retry 2 é criado nesta etapa; retry 3 e ciclos são proibidos. A retenção de
+evidências permanece até o encerramento da Fase 8 e depois requer decisão
+operacional explícita. Custo histórico e telemetria Tavily são preservados.
+
+## ADR-034 — Hermes como editor-chefe permanente e matriz de papéis da operação editorial
+
+- Data: 2026-09-02
+- Status: aprovada (reconciliação da Fase 8)
+- Fase afetada: 8 (e contrato transversal às fases seguintes)
+
+### Contexto
+
+A reconciliação da Fase 8 reaproxima código, documentação e contratos da
+arquitetura original do blog: o Hermes é o **editor-chefe** e motor editorial;
+o runner é somente **governança**; DeepSeek e Tavily são recursos subordinados
+ao Hermes; Payload é CMS e ambiente de revisão; n8n é orquestração operacional
+futura, sem decisões editoriais.
+
+A auditoria read-only identificou dois riscos de inversão de papéis:
+
+1. `services/hermes-editorial-runner/provider_adapter.py` monta um payload
+   DeepSeek (`build_deepseek_payload`/`call_chat_completion`) dentro do runner,
+   o que poderia ser lido como chamada direta ao modelo em substituição ao
+   Hermes. No código vigente ele é usado somente na prova de contrato de
+   capacidades do orquestrador e em testes, nunca no caminho editorial.
+2. O runner exige `finish_reason` e `tavily_operations` no `--usage-file`, mas o
+   Hermes 0.20.4 não exporta esses campos (`_write_usage_file` grava um conjunto
+   fixo; o `finish_reason` real só existe embutido em `turn_exit_reason`, no
+   formato `text_response(finish_reason=...)`, e o plugin Tavily não contabiliza
+   operações). Sem o patch de instrumentação, a exigência é insatisfazível.
+
+### Decisão
+
+1. Matriz de papéis imutável:
+
+| Papel | Componente | Responsabilidade | Proibido |
+| --- | --- | --- | --- |
+| `HERMES_ROLE=EDITOR_CHEFE` | perfil `crescimento-vertical-editorial` | decidir pauta, estratégia de pesquisa, fontes, estrutura e conteúdo; produzir o dossiê | publicar; escrever no Payload; executar comandos |
+| `RUNNER_ROLE=GOVERNANCA` | `cv-hermes-editorial-runner` | autenticar (HMAC), limitar, contabilizar, validar e persistir | produzir pauta/texto editorial; chamar DeepSeek/Tavily em substituição ao Hermes |
+| `DEEPSEEK_ROLE=MODELO_DO_HERMES` | provider `deepseek` | inferência subordinada ao Hermes | ser chamado diretamente pelo runner como editor |
+| `TAVILY_ROLE=PESQUISA_DO_HERMES` | toolset `web` (plugin Tavily) | busca/extração subordinadas ao Hermes | ser chamado diretamente pelo runner como editor |
+| `PAYLOAD_ROLE=CMS_E_REVISAO` | Payload/PostgreSQL | receber somente conteúdo validado e posteriormente aprovado | receber saída não validada |
+| `N8N_ROLE=ORQUESTRACAO_OPERACIONAL` | n8n (futuro) | orquestrar com idempotência, sem decidir editorialmente | assumir decisões editoriais |
+
+2. `PUBLICACAO_AUTOMATICA=false` e aceite humano obrigatório (reforça ADR-005);
+   Hermes nunca publica.
+3. `RETRY3=PROIBIDO` permanente: `MAX_RETRY_CHAIN=2`, `retry_number IN (1,2)` e
+   `retry2_eligibility` exigem autorização humana; não há caminho para retry 3.
+4. `provider_adapter.py` é declarado exclusivo da prova de contrato de
+   capacidades, nunca do caminho editorial.
+5. Contrato versionado de observabilidade `hermes-observability.v1`
+   (`docs/schemas/hermes-observability.v1.schema.json`) define os campos que o
+   runner consome; o runner não pode exigir campo que o Hermes não exporta sem o
+   patch de instrumentação correspondente.
+6. Instrumentação mínima versionada do Hermes 0.20.4
+   (`services/hermes-editorial-runner/hermes-instrumentation/`) exporta
+   `finish_reason` e `tavily_operations` (search/extract) sem prompts,
+   respostas integrais, headers, cookies ou segredos.
+
+### Consequências
+
+- Positivas: papéis auditáveis e sem ambiguidade; observabilidade fail-closed
+  regida por contrato versionado; retry 3 permanentemente bloqueado.
+- Negativas e riscos: o patch de instrumentação ainda não está aplicado à imagem
+  em execução; até aplicá-lo, o runner permanece fail-closed quando a telemetria
+  obrigatória está ausente (comportamento atual preservado, sem nova bateria).
+
+### Reversão
+
+Reverter por commit (código e documentação) sem migração de dados; qualquer
+mudança futura de papel exige ADR próprio e aceite humano.
+
+### Adendo de status — 3 de setembro de 2026
+
+A matriz de papéis e as proibições da ADR-034 permanecem aprovadas. O relato
+posterior de validação da imagem candidata não constitui nova decisão e foi
+invalidado por auditoria factual: runtime/imagem sem alinhamento comprovado,
+black-box embutido diferente do Git, menos casos na imagem e falha real em
+`tool_calls → Tavily` com `search.attempted=0`.
+
+Assim, qualquer registro de fechamento dos gates dessa candidata recebe o
+status **SUPERADO — NÃO VÁLIDO PARA ACEITE**. Não há decisão de causa ou
+correção funcional neste adendo. A Fase 8 continua em execução; retry 3,
+publicação automática e início da Fase 9 permanecem proibidos.
+
+As formulações históricas das ADR-016 e ADR-017 que podem sugerir credencial
+`automation` no Hermes são terminologicamente superadas pela ADR-034: o Hermes
+não recebe credencial do Payload; somente o n8n é a ponte autenticada para o
+CMS. O histórico das decisões permanece intacto.
+
+> **Nota de acompanhamento (4 de setembro de 2026):** a correção funcional que
+> este adendo declarou pendente foi entregue pela candidata
+> `phase8-instrumentation-e154bf4` (Image ID `sha256:cad0e4f…`), com black-box
+> embutido idêntico ao Git, 36 cenários aprovados em `network none` e deploy
+> fechado apenas do runner. A Fase 8 permanece em execução e aguarda aceite
+> humano; as proibições da ADR-034 (retry 3, publicação automática e início da
+> Fase 9) continuam válidas.
+
+## ADR-035 — Job raiz final da bateria Fase 8 e teto efetivo de 5 jobs
+
+- Data: 2026-09-04
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: 8 (validação controlada final)
+
+### Contexto
+
+A bateria `phase-8-deepseek-v4-flash-candidate-v1` tem limite
+`MAX_BATCH_JOBS = 4` (constante em `config.py`, validada em `validate_limits`).
+O contador persistente `jobs_reserved` já está em 4: três jobs da linhagem
+oficial de retry (original + retry 1 + retry 2, todos `failed`) e um quarto job
+(`3754da2d`, `timed_out`) executado por outro agente, fora da linhagem oficial.
+
+Para a validação controlada final da Fase 8 é necessário um novo job raiz
+real. O limite vigente o rejeitaria com `battery_job_limit_reached`.
+
+### Decisão
+
+1. Autorizar exatamente **um** novo job raiz real como validação final da
+   Fase 8, elevando o teto efetivo desta bateria de 4 para **5** jobs
+   reservados. A mudança de `MAX_BATCH_JOBS` de 4 para 5 em `config.py` (e o
+   ajuste do teste que fixava o valor 4) é a forma determinística e auditável
+   de admitir esse único job; não reabre a bateria para novos jobs.
+2. O job é um **root job novo** (sem `retryOfJobId`/`retryNumber`), nunca um
+   retry 3. `MAX_RETRY_CHAIN = 2` e `RETRY3 = PROIBIDO` permanecem válidos.
+3. Orçamento: reserva de US$ 0,50/job e guardrail persistente de US$ 2
+   (`BATTERY_BUDGET_USD`) continuam aplicáveis; custo acumulado atual
+   US$ 0,054254576.
+4. Execução exclusivamente pela janela controlada versionada
+   (`scripts/phase8-controlled-battery.sh`), com as duas travas abertas e
+   fechadas em bloco, sem `build`/`pull`, sem recriar outro serviço.
+5. Falha não autoriza retry automático; vira evidência para post-mortem.
+
+### Consequências e reversão
+
+- Positivas: prova real de ponta a ponta (DeepSeek + Tavily → dossiê válido) e
+  fechamento da Fase 8 com evidência factual.
+- Riscos: o job real pode falhar (schema/telemetria/timeout), consumindo até
+  ~US$ 0,50 sem dossiê; não há fallback automático.
+- Reversão: restaurar `MAX_BATCH_JOBS = 4` (e o teste) e recriar o runner com a
+  imagem anterior; o job e seus contadores permanecem imutáveis para auditoria.
+
+### Critério de validação
+
+Job raiz termina `succeeded` com dossiê válido (`editorial-dossier.v1`),
+observabilidade `hermes-observability.v1` completa, `retry3=0`, custo dentro do
+guardrail e travas fechadas ao final.
+
+## ADR-036 — Job raiz de teste E2E da Fase 9 (teto efetivo de 6 jobs)
+
+- Data: 2026-09-05
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: 9 (validação E2E)
+
+### Contexto
+
+Após o ADR-035, a bateria `phase-8-deepseek-v4-flash-candidate-v1` tem teto de
+5 jobs, e `jobs_reserved` já está em 5. A conclusão da Fase 9 exige o teste E2E
+completo — uma execução real do Hermes alimentando o pipeline n8n → draft →
+Telegram. Esse teste consome 1 novo job raiz, o qual o limite vigente rejeitaria
+com `battery_job_limit_reached`.
+
+### Decisão
+
+1. Autorizar **um** novo job raiz real como teste E2E da Fase 9, elevando o teto
+   efetivo de 5 para **6** (`MAX_BATCH_JOBS` 5→6 em `config.py` + teste).
+2. O job é **root novo**, nunca retry 3; `MAX_RETRY_CHAIN=2` e `RETRY3=PROIBIDO`
+   permanecem válidos.
+3. Guardrail de US$ 2 e reserva de US$ 0,50/job continuam aplicáveis; custo
+   acumulado atual US$ 0,1053.
+4. Execução apenas pela janela controlada versionada, com as duas travas abertas
+   e fechadas em bloco; sem build/pull, sem recriar outro serviço.
+5. Falha não autoriza retry automático; vira evidência para post-mortem.
+
+### Consequências e reversão
+
+- Positivas: prova E2E do pipeline editorial completo em staging.
+- Riscos: o job pode falhar, consumindo até ~US$ 0,50 sem dossiê.
+- Reversão: restaurar `MAX_BATCH_JOBS=5` e recriar o runner com a imagem
+  anterior; contadores permanecem imutáveis para auditoria.
+
+## ADR-039 — Nova identidade visual (laranja + grafite/preto/branco/cinza)
+
+- Data: 2026-09-05
+- Status: aprovada
+- Responsável: responsável pelo produto
+- Fase afetada: transversal (identidade visual)
+
+### Contexto
+
+O ADR-008 fixou a direção escura azul/ciano. O responsável pelo produto decidiu
+substituí-la por uma identidade em **laranja** sobre base neutra
+(preto/grafite) com branco e cinza para texto — mais distinta da concorrência
+de IA (que converge para azul) e alinhada ao posicionamento de "crescimento"
+(energia, ação).
+
+### Decisão
+
+Adotar a paleta:
+
+| Papel | Valor |
+| --- | --- |
+| background | `#0a0a0a` |
+| surface | `#161616` |
+| surface-raised | `#1f1f1f` |
+| foreground | `#fafafa` |
+| muted | `#a3a3a3` |
+| action (laranja) | `#f97316` |
+| accent (laranja claro) | `#fb923c` |
+| accent-light | `#fdba74` |
+| action-deep | `#ea580c` / `#c2410c` |
+
+Mantêm-se os estados de sucesso/erro/aviso (`#45d69b`, `#ff758f`, `#ffd166`) e
+a direção escura (premium). O laranja é usado como **acento** (CTAs, destaques,
+glow), nunca como fundo dominante.
+
+### Consequências e reversão
+
+- Atualizar `globals.css` (tokens + valores hardcoded), a Constituição §16 e o
+  ADR-008 (substituído por este ADR).
+- Regenerar as capas dos artigos (hoje em azul/ciano).
+- Reversão: restaurar `globals.css` ao commit anterior e recriar o app; nenhuma
+  migração de dados envolvida.
+
+### Adendo de status (5 de setembro de 2026)
+
+O job E2E (slot 6) terminou `invalid_dossier_json`: o Hermes emitiu um prefácio
+de texto antes do JSON ("Pesquisa concluída… Dossiê conforme o schema…"), e a
+normalização do runner só tratava code fence. A saída era válida; a extração
+falhou. A normalização foi corrigida (commit `1584e47`, extração do primeiro
+`{` ao último `}`) e validada offline contra a saída real (0 erros de schema).
+Autoriza-se **uma** re-execução do E2E (slot 7, `MAX_BATCH_JOBS` 6→7) para
+obter o sucesso limpo; mesmas restrições de custo, retry 3 e travas.
+
+O slot 7 terminou `invalid_dossier_schema`: o prompt do runner mencionava
+"justificativa 400" (campo inexistente no schema) e omitia os enums de
+`riskFlags`/`claims`, levando o Hermes a emitir campos inválidos. O prompt foi
+realinhado ao `editorial-dossier.v1` (commit `a365a4f`) e os enums explicitados.
+Autoriza-se **uma** nova re-execução (slot 8, `MAX_BATCH_JOBS` 7→8) para obter
+o sucesso limpo do E2E; mesmas restrições.
+
+## ADR-038 — Transição da bateria de validação para orçamento mensal de produção
+
+- Data: 2026-09-05
+- Status: aprovada
+- Responsável: responsável técnico (delegação expressa do responsável pelo produto)
+- Fase afetada: 10 (produção editorial contínua)
+
+### Contexto
+
+O runner foi construído para a **validação** das Fases 8/9 com limites
+**cumulativos**: `MAX_BATCH_JOBS` (teto de jobs, hoje 8/8) e
+`BATTERY_BUDGET_USD` (US$ 2,0 acumulados, hoje US$ 0,24). Esses contadores
+nunca resetam. Para a Fase 10 (produção de ~24 pautas), qualquer teto
+cumulativo eventualmente trava a operação — o que não representa o modelo de
+custo desejado.
+
+### Decisão
+
+1. **Remover o teto cumulativo de jobs** (`MAX_BATCH_JOBS`): a bateria de
+   validação está concluída; a produção é contínua e limitada por custo, não
+   por contagem. `jobs_reserved` permanece apenas como métrica de auditoria.
+2. **Orçamento passa a ser mensal** (`MONTHLY_BUDGET_USD`, padrão US$ 10,00,
+   sobrescrevível por env). O gasto é contabilizado por mês-calendário
+   (`budget_month` + `month_spend_usd`), e a reserva de US$ 0,50/job é mantida.
+   `MAX_CONCURRENT_JOBS = 1` permanece.
+3. `retry3=proibido`, `MAX_RETRY_CHAIN=2` e publicação humana permanecem
+   inalterados.
+
+### Justificativa do valor (sem inventar)
+
+Custo real observado por job `succeeded`: ~US$ 0,045–0,051 (bateria da Fase 8
+e E2E da Fase 9). Na cadência alvo de 2 pautas/semana (~8–9/mês), o consumo
+esperado é ~US$ 0,40–0,50/mês. O teto de US$ 10,00 dá ~20× de folga, cobrindo
+pautas mais densas (mais fontes/claims) sem expor o projeto a custo aberto.
+
+### Consequências e reversão
+
+- Positivas: produção contínua, custo previsível e limitado por mês.
+- Riscos: o teto mensal é um guardrail, não um teto transacional — uma chamada
+  já iniciada pode ultrapassar o saldo do mês (mesma semântica anterior).
+- Reversão: restaurar `MAX_BATCH_JOBS`/`BATTERY_BUDGET_USD` via commit e
+  recriar o runner com a imagem anterior; os dados históricos de custo e jobs
+  permanecem intactos na tabela `jobs`.

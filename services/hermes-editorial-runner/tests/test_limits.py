@@ -1,0 +1,112 @@
+import os
+import sys
+import unittest
+from unittest import mock
+from pathlib import Path
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+import config
+import hermline
+
+
+class TestCandidateLimits(unittest.TestCase):
+    def test_exact_candidate_limits(self):
+        self.assertEqual(config.HERMES_PROVIDER, "deepseek")
+        self.assertEqual(config.HERMES_MODEL, "deepseek-v4-flash")
+        self.assertEqual(config.HERMES_REASONING, "none")
+        self.assertEqual(config.MAX_CONCURRENT_JOBS, 1)
+        self.assertEqual(config.MONTHLY_BUDGET_USD, 10.0)
+        self.assertEqual(config.MAX_TURNS, 8)
+        self.assertEqual(config.MAX_WEB_SEARCHES, 3)
+        self.assertEqual(config.MAX_FINAL_SOURCES, 4)
+        self.assertEqual(config.JOB_TIMEOUT_SECONDS, 300)
+        self.assertEqual(config.PROCESS_TERM_GRACE_SECONDS, 2)
+        self.assertEqual(config.PROCESS_KILL_WAIT_SECONDS, 2)
+        self.assertEqual(config.PROCESS_PIPE_DRAIN_SECONDS, 1)
+        self.assertEqual(config.CLIENT_DEADLINE_SECONDS, 330)
+        self.assertEqual(config.HTTP_POST_TIMEOUT_SECONDS, 320)
+        self.assertEqual(config.HTTP_GET_TIMEOUT_SECONDS, 30)
+        self.assertEqual(config.ADMISSION_BUDGET_SECONDS, 5)
+        self.assertEqual(config.FINALIZATION_BUDGET_SECONDS, 15)
+        self.assertEqual(config.RESPONSE_DELIVERY_BUDGET_SECONDS, 10)
+        self.assertEqual(config.MODEL_MAX_TOKENS, 4096)
+        self.assertEqual(config.OUTPUT_MAX_BYTES, 256 * 1024)
+        self.assertEqual(config.PROVIDER_MAX_RETRIES, 1)
+        self.assertEqual(config.STREAM_RETRIES, 0)
+        self.assertEqual(config.JOB_RESERVATION_USD, 0.50)
+
+    def test_limit_validator_accepts_candidate(self):
+        config.validate_limits()
+
+    def test_process_lifecycle_limits_are_positive(self):
+        with mock.patch.object(config, "PROCESS_TERM_GRACE_SECONDS", 0):
+            with self.assertRaisesRegex(ValueError, "process_lifecycle_limits_invalid"):
+                config.validate_limits()
+
+    def test_deadline_validator_rejects_incompatible_contract(self):
+        with self.assertRaisesRegex(ValueError, "client_deadline_budget_insufficient"):
+            config.validate_deadline_contract(client_deadline_seconds=310)
+        with self.assertRaisesRegex(ValueError, "post_timeout_budget_insufficient"):
+            config.validate_deadline_contract(http_post_timeout_seconds=319)
+        with self.assertRaisesRegex(ValueError, "post_timeout_must_precede_client_deadline"):
+            config.validate_deadline_contract(http_post_timeout_seconds=330)
+
+    def test_stdout_limit_rejects_oversize(self):
+        with self.assertRaisesRegex(RuntimeError, "output_too_large"):
+            hermline.bounded_stdout("x" * (config.OUTPUT_MAX_BYTES + 1))
+
+    def test_profile_has_no_fallback_and_minimal_thinking(self):
+        profile = Path(__file__).parents[3] / "hermes/crescimento-vertical-editorial/config.yaml"
+        text = profile.read_text(encoding="utf-8")
+        self.assertIn("fallback_providers: []", text)
+        self.assertIn("reasoning_effort: none", text)
+        self.assertIn("max_tokens: 4096", text)
+        self.assertIn("api_max_retries: 1", text)
+
+    def test_compose_declares_hardened_opt_data_tmpfs(self):
+        compose = Path(__file__).parents[3] / "docker-compose.hermes-editorial.yml"
+        text = compose.read_text(encoding="utf-8")
+        self.assertIn(
+            "/opt/data:rw,nosuid,nodev,noexec,size=16m,mode=0700,uid=10000,gid=10000",
+            text,
+        )
+        self.assertNotRegex(text, r"source:\s*[^\n]+\n\s+target:\s*/opt/data")
+        self.assertIn("RUNNER_EXECUTION_ENABLED: \"false\"", text)
+        self.assertIn("- runner-state:/state", text)
+
+    def test_runner_image_remains_non_root_and_state_is_private(self):
+        dockerfile = Path(__file__).parents[1] / "Dockerfile"
+        text = dockerfile.read_text(encoding="utf-8")
+        self.assertIn("install -d -o 10000 -g 10000 -m 0700 /state", text)
+        self.assertIn("USER hermes", text)
+
+    def test_runner_uses_ephemeral_logging_wrapper_without_changing_profile(self):
+        compose = Path(__file__).parents[3] / "docker-compose.hermes-editorial.yml"
+        dockerfile = Path(__file__).parents[1] / "Dockerfile"
+        wrapper = Path(__file__).parents[1] / "hermes_wrapper.py"
+        self.assertIn("HERMES_BIN: /app/hermes_wrapper.py", compose.read_text(encoding="utf-8"))
+        self.assertIn("hermes_wrapper.py", dockerfile.read_text(encoding="utf-8"))
+        wrapper_text = wrapper.read_text(encoding="utf-8")
+        self.assertIn('kwargs["hermes_home"] = Path("/opt/data")', wrapper_text)
+        self.assertIn('kwargs["max_size_mb"] = 1', wrapper_text)
+        self.assertIn('kwargs["backup_count"] = 1', wrapper_text)
+        self.assertIn("os.umask(0o077)", wrapper_text)
+
+    def test_controlled_battery_is_single_post_get_only_polling(self):
+        client = Path(__file__).parents[1] / "controlled_battery.py"
+        orchestrator = Path(__file__).parents[3] / "scripts" / "phase8-controlled-battery.sh"
+        text = client.read_text(encoding="utf-8")
+        script = orchestrator.read_text(encoding="utf-8")
+        self.assertEqual(text.count('self._request("POST"'), 1)
+        self.assertIn('self.post_count != 0', text)
+        self.assertIn('self._request("GET"', text)
+        self.assertNotIn("idempot", text.lower())
+        self.assertIn("trap cleanup EXIT", script)
+        self.assertIn("--execute --confirm SINGLE_POST_AUTHORIZED", script)
+        self.assertIn("--user 10000:10000", script)
+        self.assertIn("--mount type=bind,source=/opt/crescimento-vertical/.secrets/hmac-secret", script)
+
+
+if __name__ == "__main__":
+    unittest.main()

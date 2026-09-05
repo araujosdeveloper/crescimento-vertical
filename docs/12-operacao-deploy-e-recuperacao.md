@@ -249,3 +249,11 @@ PostgreSQL descartável/staging. Rollback restaura a imagem anterior e reverte a
 migration com procedimento revisado; não há cron de retenção ou notificação em
 produção nesta fase. A ausência de provedor externo deixa a outbox pendente sem
 afetar o armazenamento do lead.
+
+## Runner editorial — Fase 8
+
+Deploy candidato exige backup, CI verde e credencial exclusiva. Recriação é
+restrita a `cv-hermes-editorial-runner`; portal, banco, n8n, Hermes compartilhado,
+runner e produção permanecem fora do escopo. O rollback desliga a flag, remove
+o arquivo de habilitação e restaura a imagem anterior, preservando o volume de
+estado. Nenhuma agenda ou publicação é ativada nesta fase.

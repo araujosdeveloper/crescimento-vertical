@@ -1,5 +1,11 @@
 # Auditoria da integração Hermes/n8n (Fase 3A)
 
+> **Documento histórico, auditado em 25 de agosto de 2026.** A terminologia que
+> reduz o Hermes a pesquisa/redação está superada pelo ADR-034. O papel vigente
+> é **editor-chefe e motor central do blog**; DeepSeek/Tavily são subordinados,
+> o runner governa e o n8n orquestra sem decidir editorialmente. Os fatos
+> observados na data permanecem preservados.
+
 Data da auditoria: 25 de agosto de 2026. Escopo: **somente leitura**. Nenhum
 contêiner, credencial, rede ou configuração foi alterado. Nenhum valor de
 segredo é registrado aqui — apenas nomes de variáveis, imagens e topologia.

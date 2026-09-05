@@ -25,7 +25,7 @@ def valid_request():
         "searchIntent": "verificar impacto",
         "language": "pt-BR",
         "requestedAt": "2026-08-25T12:00:00Z",
-        "maxSources": 5,
+        "maxSources": 4,
         "seedSources": ["https://exemplo.com/doc"],
     }
 
@@ -60,7 +60,7 @@ class TestRequestSchema(unittest.TestCase):
         req = valid_request()
         req["maxSources"] = 1
         self.assertTrue(schemas.validate_request(req))
-        req["maxSources"] = 11
+        req["maxSources"] = 5
         self.assertTrue(schemas.validate_request(req))
 
 

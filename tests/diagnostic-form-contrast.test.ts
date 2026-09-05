@@ -7,10 +7,10 @@ const component = readFileSync("src/components/diagnostic-form.tsx", "utf8");
 describe("contraste do formulário de diagnóstico", () => {
   it("mantém painel claro, campos distinguíveis e foco acessível", () => {
     expect(css).toContain(".diagnostic-form-panel");
-    expect(css).toMatch(/\.diagnostic-form-panel\s*\{[^}]*background:\s*#f8fafc/i);
+    expect(css).toMatch(/\.diagnostic-form-panel\s*\{[^}]*background:\s*#fafafa/i);
     expect(css).toMatch(/\.diagnostic-form-field input[^}]*background:\s*#fff/i);
     expect(css).toMatch(/\.diagnostic-form-field input[^}]*border:\s*1px solid #94a3b8/i);
-    expect(css).toContain("outline: 3px solid rgba(2,132,199,.3)");
+    expect(css).toContain("outline: 3px solid rgba(234,88,12,.3)");
     expect(css).toContain("color: #64748b");
   });
 

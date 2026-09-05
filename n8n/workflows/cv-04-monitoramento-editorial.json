@@ -1,0 +1,67 @@
+{
+  "name": "CV-04 — Monitoramento Editorial",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "days", "daysInterval": 7 }]
+        }
+      },
+      "id": "d1010000-0000-4001-8001-000000000001",
+      "name": "Agenda Semanal",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-460, 0]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAYLOAD_BASE_URL }}/api/articles?where[workflowStatus][equals]=published",
+        "sendBody": false,
+        "options": {}
+      },
+      "id": "d2020000-0000-4002-8002-000000000002",
+      "name": "Payload Listar Publicados",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-220, 0],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "944d07f2-54ea-4699-9321-9d5fe6c1eb31",
+          "name": "CV Payload Automation — API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "5710991322",
+        "text": "=Revisão semanal: {{ $json.totalDocs }} artigos publicados para verificar links e fontes.",
+        "additionalFields": {}
+      },
+      "id": "d3030000-0000-4003-8003-000000000003",
+      "name": "Telegram Lembrete de Revisão",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [20, 0],
+      "credentials": {
+        "telegramApi": {
+          "id": "3f535ab5-8faf-4c1a-85e6-72e196480c28",
+          "name": "CV Telegram Bot — Revisão Editorial"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Agenda Semanal": {
+      "main": [[{ "node": "Payload Listar Publicados", "type": "main", "index": 0 }]]
+    },
+    "Payload Listar Publicados": {
+      "main": [[{ "node": "Telegram Lembrete de Revisão", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "d4040000-0000-4004-8004-000000000004",
+  "id": "d5050000-0000-4005-8005-000000000005",
+  "pinData": {}
+}

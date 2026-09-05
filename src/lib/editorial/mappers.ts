@@ -32,10 +32,27 @@ function preferredImageUrl(media: UnknownRecord): string | null {
     const size = asRecord(sizes?.[key]);
     const url = asString(size?.url);
     if (url) {
-      return url;
+      return toRelativeUrl(url);
     }
   }
-  return asString(media.url);
+  return toRelativeUrl(asString(media.url));
+}
+
+/**
+ * Converte URL absoluta da mídia em caminho relativo, para o otimizador de
+ * imagem do Next resolver internamente (localPatterns) sem round-trip externo
+ * (evita falha por TLS/BasicAuth no staging).
+ */
+function toRelativeUrl(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+  try {
+    const parsed = new URL(value);
+    return parsed.pathname + parsed.search;
+  } catch {
+    return value;
+  }
 }
 
 /**

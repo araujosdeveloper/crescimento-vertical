@@ -294,3 +294,9 @@ Os cinco tipos, hubs, busca, filtros, tags, atribuição pública, citações,
 correções, relacionados, RSS, sitemap e estados vazios devem preservar DTOs
 whitelist, drafts/futuros privados, canonical correto e noindex de busca/filtros
 e tags não indexáveis.
+
+Para a Fase 8, o aceite técnico exige política de fontes A/B/C, recusa de
+escopo e prompt injection, URLs HTTPS canônicas, idempotência, concorrência,
+limites, usage file e dossier JSON estrito. A bateria real não foi executada:
+o preflight classificou a credencial disponível como compartilhada (B), sem
+autorização de reutilização.

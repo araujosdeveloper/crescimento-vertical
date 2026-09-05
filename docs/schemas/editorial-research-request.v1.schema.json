@@ -60,7 +60,7 @@
     "maxSources": {
       "type": "integer",
       "minimum": 2,
-      "maximum": 10
+      "maximum": 4
     },
     "seedSources": {
       "type": "array",
@@ -70,6 +70,21 @@
         "format": "uri",
         "pattern": "^https://"
       }
+    },
+    "retryOfJobId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "retryReason": {
+      "enum": ["retry_after_ephemeral_logging_fix", "retry_after_dossier_contract_and_observability_fix"]
+    },
+    "rootJobId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "retryNumber": {
+      "type": "integer",
+      "const": 2
     }
   }
 }

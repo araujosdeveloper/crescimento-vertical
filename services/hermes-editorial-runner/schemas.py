@@ -3,7 +3,7 @@
 import json
 import os
 
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, FormatChecker
 
 import config
 
@@ -33,9 +33,9 @@ def get_dossier_schema() -> dict:
 
 def validate_request(instance) -> list:
     return list(
-        Draft202012Validator(get_request_schema()).iter_errors(instance)
+        Draft202012Validator(get_request_schema(), format_checker=FormatChecker()).iter_errors(instance)
     )
 
 
 def validate_dossier(instance) -> list:
-    return list(Draft202012Validator(get_dossier_schema()).iter_errors(instance))
+    return list(Draft202012Validator(get_dossier_schema(), format_checker=FormatChecker()).iter_errors(instance))

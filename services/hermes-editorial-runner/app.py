@@ -11,6 +11,7 @@ Nenhum segredo é exposto em log ou resposta; o corpo integral nunca é logado.
 
 import json
 import logging
+import os
 import queue
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -19,7 +20,14 @@ import config
 import hmac_auth
 import hermline
 import schemas
+import policy
+import evidence
+from state import IdempotencyConflictError, JobStore, RetryLineageError
 from nonce_store import NonceStore
+
+# Arquivos operacionais, SQLite WAL/SHM e usage nascem privados mesmo antes
+# dos chmod explícitos de defesa em profundidade.
+os.umask(0o077)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,10 +38,74 @@ logger = logging.getLogger("hermes-editorial-runner")
 _nonce_store = NonceStore()
 _job_queue: "queue.Queue[str] | None" = queue.Queue(maxsize=10)
 _job_store: dict[str, dict] = {}
+_persistent_store: JobStore | None = None
+_store_lock = __import__("threading").Lock()
+
+
+def _get_persistent_store() -> JobStore:
+    global _persistent_store
+    with _store_lock:
+        if _persistent_store is None:
+            _persistent_store = JobStore()
+        return _persistent_store
 
 
 def _safe_job_state(job_id: str) -> dict | None:
-    return _job_store.get(job_id)
+    state = _job_store.get(job_id)
+    if state is not None:
+        return state
+    try:
+        job = _get_persistent_store().get_by_id(job_id)
+    except OSError:
+        return None
+    return _get_persistent_store().public(job) if job else None
+
+
+def _finalize_terminal(store, job_id: str, state: str, error_code: str, *,
+                       usage: dict | None = None, output: str | None = None,
+                       errors: list | None = None, metadata: dict | None = None) -> None:
+    """Persiste usage, contabilização e evidência em bloco seguro.
+
+    Contabilização de custo/busca é best-effort (nunca mascara o estado
+    terminal); a evidência é gravada para qualquer estado terminal não sucedido,
+    inclusive falha genérica e timeout. O gate fail-closed de telemetria
+    obrigatória permanece exclusivo do caminho de sucesso.
+    """
+    existing = store.get_by_id(job_id)
+    already_finalized = bool(
+        existing and existing.get("state") == state and existing.get("error_code") == error_code
+    )
+    usage_complete = isinstance(usage, dict) and usage.get("_collection_complete", True)
+    metadata = dict(metadata or {})
+    if isinstance(usage, dict) and usage_complete and not already_finalized:
+        try:
+            research = store.record_research_usage(job_id, usage)
+            usage.update(research)
+        except RuntimeError as exc:
+            metadata["usage_research_persistence_error"] = str(exc)
+        try:
+            cost = store.record_battery_usage(usage)
+            usage.update(cost)
+        except RuntimeError as exc:
+            metadata["usage_cost_persistence_error"] = str(exc)
+    if isinstance(usage, dict) and metadata:
+        usage["_collection_metadata"] = metadata
+    manifest = None
+    try:
+        manifest = evidence.persist_failure(
+            job_id, output or "", errors or [], usage, metadata,
+            state=state, error_code=error_code,
+        )
+    except Exception:
+        manifest = None
+    if manifest is not None:
+        try:
+            store.record_failure_evidence(job_id, manifest, metadata)
+        except Exception as exc:
+            metadata["evidence_persistence_error"] = type(exc).__name__
+    if already_finalized:
+        return
+    store.update(job_id, state, error_code=error_code, usage=usage)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -156,6 +228,15 @@ class Handler(BaseHTTPRequestHandler):
                 },
             )
             return
+        decision, reasons = policy.classify_request(data)
+        if decision != "accepted":
+            self._send_json(422, {"error": "topic_rejected", "status": "rejected", "reasons": reasons, "correlationId": cid})
+            return
+        try:
+            data["seedSources"] = policy.canonical_seed_sources(data)
+        except ValueError as exc:
+            self._send_json(422, {"error": str(exc), "correlationId": cid})
+            return
         logger.info("validate correlationId=%s ok", cid)
         self._send_json(200, {"valid": True, "correlationId": cid})
 
@@ -172,16 +253,100 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
 
+        decision, reasons = policy.classify_request(data)
+        if decision != "accepted":
+            logger.info("job correlationId=%s rejected reasons=%s", cid, ",".join(reasons))
+            self._send_json(422, {"error": "topic_rejected", "status": "rejected", "reasons": reasons, "correlationId": cid})
+            return
+        try:
+            data["seedSources"] = policy.canonical_seed_sources(data)
+        except ValueError as exc:
+            self._send_json(422, {"error": str(exc), "correlationId": cid})
+            return
+
         if not config.execution_enabled():
             logger.info("job correlationId=%s execution_disabled", cid)
             self._send_json(503, {"error": "execution_disabled"})
             return
 
-        # Execução futura: enfileira e devolve jobId. Não alcançável nesta fase.
-        self._send_json(503, {"error": "execution_disabled"})
+        fingerprint = policy.topic_fingerprint(data["topic"], data["primaryPillar"])
+        store = _get_persistent_store()
+        semantic_match = store.get_by_fingerprint(fingerprint)
+        if semantic_match and semantic_match["idempotency_key"] != data["idempotencyKey"] and not data.get("retryOfJobId"):
+            self._send_json(409, {"error": "semantic_duplicate_review", "status": "rejected", "correlationId": cid})
+            return
+        try:
+            job, created = store.create_or_get(data, fingerprint)
+        except (IdempotencyConflictError, RetryLineageError) as exc:
+            self._send_json(409, {"error": str(exc), "correlationId": cid})
+            return
+        if not created:
+            self._send_json(200, {**store.public(job), "idempotentReplay": True})
+            return
+        try:
+            store.reserve_battery_job()
+        except RuntimeError as exc:
+            code = str(exc)
+            store.update(job["id"], "rejected", error_code=code)
+            self._send_json(429, {"error": code, "jobId": job["id"]})
+            return
+        store.update(job["id"], "running")
+        try:
+            result = hermline.run_hermes(data)
+            # Research telemetry is an acceptance gate: proxy references are
+            # never treated as a search count.
+            research = store.record_research_usage(job["id"], result["usage"])
+            result["usage"].update(research)
+            cost = store.record_battery_usage(result["usage"])
+            result["usage"].update(cost)
+            store.update(job["id"], "succeeded", result=result["dossier"], usage=result["usage"])
+            self._send_json(202, {"jobId": job["id"], "correlationId": cid, "state": "succeeded"})
+        except TimeoutError as exc:
+            _finalize_terminal(
+                store, job["id"], "timed_out", "timeout",
+                usage=getattr(exc, "usage", None), metadata=getattr(exc, "usage_meta", None),
+            )
+            self._send_json(504, {"error": "job_timed_out", "jobId": job["id"]})
+        except evidence.HermesRunError as exc:
+            _finalize_terminal(
+                store, job["id"], "failed", exc.error_code,
+                usage=exc.usage, output=exc.output, errors=exc.errors, metadata=exc.metadata,
+            )
+            self._send_json(502, {"error": exc.error_code, "jobId": job["id"]})
+        except Exception as exc:  # sanitized, no exception text
+            safe_codes = {
+                "output_too_large",
+                "invalid_dossier_json",
+                "invalid_dossier_schema",
+                "usage_file_missing_or_invalid",
+                "usage_provider_model_mismatch",
+                "provider_finish_reason_missing",
+                "hermes_nonzero_exit",
+                "execution_disabled",
+                "deepseek_credential_unavailable",
+                "tavily_credential_unavailable",
+                "battery_job_limit_reached",
+                "budget_guardrail_reached",
+                "tavily_usage_unavailable",
+                "tavily_usage_invalid",
+                "tavily_search_limit_reached",
+                "hermes_process_start_failed",
+                "hermes_process_signal_failed",
+                "hermes_process_reap_timeout",
+                "hermes_process_group_not_empty",
+                "hermes_process_group_unverifiable",
+                "hermes_descendants_remaining",
+                "hermes_pipe_drain_timeout",
+            }
+            code = str(exc) if str(exc) in safe_codes else "job_failed"
+            _finalize_terminal(store, job["id"], "failed", code)
+            self._send_json(502, {"error": code, "jobId": job["id"]})
+        finally:
+            store.release_battery_reservation()
 
 
 def main() -> None:
+    config.validate_limits()
     server = ThreadingHTTPServer(
         (config.LISTEN_HOST, config.LISTEN_PORT), Handler
     )

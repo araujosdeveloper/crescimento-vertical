@@ -2,3 +2,7 @@
 # espaços finais dentro de template literals. Desativa a checagem de whitespace
 # somente para esses arquivos gerados.
 migrations/** -whitespace
+
+# Patches unificados usam linha de contexto vazia como um único espaço
+# (formato diff). Desativa a checagem de whitespace para esses artefatos.
+*.patch -whitespace

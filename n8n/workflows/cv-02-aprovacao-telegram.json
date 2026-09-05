@@ -1,0 +1,47 @@
+{
+  "name": "CV-02 — Aprovação via Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "hermes-editorial/notify",
+        "httpMethod": "POST",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "b1010000-0000-4001-8001-000000000001",
+      "name": "Webhook Notificar",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-460, 0],
+      "webhookId": "cv02-notificar-revisao"
+    },
+    {
+      "parameters": {
+        "chatId": "5710991322",
+        "text": "=Novo rascunho para revisão\n\nTítulo: {{ $json.body.title }}\nPilar: {{ $json.body.primaryPillar }}\n\nRevise no Payload Admin e aprove ou rejeite.",
+        "additionalFields": {}
+      },
+      "id": "b2020000-0000-4002-8002-000000000002",
+      "name": "Telegram Enviar Resumo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [-220, 0],
+      "credentials": {
+        "telegramApi": {
+          "id": "3f535ab5-8faf-4c1a-85e6-72e196480c28",
+          "name": "CV Telegram Bot — Revisão Editorial"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Notificar": {
+      "main": [[{ "node": "Telegram Enviar Resumo", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "b3030000-0000-4003-8003-000000000003",
+  "id": "b4040000-0000-4004-8004-000000000004",
+  "pinData": {}
+}
