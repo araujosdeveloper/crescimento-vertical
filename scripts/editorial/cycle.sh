@@ -34,7 +34,12 @@ print(json.dumps(data[i], ensure_ascii=False))
 PY
 }
 
-INDEX="${1:-$(next_index)}"
+INDEX="$(next_index)"
+if [ "$1" = "--index" ]; then
+  INDEX="${2:?índice ausente}"
+elif [ -n "$1" ]; then
+  INDEX="$1"
+fi
 PAUTA="$(pauta_at "$INDEX")"
 if [ -z "$PAUTA" ]; then
   log "fila esgotada (índice $INDEX). Adicione pautas em pautas.json."
@@ -81,7 +86,7 @@ PY
 
 DOSSIER_FILE="$(mktemp)"
 log "gerando dossiê (runner)..."
-if ! echo "$REQUEST" | docker exec -i cv-hermes-editorial-runner /opt/hermes/.venv/bin/python - < "$DIR/runner-request.py" > "$DOSSIER_FILE" 2>"$ERRLOG"; then
+if ! docker exec -i -e REQUEST_BODY="$REQUEST" cv-hermes-editorial-runner /opt/hermes/.venv/bin/python - < "$DIR/runner-request.py" > "$DOSSIER_FILE" 2>"$ERRLOG"; then
   log "FALHA no runner:"; tail -5 "$ERRLOG"; cat "$DOSSIER_FILE"; exit 1
 fi
 if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if 'error' in d else 1)" "$DOSSIER_FILE"; then

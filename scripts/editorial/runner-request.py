@@ -26,7 +26,8 @@ TIMEOUT = int(os.environ.get("REQUEST_TIMEOUT", "330"))
 
 
 def main() -> int:
-    body = sys.stdin.buffer.read()
+    raw = os.environ.get("REQUEST_BODY")
+    body = raw.encode("utf-8") if raw is not None else sys.stdin.buffer.read()
     try:
         data = json.loads(body)
     except (json.JSONDecodeError, UnicodeDecodeError):
