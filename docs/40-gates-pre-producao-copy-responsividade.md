@@ -17,8 +17,9 @@ autoritativa) e em `src/lib/commercial/data.ts` (fallback sem banco).
 
 ## Gate B — homologação responsiva e acessível
 
-**Estado:** pendente de inspeção visual humana. Não pode ser declarado
-concluído por teste automatizado (ADR-023).
+**Estado:** **aprovado** — aceite humano do responsável pelo produto em
+6/9/2026. Validação integral nos cinco viewports (360/390/768/1024/1440) e nas
+rotas representativas, sem corte, overflow ou sobreposição de CTA.
 
 ### Viewports obrigatórios
 

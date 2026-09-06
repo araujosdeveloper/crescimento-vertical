@@ -38,10 +38,10 @@ registrada.
 ## Situação vigente — 6 de setembro de 2026
 
 A Fase 12 foi **iniciada** em 6 de setembro de 2026 (documento canônico em
-`docs/44`). O lançamento está bloqueado pelas pré-condições: Gate A (copy
-comercial), Gate B (homologação responsiva nos cinco viewports), commit das
-mudanças da Fase 11, cópia off-site (ADR-041), migração de DNS e decisão de
-analytics.
+`docs/44`). Os dois gates pré-produção (copy comercial e homologação
+responsiva) foram **aprovados em 6/9/2026**. Restam como pré-condições de
+lançamento: commit das mudanças da Fase 11, cópia off-site (ADR-041), migração
+de DNS e decisão de analytics.
 
 ## Situação vigente — 6 de setembro de 2026
 
@@ -135,7 +135,8 @@ produção. As Fases 5 a 12 permanecem pendentes.
    especificidade, problemas atendidos, entregáveis, diferenciais, processo,
    limites e CTAs.
 
-Nenhum dos dois gates pode ser declarado concluído por este encerramento.
+Ambos os gates foram **encerrados com aceite humano em 6/9/2026** (ver
+`docs/40`). Produção deixou de estar bloqueada por esses dois gates.
 
 A Fase 7 foi concluída em 30 de agosto de 2026 após aceite humano expresso do
 formulário claro, envio real, mensagem de sucesso, captação consentida e

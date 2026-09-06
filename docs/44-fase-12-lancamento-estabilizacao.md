@@ -12,8 +12,7 @@ dias sem incidente crítico.
 Estes itens bloqueiam o deploy de produção e exigem decisão/aceite humano:
 
 - [x] **Gate A — copy comercial**: aprovado por aceite humano (6/9/2026).
-- [ ] **Gate B — homologação responsiva**: aceite visual humano nos cinco
-  viewports (360/390/768/1024/1440) e rotas representativas, conforme `docs/40`.
+- [x] **Gate B — homologação responsiva**: aprovado por aceite humano (6/9/2026).
 - [ ] **Mudanças da Fase 11 commitadas e com CI verde** (working tree limpa).
 - [ ] **Cópia off-site de backup** (ADR-041): destino + credencial
   (`scripts/phase11-offsite-backup.sh`, ver `docs/43`).
