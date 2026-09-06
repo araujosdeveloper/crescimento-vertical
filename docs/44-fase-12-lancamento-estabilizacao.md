@@ -21,8 +21,8 @@ Estes itens bloqueiam o deploy de produção e exigem decisão/aceite humano:
   (Let's Encrypt via `mytlschallenge`) e redirect `www → apex` (301) validados.
 - [x] **Analytics**: GA4 ativado (measurement ID `G-GZEL0RQ2E2`) com consentimento
   LGPD (banner + `gtag` somente após aceite; eventos `page_view`,
-  `whatsapp_click`, `diagnostic_submit/success/error`). Search Console permanece
-  a ativar.
+  `whatsapp_click`, `diagnostic_submit/success/error`) e **Search Console**
+  configurado pelo responsável (6/9/2026).
 
 ## Lançamento executado (6/9/2026)
 
