@@ -31,7 +31,12 @@ docker exec "$POSTGRES_CONTAINER" sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGR
 
 if [ "$MODE" = "daily" ]; then
   log "mídia ($MEDIA_VOLUME)"
-  docker run --rm -v "$MEDIA_VOLUME":/media -v "$DEST":/backup alpine tar -czf /backup/media.tar.gz -C /media . 2>/dev/null || log "mídia indisponível, continuando"
+  MEDIA_PATH="$(docker volume inspect "$MEDIA_VOLUME" --format '{{.Mountpoint}}' 2>/dev/null || true)"
+  if [ -n "$MEDIA_PATH" ] && [ -d "$MEDIA_PATH" ]; then
+    tar -czf "$DEST/media.tar.gz" -C "$MEDIA_PATH" .
+  else
+    log "mídia indisponível, continuando"
+  fi
 
   log "bundle Git ($REPO_DIR)"
   git -C "$REPO_DIR" bundle create "$DEST/repo.bundle" --all

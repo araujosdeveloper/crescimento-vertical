@@ -39,25 +39,35 @@ objetivo é tornar a operação segura, observável e recuperável antes da Fase
 
 ## Observabilidade
 
+### Feito
+
+- **Health check + alerta** (`scripts/phase11-health-check.sh`): verifica os
+  containers a cada 5 min (cron) e envia alerta via Telegram
+  (`@AlertaHermes_Bot`, chat `5710991322`) se algum sair do estado `healthy`.
+
 ### Pendente
 
 - Logs estruturados (JSON, UTC, nível, serviço, ambiente, release, requestId);
-- métricas: uptime, HTTP 5xx, latência p95, CPU/RAM/disco, PostgreSQL, jobs,
-  custos, workflows, leads pendentes;
-- alertas entregues ao responsável (canal a definir);
-- dashboard mínimo operacional;
-- ausência de PII/tokens/prompts em logs.
+- métricas: HTTP 5xx, latência p95, CPU/RAM/disco, PostgreSQL, jobs, custos,
+  workflows, leads pendentes;
+- dashboard mínimo operacional (decisão de ferramenta a definir);
+- ausência de PII/tokens/prompts em logs (revisão).
 
 ## Backup e recuperação
 
-### Pendente (implementar nesta fase)
+### Feito
 
-- PostgreSQL lógico a cada 6 h (`pg_dump` custom);
-- backup completo diário (banco + mídia + configuração + Git bundle);
-- retenção 30 dias (diário) + 12 meses (mensal);
+- **Script de backup** (`scripts/phase11-backup.sh`): dump PostgreSQL (custom),
+  mídia, configuração e bundle Git, com `SHA256SUMS`.
+- **Cron** na VPS: lógico a cada 6 h (`hourly`) e completo diário às 3 h
+  (`daily`), em `/opt/backups/crescimento-vertical`.
+
+### Pendente
+
+- retenção automática (30 dias diário + 12 meses mensal);
 - cópia criptografada off-site;
-- teste mensal de restauração isolada;
-- RPO ≤ 6 h e RTO ≤ 4 h.
+- teste mensal de restauração isolada (provar RTO ≤ 4 h);
+- RPO ≤ 6 h (já coberto pelo cron a cada 6 h).
 
 ## Runbooks
 
