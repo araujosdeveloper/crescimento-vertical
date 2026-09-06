@@ -45,6 +45,9 @@ restauração isolada roda no 1º dia de cada mês via
 
 ### Cloudflare R2 (provedor escolhido)
 
+Configurado e validado em 6/9/2026: envio de teste + round-trip (download →
+`gpg --decrypt` → `sha256sum -c`) OK. Cron diário às 3h30 UTC.
+
 1. Criar bucket no R2 e um **R2 API Token** (Access Key ID + Secret Access Key).
 2. Endpoint: `https://<account-id>.r2.cloudflarestorage.com` (Account ID no
    dashboard). O script usa boto3 com path-style (padrão do R2).

@@ -6,7 +6,7 @@
 | --- | --- |
 | Branch/HEAD | `main` / `6db0d01` (mudanças da Fase 11 ainda não commitadas) |
 | Fase ativa | Fase 12 — **em execução** (migração, lançamento e estabilização); Fase 11 aceita 6/9/2026 |
-| Pré-condições | Gates A e B aprovados (6/9); commit Fase 11, off-site (ADR-041), DNS e analytics — ver `docs/44` |
+| Pré-condições | Gates A/B aprovados; off-site R2 configurado e validado (6/9); commit/merge Fase 11, DNS e analytics — ver `docs/44` |
 | Restrições | Publicação automática e retry 3 continuam proibidos |
 
 Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
