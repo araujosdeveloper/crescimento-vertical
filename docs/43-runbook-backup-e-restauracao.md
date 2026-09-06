@@ -43,11 +43,24 @@ restauração isolada roda no 1º dia de cada mês via
 
 ## Cópia off-site criptografada (Fase 12 — ADR-041)
 
+### Cloudflare R2 (provedor escolhido)
+
+1. Criar bucket no R2 e um **R2 API Token** (Access Key ID + Secret Access Key).
+2. Endpoint: `https://<account-id>.r2.cloudflarestorage.com` (Account ID no
+   dashboard). O script usa boto3 com path-style (padrão do R2).
+3. Segredos locais (nunca versionados):
+   - `.secrets/offsite-access-key` (Access Key ID)
+   - `.secrets/offsite-secret-key` (Secret Access Key)
+   - `.secrets/offsite-gpg-passphrase` (senha gerada com `openssl rand -hex 32`)
+   - `chmod 600` em todos.
+4. Variáveis de ambiente do script (`OFFSITE_*`): endpoint, bucket, caminhos dos
+   três arquivos acima e prefixo (padrão `crescimento-vertical`).
+
+### Envio e restauração
+
 - **Envio** (diário, após o backup das 3h):
   `scripts/phase11-offsite-backup.sh /opt/backups/crescimento-vertical`
-  usando GPG AES-256 + boto3 para storage S3-compatível. Requer as variáveis
-  `OFFSITE_*` (segredos por arquivo em `.secrets/`, nunca versionados).
+  usando GPG AES-256 + boto3. Cron sugerido:
+  `0 4 * * * ... phase11-offsite-backup.sh ...` (após o backup diário).
 - **Restauração off-site**: baixar o objeto, `gpg --decrypt --passphrase-file`,
   descompactar e seguir o procedimento de restauração isolada acima.
-- Cron sugerido: `0 4 * * * scripts/phase11-offsite-backup.sh ...` (após o
-  backup diário), quando as credenciais existirem.
