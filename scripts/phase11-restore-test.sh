@@ -52,7 +52,7 @@ if [ "$ready" != "true" ]; then
 fi
 
 log "restaurando dump (pg_restore)"
-docker exec -i "$TMP_CONTAINER" pg_restore -U restore -d restore --clean --if-exists < "$DUMP" >/dev/null
+docker exec -i "$TMP_CONTAINER" pg_restore -U restore -d restore --clean --if-exists --no-owner --no-acl --exit-on-error < "$DUMP" >/dev/null
 
 log "contagens restauradas"
 docker exec "$TMP_CONTAINER" psql -U restore -d restore -Atc \
