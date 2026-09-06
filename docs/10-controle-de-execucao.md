@@ -1,20 +1,73 @@
 # Controle de execução
 
-## Estado vigente — 5 de setembro de 2026
+## Estado vigente — 6 de setembro de 2026
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `d747134` |
-| Fase ativa | Fase 10 — **concluída e aceita** (aceite humano 5/9/2026); Fase 11 em execução |
-| PR | #14 aberto e draft (Fases 8–10 empilhadas na mesma branch; merge pendente) |
-| Fase 10 | **SUCESSO** — 5 artigos publicados (1 por pilar), com fonte nível A, capa, revisor, categoria, serviço e SEO; calendário de 90 dias em docs/38 |
-| Identidade visual | nova paleta laranja/grafite/preto (ADR-039) aplicada e capas regeneradas |
-| Runtime | runner healthy; travas fechadas; `retry3=0`; custo do mês US$ 0,27 (teto US$ 10) |
+| Branch/HEAD | `main` / `6db0d01` (mudanças da Fase 11 ainda não commitadas) |
+| Fase ativa | Fase 12 — **em execução** (migração, lançamento e estabilização); Fase 11 aceita 6/9/2026 |
+| Pré-condições | Gates A/B aprovados; off-site R2 configurado e validado (6/9); commit/merge Fase 11, DNS e analytics — ver `docs/44` |
 | Restrições | Publicação automática e retry 3 continuam proibidos |
 
-Próxima ação: iniciar a Fase 11 (segurança, observabilidade, backup e
-recuperação). O Hermes permanece editor-chefe; runner é governança;
-DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada para o Payload.
+Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
+qualquer deploy de produção.
+
+## Registro da sessão 2026-09-06 — ativação do GA4 (Fase 12)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — analytics de lançamento |
+| Objetivo | Ativar GA4 com consentimento LGPD |
+| Alterações | `src/lib/analytics.ts`, `src/components/analytics/analytics-consent.tsx` (banner + `gtag` pós-consent, `useSyncExternalStore`), eventos em WhatsApp/diagnóstico, `NEXT_PUBLIC_GA_MEASUREMENT_ID` (Dockerfile/compose/env), cookies/privacidade atualizados |
+| Validações | lint/typecheck/112 testes/build; GA ID inlined no bundle do container; banner renderizado; sem segredos no container (`.dockerignore` exclui `.env*`) |
+| Estado | GA4 ativo em produção; imagem anterior preservada como `cv-production-app:pre-ga4` |
+| Próxima ação | Ativar Search Console quando houver propriedade; concluir 7 dias de estabilização |
+
+## Registro da sessão 2026-09-06 — lançamento em produção (Fase 12)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — migração, lançamento e estabilização |
+| Objetivo | Lançar o portal novo em produção |
+| Execução | DNS apex/www → VPS; TLS Let's Encrypt emitido; redirect `www→apex` (301); portal novo ativo e indexável |
+| Validações | TLS `ssl_verify_result=0`; home/conteudos/artigo/sitemap/robots/diagnostico/admin/healthchecks 200; `/admin` noindex; 404 tratado; legado preservado como rollback |
+| Estado | Produção **no ar**; iniciada janela de 7 dias de estabilização |
+| Próxima ação | Ativar analytics (GA4/Search Console) e encerrar estabilização após 7 dias sem incidente crítico |
+
+## Registro da sessão 2026-09-06 — deploy de produção preparado (Fase 12)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — migração, lançamento e estabilização |
+| Objetivo | Preparar e implantar o portal novo em produção (blue-green) |
+| Alterações | `docker-compose.production.yml`, `.env.production` (600, fora do Git), imagem `cv-production-app:latest`, PostgreSQL `cv-production-postgres` + 7 migrações, conteúdo migrado do staging (lead/outbox de teste removidos), mídia copiada |
+| Validações | compose config; build; migrações; smoke interno 200 em `/`, `/conteudos`, artigo, sitemap, robots, `/diagnostico`, `/admin`; páginas indexáveis, `/admin` noindex |
+| Estado | app `healthy`; legado `crescimento-vertical` preservado como rollback; DNS ainda não migrado |
+| Próxima ação | Migração de DNS (apex/www) e analytics; depois verificação externa e 7 dias de estabilização |
+
+## Registro da sessão 2026-09-06 — início da Fase 12
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — migração, lançamento e estabilização |
+| Objetivo | Migrar a produção legada para o portal novo e estabilizar |
+| Alterações | `docs/44-fase-12-lancamento-estabilizacao.md` (canônico), índice, ROTEIRO-MESTRE |
+| Pré-condições | Gate A/B, commit Fase 11, off-site, DNS e analytics pendentes |
+| Próxima ação | Resolver as pré-condições (decisões/acites humanos) |
+
+## Registro da sessão 2026-09-06 — fechamento e aceite da Fase 11
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | `main` / `6db0d01` (trabalho em andamento, sem merge) |
+| Fase | 11 — segurança, observabilidade, backup e recuperação |
+| Objetivo | Resolver as pendências locais e concluir a fase |
+| Alterações | `scripts/phase11-retention.sh`, `scripts/phase11-restore-test.sh`, `src/lib/logger.ts`, `src/app/api/health/metrics/route.ts` (+ `outboxPending`), `src/app/api/leads/route.ts` (logs estruturados), `Dockerfile`/`docker-compose.phase2.yml` (imagens base por digest), `tests/lead-route-contract.test.ts`, ADR-040/041, docs 39/43 |
+| Validações | `bash -n` dos scripts; typecheck; eslint (arquivos alterados); 112 testes; `next build`; `git diff --check` |
+| Decisões | ADR-041: off-site postergado p/ Fase 12; dashboard = digest Telegram; Hermes/n8n `:latest` aceitos com risco documentado |
+| Cron aplicado | retenção (`0 4 * * *`) e teste mensal de restauração (`0 5 1 * *`) adicionados ao crontab da VPS |
+| Aceite | Aceite humano expresso do responsável pelo produto em 6/9/2026 |
+| Próxima ação | Iniciar a Fase 12 (pré-lançamento inclui cópia off-site) |
 
 ### Bateria real final — 4 de setembro de 2026
 

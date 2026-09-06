@@ -1,4 +1,4 @@
-FROM node:22-alpine AS deps
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS deps
 WORKDIR /app
 
 COPY package*.json ./
@@ -11,7 +11,7 @@ RUN npm install --global npm@11 && npm ci
 FROM deps AS prod-deps
 RUN npm prune --omit=dev
 
-FROM node:22-alpine AS builder
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -22,6 +22,7 @@ ARG NEXT_PUBLIC_CONTACT_EMAIL=contato@crescimentovertical.com
 ARG NEXT_PUBLIC_WHATSAPP_NUMBER
 ARG NEXT_PUBLIC_WHATSAPP_DISPLAY
 ARG NEXT_PUBLIC_WHATSAPP_MESSAGE
+ARG NEXT_PUBLIC_GA_MEASUREMENT_ID
 ARG SITE_NOINDEX=false
 
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -30,12 +31,13 @@ ENV NEXT_PUBLIC_CONTACT_EMAIL=$NEXT_PUBLIC_CONTACT_EMAIL
 ENV NEXT_PUBLIC_WHATSAPP_NUMBER=$NEXT_PUBLIC_WHATSAPP_NUMBER
 ENV NEXT_PUBLIC_WHATSAPP_DISPLAY=$NEXT_PUBLIC_WHATSAPP_DISPLAY
 ENV NEXT_PUBLIC_WHATSAPP_MESSAGE=$NEXT_PUBLIC_WHATSAPP_MESSAGE
+ENV NEXT_PUBLIC_GA_MEASUREMENT_ID=$NEXT_PUBLIC_GA_MEASUREMENT_ID
 ENV SITE_NOINDEX=$SITE_NOINDEX
 
 RUN npm run build
 
 # One-shot migration stage: full app context (payload CLI + config + migrations).
-FROM node:22-alpine AS migrate
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS migrate
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -62,7 +64,7 @@ USER nextjs
 
 CMD ["node", "node_modules/payload/bin.js", "migrate"]
 
-FROM node:22-alpine AS runner
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production

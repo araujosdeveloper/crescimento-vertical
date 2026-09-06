@@ -1,23 +1,16 @@
 # =============================================================================
-# Fase 2A — Blue-green staging (Payload + PostgreSQL).
+# Fase 12 — Produção (blue-green do portal novo).
 #
-# Projeto exclusivo: crescimento-vertical-phase2-staging
-#   - cv-phase2-staging-app
-#   - cv-phase2-staging-postgres
-#   - cv-phase2-staging-migrate (one-shot, perfil "migrate")
+# Projeto exclusivo: crescimento-vertical-production
+#   - cv-production-app
+#   - cv-production-postgres
+#   - cv-production-migrate (one-shot, perfil "migrate")
 #
-# NÃO substitui docker-compose.yml (produção) nem docker-compose.staging.yml
-# (staging antigo). O staging antigo permanece ativo como fallback de rollback.
-#
-# Rede interna exclusiva (app + postgres) sem porta publicada. A aplicação
-# também entra na rede externa n8n_default SOMENTE para o Traefik alcançá-la.
-# O postgres NÃO participa de n8n_default.
-#
-# Roteamento controlado por PHASE2_TRAEFIK_ENABLE (default false). Quando true,
-# o router do candidate assume o Host do staging com prioridade superior à do
-# staging antigo.
+# Roteia apex/www com prioridade 200, acima do container legado
+# `crescimento-vertical` (prioridade 0), que permanece como rollback até o
+# aceite. O banco NÃO publica porta e NÃO participa de n8n_default.
 # =============================================================================
-name: crescimento-vertical-phase2-staging
+name: crescimento-vertical-production
 
 services:
   app:
@@ -30,10 +23,10 @@ services:
         - NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
         - NEXT_PUBLIC_WHATSAPP_DISPLAY=${NEXT_PUBLIC_WHATSAPP_DISPLAY:-}
         - NEXT_PUBLIC_WHATSAPP_MESSAGE=${NEXT_PUBLIC_WHATSAPP_MESSAGE:-}
-        - SITE_NOINDEX=true
-    image: cv-phase2-staging-app:latest
-    container_name: cv-phase2-staging-app
-    # UID não-root da imagem; GID 0 somente para ler o secret 0640 root:root.
+        - NEXT_PUBLIC_GA_MEASUREMENT_ID=${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}
+        - SITE_NOINDEX=false
+    image: cv-production-app:latest
+    container_name: cv-production-app
     user: "1001:0"
     restart: unless-stopped
     init: true
@@ -49,7 +42,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       PAYLOAD_MEDIA_DIR: /app/media
-      SITE_NOINDEX: ${SITE_NOINDEX}
+      SITE_NOINDEX: "false"
       LEAD_NOTIFICATION_ENABLED: ${LEAD_NOTIFICATION_ENABLED:-false}
       LEAD_SMTP_HOST: ${LEAD_SMTP_HOST:-smtp.hostinger.com}
       LEAD_SMTP_PORT: ${LEAD_SMTP_PORT:-465}
@@ -58,7 +51,7 @@ services:
       LEAD_SMTP_FROM: ${LEAD_SMTP_FROM:-contato@crescimentovertical.com}
       LEAD_NOTIFICATION_TO: ${LEAD_NOTIFICATION_TO:-contato@crescimentovertical.com}
       LEAD_SMTP_PASSWORD_FILE: /run/secrets/lead_smtp_password
-      LEAD_ADMIN_BASE_URL: ${LEAD_ADMIN_BASE_URL:-https://staging.crescimentovertical.com}
+      LEAD_ADMIN_BASE_URL: ${LEAD_ADMIN_BASE_URL:-https://crescimentovertical.com}
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,21 +85,27 @@ services:
           cpus: "1.00"
           memory: 512M
     labels:
-      - 'traefik.enable=${PHASE2_TRAEFIK_ENABLE:-false}'
+      - 'traefik.enable=true'
       - 'traefik.docker.network=n8n_default'
-      - 'traefik.http.routers.cv-phase2-staging.rule=Host(`${STAGING_HOST}`)'
-      - 'traefik.http.routers.cv-phase2-staging.entrypoints=websecure'
-      - 'traefik.http.routers.cv-phase2-staging.tls=true'
-      - 'traefik.http.routers.cv-phase2-staging.tls.certresolver=mytlschallenge'
-      - 'traefik.http.routers.cv-phase2-staging.priority=200'
-      - 'traefik.http.routers.cv-phase2-staging.middlewares=cv-phase2-staging-robots,cv-phase2-staging-basicauth'
-      - 'traefik.http.middlewares.cv-phase2-staging-basicauth.basicauth.users=${STAGING_BASIC_AUTH_USERS}'
-      - 'traefik.http.middlewares.cv-phase2-staging-robots.headers.customresponseheaders.X-Robots-Tag=noindex, nofollow, noarchive'
-      - 'traefik.http.services.cv-phase2-staging.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.cv-production.rule=Host(`crescimentovertical.com`)'
+      - 'traefik.http.routers.cv-production.entrypoints=websecure'
+      - 'traefik.http.routers.cv-production.tls=true'
+      - 'traefik.http.routers.cv-production.tls.certresolver=mytlschallenge'
+      - 'traefik.http.routers.cv-production.priority=200'
+      - 'traefik.http.services.cv-production.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.cv-production-www.rule=Host(`www.crescimentovertical.com`)'
+      - 'traefik.http.routers.cv-production-www.entrypoints=websecure'
+      - 'traefik.http.routers.cv-production-www.tls=true'
+      - 'traefik.http.routers.cv-production-www.tls.certresolver=mytlschallenge'
+      - 'traefik.http.routers.cv-production-www.priority=200'
+      - 'traefik.http.routers.cv-production-www.middlewares=cv-production-www-redirect'
+      - 'traefik.http.middlewares.cv-production-www-redirect.redirectregex.regex=^https?://www\.crescimentovertical\.com/(.*)'
+      - 'traefik.http.middlewares.cv-production-www-redirect.redirectregex.replacement=https://crescimentovertical.com/$${1}'
+      - 'traefik.http.middlewares.cv-production-www-redirect.redirectregex.permanent=true'
 
   postgres:
     image: postgres:16-alpine@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
-    container_name: cv-phase2-staging-postgres
+    container_name: cv-production-postgres
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -126,7 +125,6 @@ services:
       - internal
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    # Sem `ports`: o banco nunca é exposto publicamente na VPS.
     healthcheck:
       test:
         - CMD-SHELL
@@ -151,7 +149,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: migrate
-    image: cv-phase2-staging-migrate:latest
+    image: cv-production-migrate:latest
     profiles: ["migrate"]
     restart: "no"
     security_opt:

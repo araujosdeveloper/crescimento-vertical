@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { AnalyticsConsent } from "@/components/analytics/analytics-consent";
 import { FloatingWhatsAppButton } from "@/components/floating-whatsapp-button";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -15,6 +16,7 @@ export function SiteShell({ children }: { children: ReactNode }) {
       </main>
       <SiteFooter />
       <FloatingWhatsAppButton />
+      <AnalyticsConsent />
     </>
   );
 }

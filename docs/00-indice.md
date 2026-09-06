@@ -43,7 +43,7 @@
 - [Runbook operacional](41-runbook-operacional.md)
 - [Runbook de incidentes e rollback](42-runbook-incidentes-e-rollback.md)
 - [Runbook de backup e restauração](43-runbook-backup-e-restauracao.md)
-- Fase 12: documento canônico será criado na respectiva fase; permanece pendente.
+- [Fase 12 — Migração, lançamento e estabilização](44-fase-12-lancamento-estabilizacao.md)
 - [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 - [Portal editorial público](19-portal-editorial-publico.md)
 - [Deploy do portal editorial público no staging](20-deploy-phase2b-staging.md)

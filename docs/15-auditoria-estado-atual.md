@@ -46,7 +46,8 @@ reserva zero e travas fechadas. Nenhuma publicação, Payload, n8n ou Fase 9.
 | 8 | Concluída — aceite humano (4/9/2026): black-box 36/36 + bateria real `succeeded` |
 | 9 | Concluída — aceite humano (5/9/2026): E2E completo + workflows CV-01..04 ativos |
 | 10 | Concluída — aceite humano (5/9/2026): 1 artigo publicado por pilar (5 pilares) |
-| 11–12 | Pendentes (Fase 11 em execução) |
+| 11 | Concluída — aceite humano (6/9/2026); off-site postergado p/ Fase 12 (ADR-041) |
+| 12 | Em execução — lançada em produção em 6/9/2026 (portal novo ativo, TLS válido, `www→apex` 301); estabilização de 7 dias |
 
 ### Correção comprovada do gate offline da Fase 8
 

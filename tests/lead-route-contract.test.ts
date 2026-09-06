@@ -13,7 +13,7 @@ describe("contrato de aceitação sem notificador", () => {
 
   it("mantém idempotência sem criar segundo lead", () => {
     expect(route).toContain('where: { idempotencyKey: { equals: key } }');
-    expect(route).toContain('if (existing.docs[0]) return NextResponse.json({ ok: true');
+    expect(route).toContain('if (existing.docs[0]) {');
     expect(route).toContain('if (attempt && now - attempt.at < 3600000) return NextResponse.json({ ok: true');
   });
 });

@@ -1247,3 +1247,87 @@ pautas mais densas (mais fontes/claims) sem expor o projeto a custo aberto.
 - Reversão: restaurar `MAX_BATCH_JOBS`/`BATTERY_BUDGET_USD` via commit e
   recriar o runner com a imagem anterior; os dados históricos de custo e jobs
   permanecem intactos na tabela `jobs`.
+
+## ADR-040 — Fase 11: pin de imagens base, retenção e log estruturado sem nova dependência
+
+- Data: 2026-09-06
+- Status: aprovada
+- Responsável: responsável técnico (delegação expressa do responsável pelo produto)
+- Fase afetada: 11 (segurança, observabilidade, backup e recuperação)
+
+### Contexto
+
+O critério de saída da Fase 11 exige “imagens e dependências fixadas (sem
+`latest`)” e as pendências de observabilidade/backup listavam retenção
+automática, rotina de restauração, logs estruturados e revisão de PII. A
+base já fixa dependências npm por versão exata e as actions do CI por SHA; as
+imagens base (`node:22-alpine`, `postgres:16-alpine`) e a retenção dos backups
+continuavam flutuantes.
+
+### Decisão
+
+1. **Pinar imagens base por digest**: `node:22-alpine@sha256:c610fcdf…` no
+   `Dockerfile` e `postgres:16-alpine@sha256:57c72fd2…` no
+   `docker-compose.phase2.yml`, seguindo o padrão já usado pelo runner (Hermes
+   por digest) e pelo conector (n8n por digest).
+2. **Retenção** (`scripts/phase11-retention.sh`): hourly 7 dias, daily 30 dias,
+   monthly 12 meses, com promoção mensal automática no 1º dia do mês.
+3. **Rotina de restauração** (`scripts/phase11-restore-test.sh`): teste mensal
+   isolado e não destrutivo (PostgreSQL 16 descartável + conferência de
+   contagens), sem tocar produção/staging.
+4. **Log estruturado sem nova dependência** (`src/lib/logger.ts`): emissor JSON
+   de uma linha por evento com `ts`/`level`/`service`/`env`/`release`/
+   `requestId`/`message`, aplicado aos endpoints operacionais. Não foi adicionada
+   biblioteca de logging para não violar a regra de dependência mínima.
+
+### Consequências e reversão
+
+- Positivas: base reproduzível por digest, recuperação auditável e logs
+  pesquisáveis sem custo de dependência.
+- Riscos: digest de imagem base precisa ser re-resolvido em upgrades futuros
+  (custo pequeno e versionado).
+- Reversão: reverter os `FROM`/`image` para tags flutuantes e remover os
+  scripts/log via commit.
+
+### Decisões ainda abertas (fora desta ADR)
+
+Destino off-site de backup, solução de métricas/dashboard e política de
+atualização do n8n/Hermes compartilhados permanecem pendentes de decisão do
+responsável (registradas em `docs/39`).
+
+## ADR-041 — Fase 11: decisões de fechamento (off-site, dashboard e imagens compartilhadas)
+
+- Data: 2026-09-06
+- Status: aprovada
+- Responsável: responsável pelo produto (decisão expressa)
+- Fase afetada: 11 (fechamento) e 12 (pré-lançamento)
+
+### Contexto
+
+Três pendências bloqueavam o critério de saída da Fase 11: cópia off-site,
+solução de métricas/dashboard e política de atualização das imagens
+compartilhadas (`ghcr.io/hostinger/hvps-hermes-agent:latest` e
+`docker.n8n.io/n8nio/n8n:latest`).
+
+### Decisão
+
+1. **Off-site postergado para a Fase 12** (pré-lançamento). Não há credencial
+   de storage externo disponível nesta data; registrar como risco aceito e
+   torná-lo atividade obrigatória da Fase 12 antes do lançamento.
+2. **Dashboard mínimo = digest Telegram** (`scripts/phase11-metrics-report.sh` +
+   `/api/health/metrics`). Nenhuma infraestrutura de métricas dedicada será
+   adicionada agora; métricas de HTTP 5xx/p95 ficam documentadas como melhoria
+   futura.
+3. **Aceitar imagens gerenciadas `:latest`** do Hermes e do n8n (compartilhadas
+   com outros projetos), com risco documentado. Pinar por digest exigiria
+   recriação controlada de serviços fora do escopo; a atualização dessas imagens
+   permanece governada pelo operador do host.
+
+### Consequências e reversão
+
+- Positivas: fase encerrada sem nova credencial/infraestrutura; risco residual
+  explícito e rastreável.
+- Riscos: sem cópia off-site, a recuperação de desastre fica limitada ao
+  armazenamento local até a Fase 12; imagens `:latest` podem mudar em recriação.
+- Reversão: prover credencial off-site e adicionar o destino; pinar digests das
+  imagens compartilhadas quando autorizado.

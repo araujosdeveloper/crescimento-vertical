@@ -27,7 +27,7 @@ chmod 700 "$DEST"
 log() { echo "[phase11-backup] $*"; }
 
 log "dump PostgreSQL ($POSTGRES_CONTAINER)"
-docker exec "$POSTGRES_CONTAINER" sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom' > "$DEST/postgres.dump"
+docker exec "$POSTGRES_CONTAINER" sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --format=custom --no-owner --no-acl' > "$DEST/postgres.dump"
 
 if [ "$MODE" = "daily" ]; then
   log "mídia ($MEDIA_VOLUME)"

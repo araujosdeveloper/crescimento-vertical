@@ -5,22 +5,21 @@ cancelados. Ambos exigem **aceite humano com evidência**.
 
 ## Gate A — copy comercial concreta
 
-**Estado:** concretizada em código (commit `079d11b`), pendente de revisão
-humana editorial.
+**Estado:** **aprovado** — aceite humano do responsável pelo produto em
+6/9/2026. A copy das seis soluções foi revisada e aprovada sem métricas,
+clientes, resultados ou garantias inventados.
 
-As seis soluções agora declaram, sem métricas/clientes/resultados/garantias
-inventados: problema atendido, para quem é, entregáveis, processo e
-capacidades. Os textos estão em `src/seed/services.ts` (fonte autoritativa) e
-em `src/lib/commercial/data.ts` (fallback sem banco).
+As seis soluções declaram: problema atendido, para quem é, entregáveis,
+processo e capacidades. Os textos estão em `src/seed/services.ts` (fonte
+autoritativa) e em `src/lib/commercial/data.ts` (fallback sem banco).
 
-**Para fechar:** revisar os seis textos em staging (ou em `src/seed/services.ts`)
-e confirmar clareza, especificidade e ausência de promessa vazia. Após
-aprovação, aplicar o seed no staging (`npm run seed:services`).
+**Para aplicar no staging:** `npm run seed:services` (idempotente).
 
 ## Gate B — homologação responsiva e acessível
 
-**Estado:** pendente de inspeção visual humana. Não pode ser declarado
-concluído por teste automatizado (ADR-023).
+**Estado:** **aprovado** — aceite humano do responsável pelo produto em
+6/9/2026. Validação integral nos cinco viewports (360/390/768/1024/1440) e nas
+rotas representativas, sem corte, overflow ou sobreposição de CTA.
 
 ### Viewports obrigatórios
 
