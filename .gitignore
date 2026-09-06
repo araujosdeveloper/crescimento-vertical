@@ -58,3 +58,6 @@ __pycache__/
 
 # override de runtime (habilita execução do runner em produção)
 docker-compose.hermes-editorial.prod-override.yml
+
+# estado do ciclo editorial (runtime)
+scripts/editorial/consumed.txt
