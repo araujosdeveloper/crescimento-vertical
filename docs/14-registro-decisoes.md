@@ -1331,3 +1331,38 @@ compartilhadas (`ghcr.io/hostinger/hvps-hermes-agent:latest` e
   armazenamento local até a Fase 12; imagens `:latest` podem mudar em recriação.
 - Reversão: prover credencial off-site e adicionar o destino; pinar digests das
   imagens compartilhadas quando autorizado.
+
+## ADR-042 — Cadência editorial 4/semana e orquestração por cron/scripts
+
+- Data: 2026-09-06
+- Status: aprovada
+- Responsável: responsável pelo produto (decisão expressa)
+- Fase afetada: pós-lançamento (Etapa 1 do `docs/45`)
+
+### Contexto
+
+O calendário da Fase 10 previa cadência alvo de 2 publicações/semana. O
+responsável decidiu elevar para **4 publicações/semana (mínimo)**, consumindo
+as 24 pautas já aprovadas em cadência acelerada (~6 semanas). A aprovação
+humana e as proibições (`retry3`, publicação automática) permanecem.
+
+### Decisão
+
+1. **Cadência**: 4 publicações/semana, executadas por cron às 07:00 BRT
+   (10:00 UTC) de segunda a quinta.
+2. **Orquestração**: cron na VPS + scripts versionados (não n8n ativo), por
+   serem mais simples, transparentes e auditáveis. Os workflows n8n CV-01..04
+   permanecem como referência de contrato, inativos.
+3. **Custo**: ~US$ 0,85/mês estimado (17 jobs/mês), dentro do teto mensal
+   `MONTHLY_BUDGET_USD=10`.
+4. **Pautas**: fila `scripts/editorial/pautas.json` (24 pautas), consumidas na
+   ordem; a fila será expandida quando esgotar.
+
+### Consequências e reversão
+
+- Positivas: produção editorial contínua e previsível, com custo baixo e
+  revisão humana obrigatória.
+- Riscos: 4 revisões/semana exigem disponibilidade do revisor; fila de 24
+  pautas cobre ~6 semanas e precisa ser reposta.
+- Reversão: desativar o cron e religar a dupla trava do runner (nenhum dado é
+  perdido; os rascunhos gerados permanecem no CMS).
