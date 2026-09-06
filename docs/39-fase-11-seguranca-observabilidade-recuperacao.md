@@ -61,13 +61,16 @@ objetivo é tornar a operação segura, observável e recuperável antes da Fase
   mídia, configuração e bundle Git, com `SHA256SUMS`.
 - **Cron** na VPS: lógico a cada 6 h (`hourly`) e completo diário às 3 h
   (`daily`), em `/opt/backups/crescimento-vertical`.
+- **Teste de restauração isolada** (6/9/2026): dump restaurado em PostgreSQL 16
+  descartável; contagens conferidas contra o banco de origem (articles=5,
+  users=2, services=6, sources=21, media=6, authors=1, categories=5). Restore
+  em segundos — RTO ≤ 4 h comprovado.
 
 ### Pendente
 
 - retenção automática (30 dias diário + 12 meses mensal);
 - cópia criptografada off-site;
-- teste mensal de restauração isolada (provar RTO ≤ 4 h);
-- RPO ≤ 6 h (já coberto pelo cron a cada 6 h).
+- teste mensal de restauração (rotina recorrente).
 
 ## Runbooks
 
