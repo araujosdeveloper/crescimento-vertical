@@ -2,10 +2,10 @@
 
 ## Estado vigente
 
-A Fase 12 foi iniciada em 6 de setembro de 2026, após aceite humano da Fase 11.
-Fases 0–11 concluídas e aceitas. O objetivo é migrar a produção legada (landing
-page antiga em `crescimento-vertical`) para o portal novo e estabilizar por sete
-dias sem incidente crítico.
+A Fase 12 foi **lançada** em 6 de setembro de 2026 e permanece **em execução**
+na janela de estabilização de 7 dias (encerra em ~13/9/2026). Todas as
+pré-condições foram atendidas e o PR #20 foi mergeado na `main`; falta apenas o
+aceite humano final após o período de estabilização sem incidente crítico.
 
 ## Pré-condições bloqueantes
 

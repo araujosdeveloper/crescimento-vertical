@@ -4,13 +4,14 @@
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `main` / `6db0d01` (mudanças da Fase 11 ainda não commitadas) |
-| Fase ativa | Fase 12 — **em execução** (migração, lançamento e estabilização); Fase 11 aceita 6/9/2026 |
-| Pré-condições | Gates A/B aprovados; off-site R2 configurado e validado (6/9); commit/merge Fase 11, DNS e analytics — ver `docs/44` |
+| Branch/HEAD | `main` / `5c4a488` (PR #20 mergeado, 4 checks verdes) |
+| Fase ativa | Fase 12 — **em execução**: lançada e em estabilização de 7 dias (encerra ~13/9/2026) |
+| Produção | portal novo ativo em `crescimentovertical.com`, TLS válido, `www→apex` 301, indexável; legado preservado como rollback |
+| Analytics | GA4 (consentimento LGPD) + Search Console ativos |
 | Restrições | Publicação automática e retry 3 continuam proibidos |
 
-Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
-qualquer deploy de produção.
+Próxima ação: encerrar a Fase 12 após 7 dias sem incidente crítico, com aceite
+humano final registrado.
 
 ## Registro da sessão 2026-09-06 — ativação do GA4 (Fase 12)
 

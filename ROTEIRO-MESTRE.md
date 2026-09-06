@@ -37,11 +37,15 @@ registrada.
 
 ## Situação vigente — 6 de setembro de 2026
 
-A Fase 12 foi **iniciada** em 6 de setembro de 2026 (documento canônico em
-`docs/44`). Os dois gates pré-produção (copy comercial e homologação
-responsiva) foram **aprovados em 6/9/2026**. Restam como pré-condições de
-lançamento: commit das mudanças da Fase 11, cópia off-site (ADR-041), migração
-de DNS e decisão de analytics.
+A Fase 12 foi **lançada em produção** em 6 de setembro de 2026: DNS migrado
+(apex e `www` → VPS), TLS Let's Encrypt válido, redirect `www → apex` (301),
+portal novo ativo e indexável, conteúdo real migrado do staging (lead/outbox de
+teste removidos), cópia off-site criptografada (R2) com cron diário, e analytics
+(GA4 com consentimento LGPD + Search Console) ativos. Os dois gates pré-produção
+(copy comercial e homologação responsiva) foram aprovados e o PR #20 foi
+mergeado na `main`. A fase permanece **em execução** durante a estabilização de
+7 dias (encerra em ~13/9/2026) e aguarda o aceite humano final para o
+encerramento.
 
 ## Situação vigente — 6 de setembro de 2026
 
