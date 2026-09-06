@@ -29,11 +29,33 @@ um portal editorial e comercial orientado à geração de receita.
 | 8 | Hermes Agent e política editorial automatizada | Fase 7 | Concluída |
 | 9 | n8n, Telegram, aprovação e publicação | Fase 8 | Concluída |
 | 10 | Conteúdo inicial e validação editorial | Fase 9 | Concluída |
-| 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Em execução |
-| 12 | Migração, lançamento e estabilização | Fase 11 | Pendente |
+| 11 | Segurança, observabilidade, backup e recuperação | Fase 10 | Concluída |
+| 12 | Migração, lançamento e estabilização | Fase 11 | Em execução |
 
 Somente uma fase pode permanecer “em execução”. Exceções precisam de decisão
 registrada.
+
+## Situação vigente — 6 de setembro de 2026
+
+A Fase 12 foi **iniciada** em 6 de setembro de 2026 (documento canônico em
+`docs/44`). O lançamento está bloqueado pelas pré-condições: Gate A (copy
+comercial), Gate B (homologação responsiva nos cinco viewports), commit das
+mudanças da Fase 11, cópia off-site (ADR-041), migração de DNS e decisão de
+analytics.
+
+## Situação vigente — 6 de setembro de 2026
+
+A Fase 11 foi **aceita e encerrada** em 6 de setembro de 2026, após aceite
+humano expresso do responsável pelo produto. As pendências locais foram
+resolvidas: retenção automática de backups (hourly 7d / daily 30d / monthly
+12m), rotina mensal de restauração isolada, log estruturado JSON sem nova
+dependência, métricas do app (contagens + leads pendentes), revisão de
+CORS/CSRF/SSRF e de PII em logs, e pinagem por digest das imagens base
+(`node:22-alpine`, `postgres:16-alpine`). As três decisões de fechamento foram
+registradas no ADR-041: a cópia off-site foi **postergada para a Fase 12**
+(pré-lançamento obrigatório), o dashboard mínimo permanece o digest Telegram e
+as imagens compartilhadas `:latest` do Hermes/n8n foram aceitas com risco
+documentado. A Fase 12 passa a ser a fase seguinte, ainda pendente.
 
 ## Situação vigente — 5 de setembro de 2026
 

@@ -1,20 +1,40 @@
 # Controle de execução
 
-## Estado vigente — 5 de setembro de 2026
+## Estado vigente — 6 de setembro de 2026
 
 | Campo | Estado comprovado |
 | --- | --- |
-| Branch/HEAD | `feat/phase-8-hermes-editorial-policy` / `d747134` |
-| Fase ativa | Fase 10 — **concluída e aceita** (aceite humano 5/9/2026); Fase 11 em execução |
-| PR | #14 aberto e draft (Fases 8–10 empilhadas na mesma branch; merge pendente) |
-| Fase 10 | **SUCESSO** — 5 artigos publicados (1 por pilar), com fonte nível A, capa, revisor, categoria, serviço e SEO; calendário de 90 dias em docs/38 |
-| Identidade visual | nova paleta laranja/grafite/preto (ADR-039) aplicada e capas regeneradas |
-| Runtime | runner healthy; travas fechadas; `retry3=0`; custo do mês US$ 0,27 (teto US$ 10) |
+| Branch/HEAD | `main` / `6db0d01` (mudanças da Fase 11 ainda não commitadas) |
+| Fase ativa | Fase 12 — **em execução** (migração, lançamento e estabilização); Fase 11 aceita 6/9/2026 |
+| Pré-condições | Gate A (copy), Gate B (responsividade), commit Fase 11, off-site (ADR-041), DNS e analytics — ver `docs/44` |
 | Restrições | Publicação automática e retry 3 continuam proibidos |
 
-Próxima ação: iniciar a Fase 11 (segurança, observabilidade, backup e
-recuperação). O Hermes permanece editor-chefe; runner é governança;
-DeepSeek/Tavily são subordinados; n8n é a única ponte autorizada para o Payload.
+Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
+qualquer deploy de produção.
+
+## Registro da sessão 2026-09-06 — início da Fase 12
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — migração, lançamento e estabilização |
+| Objetivo | Migrar a produção legada para o portal novo e estabilizar |
+| Alterações | `docs/44-fase-12-lancamento-estabilizacao.md` (canônico), índice, ROTEIRO-MESTRE |
+| Pré-condições | Gate A/B, commit Fase 11, off-site, DNS e analytics pendentes |
+| Próxima ação | Resolver as pré-condições (decisões/acites humanos) |
+
+## Registro da sessão 2026-09-06 — fechamento e aceite da Fase 11
+
+| Campo | Conteúdo |
+| --- | --- |
+| Branch/commit | `main` / `6db0d01` (trabalho em andamento, sem merge) |
+| Fase | 11 — segurança, observabilidade, backup e recuperação |
+| Objetivo | Resolver as pendências locais e concluir a fase |
+| Alterações | `scripts/phase11-retention.sh`, `scripts/phase11-restore-test.sh`, `src/lib/logger.ts`, `src/app/api/health/metrics/route.ts` (+ `outboxPending`), `src/app/api/leads/route.ts` (logs estruturados), `Dockerfile`/`docker-compose.phase2.yml` (imagens base por digest), `tests/lead-route-contract.test.ts`, ADR-040/041, docs 39/43 |
+| Validações | `bash -n` dos scripts; typecheck; eslint (arquivos alterados); 112 testes; `next build`; `git diff --check` |
+| Decisões | ADR-041: off-site postergado p/ Fase 12; dashboard = digest Telegram; Hermes/n8n `:latest` aceitos com risco documentado |
+| Cron aplicado | retenção (`0 4 * * *`) e teste mensal de restauração (`0 5 1 * *`) adicionados ao crontab da VPS |
+| Aceite | Aceite humano expresso do responsável pelo produto em 6/9/2026 |
+| Próxima ação | Iniciar a Fase 12 (pré-lançamento inclui cópia off-site) |
 
 ### Bateria real final — 4 de setembro de 2026
 
