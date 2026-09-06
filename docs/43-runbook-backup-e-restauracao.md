@@ -12,10 +12,14 @@ Cron sugerido (na VPS):
 ```
 0 */6 * * *  /opt/crescimento-vertical/scripts/phase11-backup.sh /opt/backups/crescimento-vertical hourly >> /var/log/cv-backup.log 2>&1
 0 3 * * *    /opt/crescimento-vertical/scripts/phase11-backup.sh /opt/backups/crescimento-vertical daily  >> /var/log/cv-backup.log 2>&1
-0 4 1 * *    cp -a <backup-diário-mais-recente> /opt/backups/crescimento-vertical/monthly/phase11-monthly-$(date +%Y%m)  # mensal
+0 4 * * *    /opt/crescimento-vertical/scripts/phase11-retention.sh /opt/backups/crescimento-vertical >> /var/log/cv-backup.log 2>&1
+0 5 1 * *    /opt/crescimento-vertical/scripts/phase11-restore-test.sh /opt/backups/crescimento-vertical >> /var/log/cv-restore.log 2>&1
 ```
 
-Retenção: 30 dias (diário) e 12 meses (mensal).
+Retenção: 30 dias (diário) e 12 meses (mensal), aplicada por
+`scripts/phase11-retention.sh`; dumps horários retidos por 7 dias. O teste de
+restauração isolada roda no 1º dia de cada mês via
+`scripts/phase11-restore-test.sh`.
 
 ### Validação do backup
 

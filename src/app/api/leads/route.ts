@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { CONSENT_VERSION, consentTextHash, issueFormToken, requestOriginAllowed, validateLeadInput, verifyFormToken } from "@/lib/lead-intake";
+import { log } from "@/lib/logger";
 
 const attempts = new Map<string, { count: number; at: number }>();
 const ipAttempts = new Map<string, { count: number; windowStart: number }>();
@@ -34,7 +35,11 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  if (isRateLimited(clientIp(request))) return NextResponse.json({ ok: false, error: "Muitas tentativas. Aguarde um instante e tente novamente." }, { status: 429 });
+  const requestId = randomUUID();
+  if (isRateLimited(clientIp(request))) {
+    log("warn", "lead_rate_limited", { route: "leads" }, requestId);
+    return NextResponse.json({ ok: false, error: "Muitas tentativas. Aguarde um instante e tente novamente." }, { status: 429 });
+  }
   const length = Number(request.headers.get("content-length") || 0); if (length > 20000 || !request.headers.get("content-type")?.includes("application/json") || !requestOriginAllowed(request)) return genericError();
   let input: Record<string, unknown>; try { input = await request.json(); } catch { return genericError(); }
   if (!verifyFormToken(input.formToken) || !validateLeadInput(input).value) return genericError();
@@ -44,18 +49,24 @@ export async function POST(request: Request) {
   try {
     const payload = await getPayload({ config });
     const existing = await payload.find({ collection: "leads", where: { idempotencyKey: { equals: key } }, limit: 1, overrideAccess: true });
-    if (existing.docs[0]) return NextResponse.json({ ok: true, message: "Solicitação recebida." });
+    if (existing.docs[0]) {
+      log("info", "lead_duplicate_idempotent", { route: "leads" }, requestId);
+      return NextResponse.json({ ok: true, message: "Solicitação recebida." });
+    }
     const transactionID = await payload.db.beginTransaction();
     if (!transactionID) throw new Error("transaction-unavailable");
     const transactionReq = { payload, transactionID } as never;
+    let leadId: number | string | undefined;
     try {
       const lead = await payload.create({ collection: "leads", data: { ...checked.value, consentedAt: new Date().toISOString(), retentionUntil: new Date(Date.now() + 180 * 86400000).toISOString(), notificationStatus: "pending", notificationAttempts: 0 } as never, overrideAccess: true, req: transactionReq, disableTransaction: true });
+      leadId = lead.id;
       await payload.create({ collection: "lead-outbox", data: { lead: lead.id, type: "commercial_notification", state: "pending", attempts: 0, notificationKey: randomUUID() } as never, overrideAccess: true, req: transactionReq, disableTransaction: true });
       await payload.db.commitTransaction(transactionID);
     } catch (error) {
       await payload.db.rollbackTransaction(transactionID);
       throw error;
     }
+    log("info", "lead_created", { route: "leads", leadId }, requestId);
     return NextResponse.json({ ok: true, message: "Solicitação recebida." });
-  } catch { attempts.delete(key); return NextResponse.json({ ok: false, error: "Não foi possível enviar agora. Tente novamente em instantes." }, { status: 503 }); }
+  } catch { attempts.delete(key); log("error", "lead_create_failed", { route: "leads" }, requestId); return NextResponse.json({ ok: false, error: "Não foi possível enviar agora. Tente novamente em instantes." }, { status: 503 }); }
 }

@@ -1,4 +1,4 @@
-FROM node:22-alpine AS deps
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS deps
 WORKDIR /app
 
 COPY package*.json ./
@@ -11,7 +11,7 @@ RUN npm install --global npm@11 && npm ci
 FROM deps AS prod-deps
 RUN npm prune --omit=dev
 
-FROM node:22-alpine AS builder
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -35,7 +35,7 @@ ENV SITE_NOINDEX=$SITE_NOINDEX
 RUN npm run build
 
 # One-shot migration stage: full app context (payload CLI + config + migrations).
-FROM node:22-alpine AS migrate
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS migrate
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -62,7 +62,7 @@ USER nextjs
 
 CMD ["node", "node_modules/payload/bin.js", "migrate"]
 
-FROM node:22-alpine AS runner
+FROM node:22-alpine@sha256:c610fcdfb1d5b4740dd70c284ed3cb16bb857e0f7166196e36a5501df7a3aa32 AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
