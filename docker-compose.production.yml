@@ -1,0 +1,178 @@
+# =============================================================================
+# Fase 12 — Produção (blue-green do portal novo).
+#
+# Projeto exclusivo: crescimento-vertical-production
+#   - cv-production-app
+#   - cv-production-postgres
+#   - cv-production-migrate (one-shot, perfil "migrate")
+#
+# Roteia apex/www com prioridade 200, acima do container legado
+# `crescimento-vertical` (prioridade 0), que permanece como rollback até o
+# aceite. O banco NÃO publica porta e NÃO participa de n8n_default.
+# =============================================================================
+name: crescimento-vertical-production
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
+        - NEXT_PUBLIC_CONTACT_EMAIL=${NEXT_PUBLIC_CONTACT_EMAIL}
+        - NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
+        - NEXT_PUBLIC_WHATSAPP_DISPLAY=${NEXT_PUBLIC_WHATSAPP_DISPLAY:-}
+        - NEXT_PUBLIC_WHATSAPP_MESSAGE=${NEXT_PUBLIC_WHATSAPP_MESSAGE:-}
+        - SITE_NOINDEX=false
+    image: cv-production-app:latest
+    container_name: cv-production-app
+    user: "1001:0"
+    restart: unless-stopped
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      PAYLOAD_MEDIA_DIR: /app/media
+      SITE_NOINDEX: "false"
+      LEAD_NOTIFICATION_ENABLED: ${LEAD_NOTIFICATION_ENABLED:-false}
+      LEAD_SMTP_HOST: ${LEAD_SMTP_HOST:-smtp.hostinger.com}
+      LEAD_SMTP_PORT: ${LEAD_SMTP_PORT:-465}
+      LEAD_SMTP_SECURE: ${LEAD_SMTP_SECURE:-true}
+      LEAD_SMTP_USER: ${LEAD_SMTP_USER:-contato@crescimentovertical.com}
+      LEAD_SMTP_FROM: ${LEAD_SMTP_FROM:-contato@crescimentovertical.com}
+      LEAD_NOTIFICATION_TO: ${LEAD_NOTIFICATION_TO:-contato@crescimentovertical.com}
+      LEAD_SMTP_PASSWORD_FILE: /run/secrets/lead_smtp_password
+      LEAD_ADMIN_BASE_URL: ${LEAD_ADMIN_BASE_URL:-https://crescimentovertical.com}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+      - n8n_default
+    volumes:
+      - media:/app/media
+      - type: bind
+        source: /opt/crescimento-vertical/.secrets/lead-smtp-password
+        target: /run/secrets/lead_smtp_password
+        read_only: true
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health/live').then((response) => { if (!response.ok) process.exit(1) }).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+    labels:
+      - 'traefik.enable=true'
+      - 'traefik.docker.network=n8n_default'
+      - 'traefik.http.routers.cv-production.rule=Host(`crescimentovertical.com`)'
+      - 'traefik.http.routers.cv-production.entrypoints=websecure'
+      - 'traefik.http.routers.cv-production.tls=true'
+      - 'traefik.http.routers.cv-production.tls.certresolver=mytlschallenge'
+      - 'traefik.http.routers.cv-production.priority=200'
+      - 'traefik.http.services.cv-production.loadbalancer.server.port=3000'
+      - 'traefik.http.routers.cv-production-www.rule=Host(`www.crescimentovertical.com`)'
+      - 'traefik.http.routers.cv-production-www.entrypoints=websecure'
+      - 'traefik.http.routers.cv-production-www.tls=true'
+      - 'traefik.http.routers.cv-production-www.tls.certresolver=mytlschallenge'
+      - 'traefik.http.routers.cv-production-www.priority=200'
+      - 'traefik.http.routers.cv-production-www.middlewares=cv-production-www-redirect'
+      - 'traefik.http.middlewares.cv-production-www-redirect.redirectregex.regex=^https?://www\.crescimentovertical\.com/(.*)'
+      - 'traefik.http.middlewares.cv-production-www-redirect.redirectregex.replacement=https://crescimentovertical.com/$${1}'
+      - 'traefik.http.middlewares.cv-production-www-redirect.redirectregex.permanent=true'
+
+  postgres:
+    image: postgres:16-alpine@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
+    container_name: cv-production-postgres
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - FOWNER
+      - SETGID
+      - SETUID
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - internal
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 512M
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrate
+    image: cv-production-migrate:latest
+    profiles: ["migrate"]
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+networks:
+  internal:
+  n8n_default:
+    external: true
+
+volumes:
+  media:
+  postgres-data:

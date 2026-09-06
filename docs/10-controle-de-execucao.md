@@ -12,6 +12,17 @@
 Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
 qualquer deploy de produção.
 
+## Registro da sessão 2026-09-06 — lançamento em produção (Fase 12)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — migração, lançamento e estabilização |
+| Objetivo | Lançar o portal novo em produção |
+| Execução | DNS apex/www → VPS; TLS Let's Encrypt emitido; redirect `www→apex` (301); portal novo ativo e indexável |
+| Validações | TLS `ssl_verify_result=0`; home/conteudos/artigo/sitemap/robots/diagnostico/admin/healthchecks 200; `/admin` noindex; 404 tratado; legado preservado como rollback |
+| Estado | Produção **no ar**; iniciada janela de 7 dias de estabilização |
+| Próxima ação | Ativar analytics (GA4/Search Console) e encerrar estabilização após 7 dias sem incidente crítico |
+
 ## Registro da sessão 2026-09-06 — deploy de produção preparado (Fase 12)
 
 | Campo | Conteúdo |

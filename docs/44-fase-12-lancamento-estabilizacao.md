@@ -17,10 +17,19 @@ Estes itens bloqueiam o deploy de produção e exigem decisão/aceite humano:
 - [x] **Cópia off-site de backup** (ADR-041): Cloudflare R2 configurado, envio de
   teste e round-trip (download → GPG → `SHA256SUMS`) validados em 6/9/2026;
   cron diário às 3h30 (`scripts/phase11-offsite-backup.sh`, ver `docs/43`).
-- [ ] **DNS**: apontar `crescimentovertical.com` e `www` para a VPS e confirmar
-  redirect `www` → apex (decisão de URL canônica).
+- [x] **DNS**: `crescimentovertical.com` e `www` apontam para a VPS; TLS emitido
+  (Let's Encrypt via `mytlschallenge`) e redirect `www → apex` (301) validados.
 - [ ] **Analytics**: decisão humana sobre GA4 e Search Console (sem PII,
   consentimento quando aplicável).
+
+## Lançamento executado (6/9/2026)
+
+- DNS propagado (apex e www → VPS); TLS válido em ambos (`ssl_verify_result=0`).
+- Portal novo ativo em `https://crescimentovertical.com`; `www` redireciona (301).
+- Home, `/conteudos`, artigo, `/sitemap.xml`, `/robots.txt`, `/diagnostico`,
+  `/admin` e healthchecks respondendo; páginas públicas indexáveis, `/admin`
+  noindex; 404 tratado.
+- Produção legada `crescimento-vertical` preservada como rollback.
 
 ## Pré-lançamento
 
@@ -46,7 +55,7 @@ Estes itens bloqueiam o deploy de produção e exigem decisão/aceite humano:
   `/admin`; páginas públicas **indexáveis** (`noindex` ausente), `/admin`
   `noindex`.
 
-Aguardando: migração de DNS e analytics.
+Aguardando: analytics.
 
 ## Verificação de lançamento
 
