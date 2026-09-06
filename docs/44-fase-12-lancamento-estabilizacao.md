@@ -30,6 +30,24 @@ Estes itens bloqueiam o deploy de produção e exigem decisão/aceite humano:
 4. Aplicar migrations compatíveis (expandir, sem contrair).
 5. Deploy controlado **sem destruir a produção legada** antes do aceite.
 
+## Deploy de produção (preparado em 6/9/2026)
+
+- Compose dedicado `docker-compose.production.yml` (projeto
+  `crescimento-vertical-production`) com app + PostgreSQL 16 + mídia, blue-green:
+  router apex/www com `priority=200` acima do legado (rollback), redirect
+  `www → apex` (301) e TLS `mytlschallenge`.
+- Imagem `cv-production-app:latest` construída a partir do HEAD do PR #20;
+  segredos de produção em `.env.production` (600) e senha SMTP via
+  `.secrets/lead-smtp-password` (reutilizada).
+- Migrações aplicadas (7) e conteúdo migrado do staging: 5 artigos, 1 autor,
+  5 categorias, 21 fontes, 6 mídias, 6 serviços; lead/outbox de teste **removidos**.
+- Mídia copiada do volume de staging; app `healthy`; smoke interno 200 em
+  `/`, `/conteudos`, artigo, `/sitemap.xml`, `/robots.txt`, `/diagnostico`,
+  `/admin`; páginas públicas **indexáveis** (`noindex` ausente), `/admin`
+  `noindex`.
+
+Aguardando: migração de DNS e analytics.
+
 ## Verificação de lançamento
 
 - domínio canônico e redirect de `www`;

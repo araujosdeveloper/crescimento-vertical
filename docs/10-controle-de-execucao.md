@@ -12,6 +12,17 @@
 Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
 qualquer deploy de produção.
 
+## Registro da sessão 2026-09-06 — deploy de produção preparado (Fase 12)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — migração, lançamento e estabilização |
+| Objetivo | Preparar e implantar o portal novo em produção (blue-green) |
+| Alterações | `docker-compose.production.yml`, `.env.production` (600, fora do Git), imagem `cv-production-app:latest`, PostgreSQL `cv-production-postgres` + 7 migrações, conteúdo migrado do staging (lead/outbox de teste removidos), mídia copiada |
+| Validações | compose config; build; migrações; smoke interno 200 em `/`, `/conteudos`, artigo, sitemap, robots, `/diagnostico`, `/admin`; páginas indexáveis, `/admin` noindex |
+| Estado | app `healthy`; legado `crescimento-vertical` preservado como rollback; DNS ainda não migrado |
+| Próxima ação | Migração de DNS (apex/www) e analytics; depois verificação externa e 7 dias de estabilização |
+
 ## Registro da sessão 2026-09-06 — início da Fase 12
 
 | Campo | Conteúdo |
