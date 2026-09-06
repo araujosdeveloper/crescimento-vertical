@@ -13,6 +13,17 @@
 Próxima ação: encerrar a Fase 12 após 7 dias sem incidente crítico, com aceite
 humano final registrado.
 
+## Registro da sessão 2026-09-06 — Etapa 1 (editorial contínuo) construída; bloqueada por crédito DeepSeek
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | pós-lançamento (Etapa 1 do `docs/45`) |
+| Objetivo | Cadência editorial contínua de 4 publicações/semana (ADR-042) |
+| Alterações | `scripts/editorial/` (pautas.json, runner-request.py HMAC, create-draft.ts, cycle.sh); ADR-042; runner habilitado via override de runtime (dupla trava) com backup do state |
+| Validações | HMAC + criação de job + extração de dossiê OK; DeepSeek/Tavily alcançáveis |
+| Bloqueio | **DeepSeek sem crédito (HTTP 402 Insufficient Balance)** — dossiês falham com `invalid_dossier_json`/`timeout`. Requer recarga no painel DeepSeek |
+| Estado | pipeline construído e mergeado; cron **não** agendado até resolver o crédito |
+
 ## Registro da sessão 2026-09-06 — ativação do GA4 (Fase 12)
 
 | Campo | Conteúdo |

@@ -55,3 +55,6 @@ next-env.d.ts
 # python
 __pycache__/
 *.pyc
+
+# override de runtime (habilita execução do runner em produção)
+docker-compose.hermes-editorial.prod-override.yml
