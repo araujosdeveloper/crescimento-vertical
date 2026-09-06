@@ -161,7 +161,9 @@ async function main() {
   console.log("COMPLETE_OK", updated.id);
 }
 
-main().catch((e) => {
-  console.error("ERROR", e?.message ?? e);
-  process.exit(1);
-});
+main()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error("ERROR", e?.message ?? e);
+    process.exit(1);
+  });

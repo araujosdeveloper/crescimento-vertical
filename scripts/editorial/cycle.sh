@@ -35,9 +35,9 @@ PY
 }
 
 INDEX="$(next_index)"
-if [ "$1" = "--index" ]; then
+if [ "${1:-}" = "--index" ]; then
   INDEX="${2:?índice ausente}"
-elif [ -n "$1" ]; then
+elif [ -n "${1:-}" ]; then
   INDEX="$1"
 fi
 PAUTA="$(pauta_at "$INDEX")"
@@ -93,6 +93,7 @@ if python3 -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if 'e
   log "dossiê falhou: $(cat "$DOSSIER_FILE")"; exit 1
 fi
 log "dossiê ok."
+chmod 644 "$DOSSIER_FILE"
 
 # Título final (do dossiê, com fallback no tópico).
 NEW_TITLE=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print((d.get('title') or '').strip() or sys.argv[2])" "$DOSSIER_FILE" "$TOPIC")
@@ -102,7 +103,12 @@ SEO_DESC=$(python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print((d
 run_tsx() {
   docker compose --env-file "$REPO/.env.production" -f "$REPO/docker-compose.production.yml" \
     --profile migrate run --rm -T \
-    -e PAYLOAD_MEDIA_DIR=/app/media \
+    -e "PAYLOAD_MEDIA_DIR=/app/media" \
+    -e "TITLE=${TITLE:-}" -e "DOSSIER_PATH=${DOSSIER_PATH:-}" -e "ARTICLE_TITLE=${ARTICLE_TITLE:-}" \
+    -e "NEW_TITLE=${NEW_TITLE:-}" -e "CATEGORY_SLUG=${CATEGORY_SLUG:-}" \
+    -e "CATEGORY_NAME=${CATEGORY_NAME:-}" -e "SERVICE_SLUG=${SERVICE_SLUG:-}" \
+    -e "SEO_TITLE=${SEO_TITLE:-}" -e "SEO_DESCRIPTION=${SEO_DESCRIPTION:-}" \
+    -e "COVER_TITLE=${COVER_TITLE:-}" -e "ARTICLE_ID=${ARTICLE_ID:-}" \
     -v "crescimento-vertical-production_media:/app/media" \
     -v "$REPO/scripts:/app/scripts:ro" \
     -v "$DOSSIER_FILE:/tmp/dossier.json:ro" \
@@ -110,20 +116,21 @@ run_tsx() {
 }
 
 log "criando rascunho..."
-DRAFT_OUT="$(TITLE="$TOPIC" run_tsx /app/scripts/editorial/create-draft.ts 2>&1)"
+TITLE="$TOPIC"
+DRAFT_OUT="$(run_tsx /app/scripts/editorial/create-draft.ts 2>&1)"
 echo "$DRAFT_OUT" | tail -1
 ARTICLE_ID=$(echo "$DRAFT_OUT" | grep -oE 'DRAFT_(CREATED|EXISTS) [0-9]+' | awk '{print $2}' | tail -1)
-[ -z "$ARTICLE_ID" ] && { log "não obteve id do rascunho: $DRAFT_OUT"; exit 1; }
+[ -z "$ARTICLE_ID" ] && { log "não obteve id do rascunho: $DRAFT_OUT"; tail -5 "$ERRLOG"; exit 1; }
 
 log "completando artigo (id $ARTICLE_ID)..."
 DOSSIER_PATH=/tmp/dossier.json ARTICLE_TITLE="$TOPIC" NEW_TITLE="$NEW_TITLE" \
   CATEGORY_SLUG="$CAT_SLUG" CATEGORY_NAME="$CAT_NAME" SERVICE_SLUG="$SERVICE" \
-  SEO_TITLE="$NEW_TITLE" SEO_DESCRIPTION="$SEO_DESC" \
-  run_tsx /app/scripts/produce-article.ts 2>&1 | tail -2
+  SEO_TITLE="$NEW_TITLE" SEO_DESCRIPTION="$SEO_DESC"
+run_tsx /app/scripts/produce-article.ts 2>&1 | tail -2
 
 log "gerando capa..."
-COVER_TITLE="$NEW_TITLE" ARTICLE_ID="$ARTICLE_ID" \
-  run_tsx /app/scripts/generate-article-cover.ts 2>&1 | tail -1
+COVER_TITLE="$NEW_TITLE" ARTICLE_ID="$ARTICLE_ID"
+run_tsx /app/scripts/generate-article-cover.ts 2>&1 | tail -1
 
 # ----------------------------------------------------------------- 5. Notificar
 TOKEN_FILE="$REPO/.secrets/telegram-bot-token"
