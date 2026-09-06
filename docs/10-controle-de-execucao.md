@@ -12,6 +12,17 @@
 Próxima ação: fechar as pré-condições bloqueantes da Fase 12 (docs/44) antes de
 qualquer deploy de produção.
 
+## Registro da sessão 2026-09-06 — ativação do GA4 (Fase 12)
+
+| Campo | Conteúdo |
+| --- | --- |
+| Fase | 12 — analytics de lançamento |
+| Objetivo | Ativar GA4 com consentimento LGPD |
+| Alterações | `src/lib/analytics.ts`, `src/components/analytics/analytics-consent.tsx` (banner + `gtag` pós-consent, `useSyncExternalStore`), eventos em WhatsApp/diagnóstico, `NEXT_PUBLIC_GA_MEASUREMENT_ID` (Dockerfile/compose/env), cookies/privacidade atualizados |
+| Validações | lint/typecheck/112 testes/build; GA ID inlined no bundle do container; banner renderizado; sem segredos no container (`.dockerignore` exclui `.env*`) |
+| Estado | GA4 ativo em produção; imagem anterior preservada como `cv-production-app:pre-ga4` |
+| Próxima ação | Ativar Search Console quando houver propriedade; concluir 7 dias de estabilização |
+
 ## Registro da sessão 2026-09-06 — lançamento em produção (Fase 12)
 
 | Campo | Conteúdo |
