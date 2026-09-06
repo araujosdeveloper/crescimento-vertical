@@ -16,7 +16,8 @@ Estes itens bloqueiam o deploy de produção e exigem decisão/aceite humano:
 - [ ] **Gate B — homologação responsiva**: aceite visual humano nos cinco
   viewports (360/390/768/1024/1440) e rotas representativas, conforme `docs/40`.
 - [ ] **Mudanças da Fase 11 commitadas e com CI verde** (working tree limpa).
-- [ ] **Cópia off-site de backup** (ADR-041): destino + credencial.
+- [ ] **Cópia off-site de backup** (ADR-041): destino + credencial
+  (`scripts/phase11-offsite-backup.sh`, ver `docs/43`).
 - [ ] **DNS**: apontar `crescimentovertical.com` e `www` para a VPS e confirmar
   redirect `www` → apex (decisão de URL canônica).
 - [ ] **Analytics**: decisão humana sobre GA4 e Search Console (sem PII,

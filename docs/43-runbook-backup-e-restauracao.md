@@ -40,3 +40,14 @@ restauração isolada roda no 1º dia de cada mês via
 
 - **RPO ≤ 6 h** (dump lógico a cada 6 h).
 - **RTO ≤ 4 h** (restauração de dump + mídia em PostgreSQL descartável).
+
+## Cópia off-site criptografada (Fase 12 — ADR-041)
+
+- **Envio** (diário, após o backup das 3h):
+  `scripts/phase11-offsite-backup.sh /opt/backups/crescimento-vertical`
+  usando GPG AES-256 + boto3 para storage S3-compatível. Requer as variáveis
+  `OFFSITE_*` (segredos por arquivo em `.secrets/`, nunca versionados).
+- **Restauração off-site**: baixar o objeto, `gpg --decrypt --passphrase-file`,
+  descompactar e seguir o procedimento de restauração isolada acima.
+- Cron sugerido: `0 4 * * * scripts/phase11-offsite-backup.sh ...` (após o
+  backup diário), quando as credenciais existirem.
