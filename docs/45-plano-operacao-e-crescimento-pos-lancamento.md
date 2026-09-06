@@ -30,12 +30,12 @@ Sem conteúdo novo, não há tráfego orgânico nem motivo para voltar — o mod
 negócio estagna.
 
 **Como.**
-1. Definir cadência (ex.: 1 pauta/semana) e teto de custo mensal
-   (`MONTHLY_BUDGET_USD`, hoje US$ 10).
-2. Habilitar a execução do runner pela dupla trava (remover o bloqueio de forma
-   controlada e auditável, com backup prévio do state).
-3. Agendar o ciclo editorial via n8n (workflows CV-01..04 já validados) com
-   `retry3` proibido e publicação somente após aprovação humana no Telegram.
+1. Cadência decidida (ADR-042): **4 publicações/semana**, cron seg–qui 07:00 BRT.
+2. Habilitar a execução do runner pela dupla trava (de forma controlada e
+   auditável, com backup prévio do state).
+3. Orquestrar via cron + scripts versionados (fila `scripts/editorial/pautas.json`,
+   cliente HMAC do runner e scripts de completar/capa/notificar), mantendo o
+   `retry3` proibido e a publicação somente após aprovação humana no Telegram.
 4. Manter a revisão humana obrigatória e registrar identidade do aprovador.
 
 **Critério de saída.** Pelo menos 1 pauta nova por semana percorre

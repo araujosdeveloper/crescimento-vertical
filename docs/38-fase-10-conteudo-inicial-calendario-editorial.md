@@ -43,6 +43,11 @@ Cadência alvo: 2 publicações por semana (24 pautas). O Hermes prepara o
 dossiê/rascunho; um revisor humano aprova e publica no Payload Admin.
 `retry3` e publicação automática permanecem proibidos.
 
+> **Atualização (ADR-042, 6/9/2026)**: a cadência foi elevada para **4
+> publicações/semana (mínimo)**, consumindo estas mesmas 24 pautas em cadência
+> acelerada via cron (seg–qui, 07:00 BRT), com a fila em
+> `scripts/editorial/pautas.json`.
+
 | Sem | Pauta (exemplo) | Pilar | Tipo | Funil | Solução |
 | --- | --- | --- | --- | --- | --- |
 | 1 | O que são agentes de IA e onde aplicá-los na sua empresa | ai-business | guide | topo | Agentes de IA |
