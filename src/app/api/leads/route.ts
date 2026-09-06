@@ -5,7 +5,27 @@ import config from "@payload-config";
 import { CONSENT_VERSION, consentTextHash, issueFormToken, requestOriginAllowed, validateLeadInput, verifyFormToken } from "@/lib/lead-intake";
 
 const attempts = new Map<string, { count: number; at: number }>();
+const ipAttempts = new Map<string, { count: number; windowStart: number }>();
 const genericError = () => NextResponse.json({ ok: false, error: "Não foi possível enviar agora. Revise os campos ou tente novamente." }, { status: 400 });
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 10;
+
+function clientIp(request: Request): string {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
+  return request.headers.get("x-real-ip") || "unknown";
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipAttempts.get(ip);
+  if (!entry || now - entry.windowStart > RATE_LIMIT_WINDOW_MS) {
+    ipAttempts.set(ip, { count: 1, windowStart: now });
+    return false;
+  }
+  entry.count += 1;
+  return entry.count > RATE_LIMIT_MAX;
+}
 
 export async function GET() {
   const token = issueFormToken();
@@ -14,6 +34,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (isRateLimited(clientIp(request))) return NextResponse.json({ ok: false, error: "Muitas tentativas. Aguarde um instante e tente novamente." }, { status: 429 });
   const length = Number(request.headers.get("content-length") || 0); if (length > 20000 || !request.headers.get("content-type")?.includes("application/json") || !requestOriginAllowed(request)) return genericError();
   let input: Record<string, unknown>; try { input = await request.json(); } catch { return genericError(); }
   if (!verifyFormToken(input.formToken) || !validateLeadInput(input).value) return genericError();

@@ -39,8 +39,11 @@
 - [Fase 8 — Hermes e política editorial](35-fase-8-hermes-politica-editorial.md)
 - [Fase 9 — n8n, Telegram, aprovação e publicação](37-fase-9-n8n-telegram-aprovacao-publicacao.md)
 - [Fase 10 — Conteúdo inicial e calendário editorial](38-fase-10-conteudo-inicial-calendario-editorial.md)
-- Fases 11–12: documentos canônicos serão criados somente nas respectivas
-  fases; permanecem pendentes.
+- [Fase 11 — Segurança, observabilidade, backup e recuperação](39-fase-11-seguranca-observabilidade-recuperacao.md)
+- [Runbook operacional](41-runbook-operacional.md)
+- [Runbook de incidentes e rollback](42-runbook-incidentes-e-rollback.md)
+- [Runbook de backup e restauração](43-runbook-backup-e-restauracao.md)
+- Fase 12: documento canônico será criado na respectiva fase; permanece pendente.
 - [Deploy blue-green do staging](18-deploy-phase2-staging.md)
 - [Portal editorial público](19-portal-editorial-publico.md)
 - [Deploy do portal editorial público no staging](20-deploy-phase2b-staging.md)
