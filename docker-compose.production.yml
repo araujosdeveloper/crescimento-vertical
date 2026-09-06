@@ -23,6 +23,7 @@ services:
         - NEXT_PUBLIC_WHATSAPP_NUMBER=${NEXT_PUBLIC_WHATSAPP_NUMBER:-}
         - NEXT_PUBLIC_WHATSAPP_DISPLAY=${NEXT_PUBLIC_WHATSAPP_DISPLAY:-}
         - NEXT_PUBLIC_WHATSAPP_MESSAGE=${NEXT_PUBLIC_WHATSAPP_MESSAGE:-}
+        - NEXT_PUBLIC_GA_MEASUREMENT_ID=${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}
         - SITE_NOINDEX=false
     image: cv-production-app:latest
     container_name: cv-production-app
