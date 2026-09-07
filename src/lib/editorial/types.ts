@@ -57,6 +57,7 @@ export interface PublicSeo {
 
 export interface ArticleDetail extends ArticleListItem {
   content: unknown;
+  textAlignment: "justify" | "left" | "center" | "right";
   updatedAt: string | null;
   seo: PublicSeo;
   businessImpact: string | null;

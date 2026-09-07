@@ -337,6 +337,10 @@ export interface Article {
     | null;
   tagRelations?: (number | Tag)[] | null;
   contentType: 'news' | 'analysis' | 'guide' | 'tool' | 'comparison';
+  /**
+   * Alinhamento do texto do artigo.
+   */
+  textAlignment?: ('justify' | 'left' | 'center' | 'right') | null;
   publicReviewer?: (number | null) | Author;
   businessImpact?: string | null;
   readingTime?: number | null;
@@ -834,6 +838,7 @@ export interface ArticlesSelect<T extends boolean = true> {
       };
   tagRelations?: T;
   contentType?: T;
+  textAlignment?: T;
   publicReviewer?: T;
   businessImpact?: T;
   readingTime?: T;
