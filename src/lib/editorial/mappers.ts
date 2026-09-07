@@ -13,6 +13,8 @@ import { CONTENT_TYPE_LABELS, CONTENT_TYPES, type ContentType } from "../editori
 
 type UnknownRecord = Record<string, unknown>;
 
+const ALIGNMENTS = new Set(["justify", "left", "center", "right"]);
+
 function asRecord(value: unknown): UnknownRecord | null {
   return value && typeof value === "object" ? (value as UnknownRecord) : null;
 }
@@ -147,9 +149,11 @@ export function toArticleDetail(value: unknown): ArticleDetail {
   const item = toArticleListItem(value);
   const doc = asRecord(value) ?? {};
   const seo = asRecord(doc.seo);
+  const alignment = asString(doc.textAlignment);
   return {
     ...item,
     content: doc.content ?? null,
+    textAlignment: alignment && ALIGNMENTS.has(alignment) ? (alignment as ArticleDetail["textAlignment"]) : "justify",
     updatedAt: asString(doc.updatedAt),
     seo: {
       metaTitle: asString(seo?.seoTitle),

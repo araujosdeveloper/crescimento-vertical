@@ -1379,6 +1379,10 @@ padding-inline: 17px !important;
 
 /* Corpo do artigo (prosa Lexical) */
 .editorial-prose { color: #c3cfdd; font-size: 17px; line-height: 1.85; }
+.editorial-prose-align-justify { text-align: justify; }
+.editorial-prose-align-left { text-align: left; }
+.editorial-prose-align-center { text-align: center; }
+.editorial-prose-align-right { text-align: right; }
 .editorial-prose p { margin: 0 0 1.25em; }
 .editorial-prose h2 { margin: 1.6em 0 .6em; color: #fff; font-size: 28px; line-height: 1.2; letter-spacing: -.02em; }
 .editorial-prose h3 { margin: 1.5em 0 .5em; color: #fff; font-size: 22px; line-height: 1.25; }

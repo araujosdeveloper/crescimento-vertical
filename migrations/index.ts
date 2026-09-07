@@ -5,6 +5,7 @@ import * as migration_20260828_182146_add_phase5_editorial from './20260828_1821
 import * as migration_20260829_120000_add_phase7_leads from './20260829_120000_add_phase7_leads';
 import * as migration_20260830_120000_add_lead_smtp_delivery from './20260830_120000_add_lead_smtp_delivery';
 import * as migration_20260905_032143_add_user_api_key from './20260905_032143_add_user_api_key';
+import * as migration_20260907_023201_add_article_text_alignment from './20260907_023201_add_article_text_alignment';
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20260905_032143_add_user_api_key.up,
     down: migration_20260905_032143_add_user_api_key.down,
     name: '20260905_032143_add_user_api_key'
+  },
+  {
+    up: migration_20260907_023201_add_article_text_alignment.up,
+    down: migration_20260907_023201_add_article_text_alignment.down,
+    name: '20260907_023201_add_article_text_alignment'
   },
 ];

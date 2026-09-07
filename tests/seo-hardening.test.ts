@@ -6,7 +6,7 @@ import robots from "../src/app/robots";
 import sitemap from "../src/app/sitemap";
 import { existsSync, readFileSync } from "node:fs";
 
-const article = (contentType: ArticleDetail["contentType"]): ArticleDetail => ({ title: "Seguro </script><script>alert(1)</script>", slug: "seguro", summary: "Resumo", publishedAt: "2026-08-01T00:00:00Z", updatedAt: "2026-08-02T00:00:00Z", featuredImage: null, author: { name: "Autora", slug: "autora" }, category: null, contentType, contentTypeLabel: "Notícia", publicReviewer: null, readingTime: 1, tags: [], content: {}, seo: { metaTitle: null, metaDescription: null, canonicalUrl: null }, businessImpact: null, publicCitations: [], correctionHistory: [], relatedServices: [], relatedArticles: [], aiDisclosure: null });
+const article = (contentType: ArticleDetail["contentType"]): ArticleDetail => ({ title: "Seguro </script><script>alert(1)</script>", slug: "seguro", summary: "Resumo", publishedAt: "2026-08-01T00:00:00Z", updatedAt: "2026-08-02T00:00:00Z", featuredImage: null, author: { name: "Autora", slug: "autora" }, category: null, contentType, contentTypeLabel: "Notícia", publicReviewer: null, readingTime: 1, tags: [], content: {}, textAlignment: "justify", seo: { metaTitle: null, metaDescription: null, canonicalUrl: null }, businessImpact: null, publicCitations: [], correctionHistory: [], relatedServices: [], relatedArticles: [], aiDisclosure: null });
 
 describe("contratos SEO da Fase 6", () => {
   it("seleciona NewsArticle apenas para notícias", () => {

@@ -86,6 +86,18 @@ export const Articles: CollectionConfig = {
     },
     { name: "tagRelations", type: "relationship", relationTo: "tags", hasMany: true },
     { name: "contentType", type: "select", required: true, defaultValue: "news", options: CONTENT_TYPES.map((value) => ({ label: value, value })) },
+    {
+      name: "textAlignment",
+      type: "select",
+      defaultValue: "justify",
+      options: [
+        { label: "Justificado", value: "justify" },
+        { label: "Alinhado à esquerda", value: "left" },
+        { label: "Centralizado", value: "center" },
+        { label: "Alinhado à direita", value: "right" },
+      ],
+      admin: { description: "Alinhamento do texto do artigo." },
+    },
     { name: "publicReviewer", type: "relationship", relationTo: "authors", access: { create: publishStatusFieldAccess, update: publishStatusFieldAccess } },
     { name: "businessImpact", type: "textarea" },
     { name: "readingTime", type: "number", admin: { readOnly: true } },
