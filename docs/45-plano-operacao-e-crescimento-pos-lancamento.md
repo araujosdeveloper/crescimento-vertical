@@ -63,6 +63,14 @@ rastreado nem uptime externo, a estabilização é julgada às cegas.
 **Critério de saída.** Um incidente simulado (rota 500 + queda do host) gera
 alerta externo em minutos, com contexto (release, requestId, stack) para triagem.
 
+**Progresso (7/9/2026).**
+- [x] 5xx, erros, p95 e memória instrumentados no app e expostos em
+  `/api/health/metrics` + digest diário (`src/lib/metrics.ts`,
+  `src/instrumentation.ts`).
+- [x] Uptime monitor externo: UptimeRobot ativo em `https://crescimentovertical.com/`
+  (keyword "Crescimento Vertical"), alerta por e-mail.
+- [ ] Tracking de erro server/client (Sentry) — opcional, depende de conta.
+
 ---
 
 ## Etapa 3 — Borda: Cloudflare CDN/WAF na frente
