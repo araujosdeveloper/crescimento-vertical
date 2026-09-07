@@ -56,7 +56,7 @@ describe("DTO público — não expõe campos internos", () => {
       slug: "titulo-do-artigo",
       summary: "Resumo público",
       publishedAt: "2026-08-01T12:00:00.000Z",
-      featuredImage: { url: "/api/media/file/img-feature.png", alt: "Imagem ilustrativa", width: 1600, height: 900 },
+      featuredImage: { url: "/api/media/file/img.png", alt: "Imagem ilustrativa", width: 1600, height: 900 },
       author: { name: "Autor Público", slug: "autor-publico" },
       category: { name: "Categoria", slug: "categoria" },
       contentType: "news",

@@ -26,15 +26,10 @@ function asNumber(value: unknown): number | undefined {
 }
 
 function preferredImageUrl(media: UnknownRecord): string | null {
-  const sizes = asRecord(media.sizes);
-  const preferred = ["feature", "card", "thumbnail"];
-  for (const key of preferred) {
-    const size = asRecord(sizes?.[key]);
-    const url = asString(size?.url);
-    if (url) {
-      return toRelativeUrl(url);
-    }
-  }
+  // Usa a imagem original (sem crop do Payload) para preservar a proporção; o
+  // otimizador do Next redimensiona sob demanda. As variantes pré-dimensionadas
+  // (feature/card/thumbnail) cortam a imagem para proporções fixas e distorcem
+  // a apresentação em páginas/cards.
   return toRelativeUrl(asString(media.url));
 }
 
