@@ -90,6 +90,32 @@ WAF e proteção de bot, o formulário de leads fica exposto a abuso.
 cache, WAF ativo e o endpoint de leads protegido, sem regressão de
 funcionalidade.
 
+**Progresso (7/9/2026).**
+- [x] Nameservers migrados para a Cloudflare (domínio ativo).
+- [x] Rate limit lê `CF-Connecting-IP` (preparado para o proxy).
+- [ ] Ligar o proxy (laranja) + SSL "Full" — ação do responsável no painel.
+- [ ] Certificado de Origem (Traefik) + "Full (strict)" — execução abaixo.
+
+### Como executar (runbook)
+
+1. **Proxy imediato (baixo risco):** no painel, DNS → Records → deixar `@` e
+   `www` em **Proxied (laranja)** e SSL/TLS → modo **"Full"** (não "Flexible",
+   não "Full (strict)"). O site continua no ar com o Let's Encrypt atual.
+
+2. **Certificado de Origem (permanente):**
+   - Cloudflare → SSL/TLS → Origin Server → Create Certificate → hostnames
+     `crescimentovertical.com` e `*.crescimentovertical.com` (15 anos).
+   - Salvar o certificado e a chave em `/docker/n8n/certs/` (0600).
+   - Adicionar ao `/docker/n8n/docker-compose.yml` o mount dos certs e o cert
+     estático no `command` do `traefik` (backup do compose + `acme.json` antes).
+   - Recriar somente o `traefik` e mudar o SSL para **"Full (strict)"**.
+
+3. **WAF mínimo:** Security → WAF → Custom rule — bloquear tráfego com
+   `bot score` baixo em `/api/leads` (o app já tem rate limit/honeypot).
+
+4. **Cache de estáticos:** regra para cachear `/api/media/file/*` e
+   `/_next/static/*`.
+
 ---
 
 ## Etapa 4 — Backup completo (n8n + estado do Hermes)
