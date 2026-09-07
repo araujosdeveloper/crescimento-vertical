@@ -2,10 +2,17 @@
 
 ## Backup
 
-- **Diário (completo):** banco + mídia + configuração + bundle Git.
+- **Diário (completo):** PostgreSQL **produção** + PostgreSQL staging + mídia
+  produção + **n8n (SQLite)** + **runner-state (SQLite)** + configuração +
+  bundle Git.
   `scripts/phase11-backup.sh /opt/backups/crescimento-vertical daily`
-- **A cada 6 h (lógico):** dump custom do PostgreSQL.
+- **A cada 6 h (lógico):** dump custom do PostgreSQL **produção**.
   `scripts/phase11-backup.sh /opt/backups/crescimento-vertical hourly`
+
+> **Correção (7/9/2026):** o backup apontava para o PostgreSQL/mídia de
+> **staging**; passou a apontar para **produção** e a incluir n8n e runner.
+> Os bancos SQLite (n8n e runner) são copiados de forma consistente via
+> `scripts/phase11-backup-sqlite.py` (API `sqlite3.backup`).
 
 Cron sugerido (na VPS):
 
@@ -27,6 +34,8 @@ restauração isolada roda no 1º dia de cada mês via
 2. `git bundle verify repo.bundle`
 3. `pg_restore --list postgres.dump | head` (catálogo íntegro)
 4. `tar -tzf media.tar.gz | head`
+5. `python3 -c "import sqlite3; sqlite3.connect('n8n.sqlite').execute('PRAGMA integrity_check')"`
+   (e o mesmo para `runner-state.sqlite3`)
 
 ## Restauração (isolada)
 

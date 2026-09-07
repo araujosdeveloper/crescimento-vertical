@@ -105,6 +105,14 @@ nem o estado do runner. Perder o n8n = perder CV-01..04 sem recuperação.
 **Critério de saída.** O backup diário contém workflows n8n e estado do runner;
 a restauração isolada recupera ambos.
 
+**Progresso (7/9/2026).**
+- [x] Backup diário passou a incluir **produção** (PostgreSQL + mídia), **n8n
+  (SQLite)** e **runner-state (SQLite)** via `phase11-backup-sqlite.py`.
+- [x] Corrigido: o backup apontava para **staging**; agora a fonte de verdade é
+  produção (e o off-site, que envia o diário, acompanha automaticamente).
+- [ ] Export sanitizado dos workflows n8n conferido contra o n8n vivo (Git
+  `n8n/workflows/`).
+
 ---
 
 ## Etapa 5 — Newsletter e ciclo de vida de leads
