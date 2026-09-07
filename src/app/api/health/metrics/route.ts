@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getPayload } from "payload";
 import config from "@payload-config";
 import { log } from "@/lib/logger";
+import { metricsSnapshot } from "@/lib/metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export async function GET() {
         media,
         sources,
         outboxPending,
+        ...metricsSnapshot(),
       },
       { headers: { "Cache-Control": "no-store" } },
     );

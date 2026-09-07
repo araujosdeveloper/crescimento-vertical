@@ -4,6 +4,7 @@ import { getPayload } from "payload";
 import config from "@payload-config";
 import { CONSENT_VERSION, consentTextHash, issueFormToken, requestOriginAllowed, validateLeadInput, verifyFormToken } from "@/lib/lead-intake";
 import { log } from "@/lib/logger";
+import { recordError, recordHttpStatus } from "@/lib/metrics";
 
 const attempts = new Map<string, { count: number; at: number }>();
 const ipAttempts = new Map<string, { count: number; windowStart: number }>();
@@ -35,6 +36,20 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const startedAt = Date.now();
+  try {
+    const response = await handlePost(request);
+    recordHttpStatus(response.status, Date.now() - startedAt);
+    return response;
+  } catch (error) {
+    recordError();
+    recordHttpStatus(500, Date.now() - startedAt);
+    log("error", "lead_unexpected_error", { route: "leads", message: error instanceof Error ? error.message : String(error) });
+    return NextResponse.json({ ok: false, error: "Não foi possível enviar agora. Tente novamente em instantes." }, { status: 500 });
+  }
+}
+
+async function handlePost(request: Request) {
   const requestId = randomUUID();
   if (isRateLimited(clientIp(request))) {
     log("warn", "lead_rate_limited", { route: "leads" }, requestId);
