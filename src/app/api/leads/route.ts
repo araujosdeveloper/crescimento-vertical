@@ -13,6 +13,10 @@ const RATE_LIMIT_WINDOW_MS = 60_000;
 const RATE_LIMIT_MAX = 10;
 
 function clientIp(request: Request): string {
+  // Atrás do proxy da Cloudflare, o IP real do cliente vem em CF-Connecting-IP
+  // (o X-Forwarded-For passaria a conter o IP do proxy, não do visitante).
+  const cf = request.headers.get("cf-connecting-ip");
+  if (cf) return cf.trim() || "unknown";
   const forwarded = request.headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0]?.trim() || "unknown";
   return request.headers.get("x-real-ip") || "unknown";
