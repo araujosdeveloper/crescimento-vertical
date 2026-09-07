@@ -41,19 +41,19 @@ async function main() {
     )
     .join("\n");
 
-  const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  const svg = `<svg width="1200" height="750" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#0a0a0a"/>
       <stop offset="1" stop-color="#1f1f1f"/>
     </linearGradient>
   </defs>
-  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="750" fill="url(#bg)"/>
   <rect x="80" y="120" width="8" height="150" rx="4" fill="#f97316"/>
   <circle cx="1080" cy="120" r="220" fill="#fb923c" opacity="0.07"/>
-  <circle cx="950" cy="520" r="160" fill="#f97316" opacity="0.08"/>
+  <circle cx="950" cy="620" r="160" fill="#f97316" opacity="0.08"/>
 ${titleSvg}
-  <text x="120" y="555" font-family="DejaVu Sans, sans-serif" font-size="26" fill="#a3a3a3">Crescimento Vertical — IA · Automação · Negócios</text>
+  <text x="120" y="685" font-family="DejaVu Sans, sans-serif" font-size="26" fill="#a3a3a3">Crescimento Vertical — IA · Automação · Negócios</text>
 </svg>`;
 
   const buffer = await sharp(Buffer.from(svg)).webp({ quality: 82 }).toBuffer();
