@@ -79,6 +79,7 @@ export interface Config {
     tags: Tag;
     leads: Lead;
     'lead-outbox': LeadOutbox;
+    'newsletter-subscribers': NewsletterSubscriber;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -98,6 +99,7 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     leads: LeadsSelect<false> | LeadsSelect<true>;
     'lead-outbox': LeadOutboxSelect<false> | LeadOutboxSelect<true>;
+    'newsletter-subscribers': NewsletterSubscribersSelect<false> | NewsletterSubscribersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -552,6 +554,22 @@ export interface LeadOutbox {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-subscribers".
+ */
+export interface NewsletterSubscriber {
+  id: number;
+  email: string;
+  consentVersion: string;
+  consentTextHash: string;
+  consentedAt: string;
+  status?: ('subscribed' | 'unsubscribed') | null;
+  source?: string | null;
+  idempotencyKey?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -621,6 +639,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'lead-outbox';
         value: number | LeadOutbox;
+      } | null)
+    | ({
+        relationTo: 'newsletter-subscribers';
+        value: number | NewsletterSubscriber;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1045,6 +1067,21 @@ export interface LeadOutboxSelect<T extends boolean = true> {
   sentAt?: T;
   deliveredAt?: T;
   messageId?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "newsletter-subscribers_select".
+ */
+export interface NewsletterSubscribersSelect<T extends boolean = true> {
+  email?: T;
+  consentVersion?: T;
+  consentTextHash?: T;
+  consentedAt?: T;
+  status?: T;
+  source?: T;
+  idempotencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
 }

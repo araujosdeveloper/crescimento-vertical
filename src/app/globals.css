@@ -215,6 +215,18 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 /* Footer */
 .footer { position: relative; border-top: 1px solid rgba(249,115,22,.16); background: #060606; }.footer-accent { position: absolute; left: 50%; top: -1px; width: min(750px,70%); height: 1px; transform: translateX(-50%); background: linear-gradient(90deg,transparent,#fb923c,transparent); box-shadow: 0 0 16px rgba(249,115,22,.4); }.footer-grid { display: grid; grid-template-columns: 1.45fr .8fr .9fr; gap: 55px; padding-block: 70px 62px; }.footer-brand p { max-width: 340px; margin-top: 20px; color: #808080; font-size: 13px; line-height: 1.75; }.footer-title { color: #e0e0e0; font-size: 10px; font-weight: 720; letter-spacing: .16em; text-transform: uppercase; }.footer-links,.footer-contact { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 20px; }.footer-links a,.footer-contact a { color: #858585; font-size: 12px; transition: color .2s; }.footer-links a:hover,.footer-contact a:hover { color: #fb923c; }.footer-contact span { margin-top: 4px; color: #5a5a5a; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }.footer-bottom { border-top: 1px solid rgba(249,115,22,.1); }.footer-bottom>div { display: flex; align-items: center; justify-content: space-between; padding-block: 22px; color: #5c5c5c; font-size: 10px; }
+.footer-newsletter { border-top: 1px solid rgba(249,115,22,.08); padding-block: 26px; }
+.newsletter-form { max-width: 620px; }
+.newsletter-label { display: block; color: #cfcfcf; font-size: 13px; font-weight: 600; }
+.newsletter-row { display: flex; gap: 10px; margin-top: 12px; }
+.newsletter-row input { flex: 1; min-height: 46px; border: 1px solid rgba(251,146,60,.25); border-radius: 11px; background: rgba(18,18,18,.7); padding: 0 15px; color: #fff; font-size: 14px; }
+.newsletter-row input:focus { outline: none; border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,.15); }
+.newsletter-row .button-primary { min-height: 46px; }
+.newsletter-consent { display: flex; align-items: flex-start; gap: 8px; margin-top: 12px; color: #8a8a8a; font-size: 11px; line-height: 1.5; }
+.newsletter-consent input { margin-top: 2px; }
+.newsletter-success { color: #fb923c; font-size: 13px; }
+.newsletter-error { color: #f87171; font-size: 12px; margin-top: 8px; }
+@media (max-width: 640px) { .newsletter-row { flex-direction: column; } .newsletter-row .button-primary { width: 100%; } }
 
 @keyframes pulse { 50% { opacity: .45; box-shadow: 0 0 4px #fb923c; } }
 @keyframes float { 50% { transform: translateY(-7px); } }

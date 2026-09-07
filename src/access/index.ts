@@ -231,3 +231,10 @@ export const leadOutboxCreate: Access = () => false;
 export const leadOutboxUpdate: Access = ({ req: { user } }) =>
   hasAnyRole(user, ["admin", "reviewer"]);
 export const leadOutboxDelete: Access = ({ req: { user } }) => isAdmin(user);
+
+// Newsletter: nunca legível/gravável publicamente; a inscrição entra pela rota
+// dedicada com validação própria (override interno).
+export const newsletterRead: Access = ({ req: { user } }) => isAdmin(user);
+export const newsletterCreate: Access = () => false;
+export const newsletterUpdate: Access = ({ req: { user } }) => isAdmin(user);
+export const newsletterDelete: Access = ({ req: { user } }) => isAdmin(user);

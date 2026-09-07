@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { Container } from "@/components/layout/container";
+import { NewsletterForm } from "@/components/newsletter-form";
 import { NAVIGATION_CTA, NAVIGATION_GROUPS } from "@/lib/navigation";
 import { CONTACT_EMAIL, WHATSAPP_DISPLAY, WHATSAPP_URL } from "@/lib/site";
 
@@ -23,6 +24,7 @@ export function SiteFooter() {
         <Link className="footer-diagnostic" href={NAVIGATION_CTA.href}>{NAVIGATION_CTA.label}</Link>
       </div></div>
     </Container>
+    <div className="footer-newsletter"><Container><NewsletterForm /></Container></div>
     <div className="footer-bottom"><Container><p>© 2026 Crescimento Vertical. Todos os direitos reservados.</p><p>Estratégia • Automação • Performance</p></Container></div>
   </footer>;
 }
