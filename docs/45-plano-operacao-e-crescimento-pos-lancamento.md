@@ -130,6 +130,16 @@ o ciclo LGPD (retenção/acesso/exclusão) está incompleto.
 **Critério de saída.** Inscrição na newsletter com consentimento; retenção
 automática de leads ativa; fluxo de exclusão operacional e registrado.
 
+**Progresso (7/9/2026).**
+- [x] Coleção `newsletter-subscribers` + rota `/api/newsletter` (token HMAC,
+  honeypot, rate limit, consentimento versionado) + formulário no rodapé.
+- [x] Retenção de leads agendada (cron mensal `scripts/retention-cron.sh`).
+- [x] Política de privacidade atualizada (acesso/correção/exclusão + retenção
+  automática).
+
+**Pendente (futuro).** Envio efetivo de campanhas (provedor de e-mail em massa),
+que exige nova credencial/contrato — fora do escopo desta rodada.
+
 ---
 
 ## Etapa 6 — Performance (CWV) e sincronia de ambientes
